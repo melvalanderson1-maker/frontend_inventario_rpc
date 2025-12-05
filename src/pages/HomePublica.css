@@ -1,8 +1,209 @@
-/* src/pages/HomePublica.css */
-.container { max-width:1100px; margin:0 auto; padding:0 16px; }
-.hero { background:linear-gradient(90deg,#2b1462 0%, #5b3ea6 100%); color:white; padding:40px; border-radius:8px; margin-top:16px; text-align:center; }
-.cursos-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:20px; }
-.curso-card { padding:14px; border:1px solid #eee; border-radius:8px; background:white; }
-.curso-card .actions { margin-top:10px; display:flex; gap:8px; }
-.curso-card .ver { text-decoration:none; color:#2b1462; }
-.curso-card .mat { background:#f6c53a; padding:6px 10px; border-radius:6px; color:#222; text-decoration:none; }
+/* ==============================
+   Contenedor general
+============================== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ==============================
+   Hero principal
+============================== */
+.hero {
+  background: linear-gradient(90deg, #2b1462 0%, #5b3ea6 100%);
+  color: white;
+  padding: 50px 20px;
+  border-radius: 12px;
+  margin-top: 16px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.hero h1 {
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+/* ==============================
+   Grid de cursos
+============================== */
+.cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+/* ==============================
+   Tarjeta de curso
+============================== */
+.curso-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.curso-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.15);
+}
+
+/* Contenido interno */
+.curso-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2b1462;
+  margin: 16px;
+}
+
+.curso-card p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 16px 16px 16px;
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+/* ==============================
+   Acciones: Botones y Precio en fila 1x3
+============================== */
+.curso-card .actions {
+  display: grid;
+  /*grid-template-columns: 1fr 1fr 1fr; /* 3 columnas iguales */
+  grid-template-columns: 1fr 1fr; /* 3 columnas iguales */
+  gap: 12px;
+  padding: 16px;
+  align-items: center;
+}
+
+/* Botón Ver curso */
+.curso-card .ver {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0; /* más pequeño */
+  border: 2px solid #2b1462;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #2b1462;
+  font-weight: 600;
+  font-size: 14px; /* tamaño más pequeño */
+  transition: all 0.3s ease;
+}
+
+.curso-card .ver:hover {
+  background: #2b1462;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(43,20,98,0.25);
+}
+
+/* Botón Matricular */
+.curso-card .mat {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0; /* más pequeño */
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px; /* más pequeño */
+  background: #f6c53a;
+  color: #222;
+  transition: all 0.3s ease;
+}
+
+.curso-card .mat:hover {
+  background: #e5b200;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(230,178,0,0.25);
+}
+
+/* Precio al lado del botón Matricular */
+.curso-card .precio {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2b1462;
+}
+
+/* ==============================
+   Loading y errores
+============================== */
+.loading, .error {
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+  color: #2b1462;
+}
+
+/* ==============================
+   Responsive
+============================== */
+@media (max-width: 1024px) {
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .curso-card h3 {
+    font-size: 18px;
+  }
+
+  .curso-card p {
+    font-size: 13px;
+  }
+
+  .curso-card .actions a,
+  .curso-card .precio {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .cursos-grid {
+    gap: 16px;
+  }
+
+  .curso-card {
+    border-radius: 12px;
+  }
+
+  .curso-card h3 {
+    font-size: 16px;
+  }
+
+  .curso-card p {
+    font-size: 12px;
+  }
+
+  /* En móviles, apilar verticalmente */
+  .curso-card .actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .curso-card .actions a,
+  .curso-card .precio {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+}

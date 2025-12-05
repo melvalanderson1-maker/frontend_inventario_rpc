@@ -1,85 +1,197 @@
-.checkout {
-  max-width: 700px;
+/* ==============================
+   Contenedor general
+============================== */
+.container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 16px;
+  font-family: 'Inter', sans-serif;
 }
 
+/* ==============================
+   Checkout Curso
+============================== */
 .checkout h2 {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #2b1462;
-}
-
-.card {
-  background: #ffffff;
-  padding: 18px 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-  margin-bottom: 20px;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #193bd1, #081669);
+  border-radius: 12px; /* Esquinas redondeadas */
+  color: aliceblue;
+  margin-top: 32px;
+  margin-bottom: 12px;
   text-align: center;
+  padding: 12px 24px; /* agrega espacio dentro para que el borde se vea mejor */
 }
 
-.card h3 {
-  margin: 0;
+.checkout .descripcion {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 16px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+
+/* Precio destacado en CheckoutCurso */
+/* Precio destacado en CheckoutCurso */
+.checkout .precio {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 16px auto 32px auto; /* centrado horizontal debajo de la descripción */
+  text-align: center;
+
+  /* Gradiente llamativo */
+  background: linear-gradient(90deg, #1036e2, #081669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Bloque centrado */
+  display: block;
+
+  /* Estilo de caja */
+  padding: 6px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(48, 47, 44, 0.35);
+
+  /* Animación sutil al pasar el mouse */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checkout .precio:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(35, 5, 170, 0.45);
+}
+
+
+/* ==============================
+   Secciones
+============================== */
+.secciones h3 {
   font-size: 22px;
   font-weight: 600;
+  color: #2b1462;
+  margin-bottom: 16px;
 }
 
-.card .precio {
-  margin-top: 10px;
-  font-size: 26px;
-  font-weight: bold;
+.secciones .seccion-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.secciones .seccion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+
+.secciones .seccion-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.secciones .seccion-card p strong {
   color: #2b1462;
 }
 
-.form {
-  max-width: 480px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.form input {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  transition: 0.2s;
-}
-
-.form input:focus {
-  border-color: #2b1462;
-  box-shadow: 0 0 3px rgba(43,20,98,0.3);
-}
-
-.btn {
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.25s;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  opacity: 0.9;
-}
-
-.btn.mp {
-  background: #2b1462;
-  color: white;
-}
-
-.btn.yape {
-  background: #7e16ff;
-  color: white;
-}
-
-.loading {
-  padding: 20px;
+/* ==============================
+   Botón WhatsApp
+============================== */
+.whatsapp-button {
+  margin: 32px 0;
   text-align: center;
+}
+
+.whatsapp-button a {
+  display: inline-block;
+  background-color: #25d366;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(37,211,102,0.25);
+  transition: all 0.3s ease;
+}
+
+.whatsapp-button a:hover {
+  background-color: #1ebe5d;
+  box-shadow: 0 8px 20px rgba(37,211,102,0.35);
+  transform: translateY(-2px);
+}
+
+/* ==============================
+   Loading
+============================== */
+.loading {
+  text-align: center;
+  padding: 40px 0;
+  font-size: 16px;
+  color: #2b1462;
+}
+
+/* ==============================
+   Responsive
+============================== */
+@media (max-width: 1024px) {
+  .checkout h2 {
+    font-size: 28px;
+  }
+
+  .checkout .descripcion {
+    font-size: 15px;
+  }
+
+  .checkout .precio {
+    font-size: 18px;
+  }
+
+  .secciones h3 {
+    font-size: 20px;
+  }
+
+  .secciones .seccion-card p {
+    font-size: 13px;
+  }
+
+  .whatsapp-button a {
+    font-size: 15px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout h2 {
+    font-size: 24px;
+  }
+
+  .checkout .descripcion {
+    font-size: 14px;
+  }
+
+  .checkout .precio {
+    font-size: 16px;
+  }
+
+  .secciones h3 {
+    font-size: 18px;
+  }
+
+  .secciones .seccion-card {
+    padding: 12px;
+  }
+
+  .secciones .seccion-card p {
+    font-size: 12px;
+  }
+
+  .whatsapp-button a {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
 }

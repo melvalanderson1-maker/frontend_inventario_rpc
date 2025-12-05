@@ -58,14 +58,18 @@ export default function HomePublica() {
                 <p>{c.descripcion}</p>
 
                 <div className="actions">
+                  {/*
                   <Link to={`/curso/${c.id}`} className="ver">
-                    Ver curso
                   </Link>
+                  */}
 
                   <Link to={`/checkout/${c.id}`} className="mat" onClick={() => onClickMatricular(c)}>
-                    Matricular • S/ {c.precio}
+                    Ver curso
                   </Link>
+                  <p className="precio">S/ {c.precio}</p>
                 </div>
+
+
               </div>
             ))
           )}
