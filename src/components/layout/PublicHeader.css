@@ -1,5 +1,5 @@
 /* ==============================
-   Public Header - Matriz 1x3
+   Public Header - Fusión 1x3 Responsive
 ============================== */
 .public-header {
   background: #2b1462;
@@ -11,9 +11,10 @@
   z-index: 100;
 }
 
+/* Contenedor principal */
 .public-header .container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr; /* matriz 1x3 */
+  grid-template-columns: 1fr auto; /* Escritorio: marca | enlaces */
   align-items: center;
   max-width: 1100px;
   margin: 0 auto;
@@ -21,19 +22,23 @@
   gap: 16px;
 }
 
+/* Marca a la izquierda */
 .brand {
   font-weight: 700;
   font-size: 22px;
   color: #fff;
+  justify-self: start;
 }
 
-/* Centrar la columna de enlaces */
+/* Nav a la derecha en escritorio */
 .nav {
   display: flex;
-  justify-content: center; /* al centro de la columna 2 */
+  justify-content: flex-end;
   gap: 16px;
+  align-items: center;
 }
 
+/* Enlaces normales */
 .nav a {
   color: #fff;
   text-decoration: none;
@@ -47,6 +52,7 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Botón Inicia sesión */
 .nav .btn {
   display: flex;
   justify-content: center;
@@ -67,13 +73,15 @@
 /* ==============================
    Responsive
 ============================== */
-@media (max-width: 768px) {
+
+/* Tablets grandes y medianas */
+@media (max-width: 1024px) {
   .public-header .container {
-    grid-template-columns: 1fr 1fr; /* dos columnas en tablet */
+    grid-template-columns: 1fr auto; /* mantener marca izquierda y nav derecha */
   }
 
   .nav {
-    justify-content: flex-start;
+    justify-content: center; /* centrar enlaces en tablets */
     flex-wrap: wrap;
     gap: 12px;
   }
@@ -88,9 +96,10 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Tablets pequeñas y móviles medianos */
+@media (max-width: 768px) {
   .public-header .container {
-    grid-template-columns: 1fr 1 fr 1fr; /* apilar en móviles pequeños */
+    grid-template-columns: 1fr 1fr; /* apilar marca y nav */
     text-align: center;
   }
 
@@ -103,5 +112,17 @@
 
   .nav a, .nav .btn {
     width: 100%;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .brand {
+    font-size: 18px;
+  }
+
+  .nav a, .nav .btn {
+    font-size: 14px;
+    padding: 8px 12px;
   }
 }
