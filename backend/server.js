@@ -25,12 +25,29 @@ console.log("FRONT_URL usando:", process.env.FRONT_URL);
 
 
 // CORS
+const allowedOrigins = [
+  "https://quantum.grupo-digital-nextri.com", // tu frontend real
+  "http://localhost:5173"                     // para desarrollo
+];
+
 app.use(
   cors({
-    origin: process.env.FRONT_URL || "http://localhost:5173",
-    credentials: true
+    origin: function (origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.log("❌ CORS bloqueado para:", origin);
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+    },
+    credentials: true,
   })
 );
+
 
 app.use(bodyParser.json());
 
