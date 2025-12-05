@@ -1,6 +1,107 @@
-/* src/components/layout/PublicHeader.css */
-.public-header { background: #2b1462; color: white; padding: 12px 0; }
-.public-header .container { display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:0 auto; padding:0 16px; }
-.brand { font-weight:700; font-size:20px; }
-.nav a { color:#fff; margin-left:16px; text-decoration:none; }
-.nav .btn { background:#f6c53a; color:#2b1462; padding:6px 10px; border-radius:6px; }
+/* ==============================
+   Public Header - Matriz 1x3
+============================== */
+.public-header {
+  background: #2b1462;
+  color: white;
+  padding: 12px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.public-header .container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* matriz 1x3 */
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 22px;
+  color: #fff;
+}
+
+/* Centrar la columna de enlaces */
+.nav {
+  display: flex;
+  justify-content: center; /* al centro de la columna 2 */
+  gap: 16px;
+}
+
+.nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav .btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f6c53a;
+  color: #2b1462;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.nav .btn:hover {
+  background: #e5b200;
+  color: #fff;
+}
+
+/* ==============================
+   Responsive
+============================== */
+@media (max-width: 768px) {
+  .public-header .container {
+    grid-template-columns: 1fr 1fr; /* dos columnas en tablet */
+  }
+
+  .nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    font-size: 20px;
+  }
+
+  .nav a, .nav .btn {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-header .container {
+    grid-template-columns: 1fr 1 fr 1fr; /* apilar en móviles pequeños */
+    text-align: center;
+  }
+
+  .nav {
+    justify-content: center;
+    margin-top: 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav a, .nav .btn {
+    width: 100%;
+  }
+}
