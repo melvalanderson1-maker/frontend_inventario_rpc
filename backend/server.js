@@ -26,7 +26,7 @@ console.log("FRONT_URL usando:", process.env.FRONT_URL);
 
 // CORS
 const allowedOrigins = [
-  "https://quantum.grupo-digital-nextri.com", // tu frontend real
+  "https://pruebasquantum.grupo-digital-nextri.com", // tu frontend real
   "http://localhost:5173"                     // para desarrollo
 ];
 
