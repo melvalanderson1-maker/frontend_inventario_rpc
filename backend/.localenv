@@ -1,10 +1,41 @@
 PORT=4000
-DATABASE_URL=mysql://user:password@host:3306/universidad_quantum
-JWT_SECRET=tu_jwt_secreto
 
-PAYPAL_CLIENT_ID=TU_PAYPAL_CLIENT_ID
-PAYPAL_SECRET=TU_PAYPAL_SECRET
-YAPE_API_KEY=TU_YAPE_KEY
+# 🔥 BASE DE DATOS PRODUCCION (Railway)
+DATABASE_URL=mysql://root:NBZVCoKayVPcbFmaXTceDEHMmPECSfLx@turntable.proxy.rlwy.net:36780/railway
+
+DB_HOST=turntable.proxy.rlwy.net
+DB_USER=root
+DB_PASSWORD=NBZVCoKayVPcbFmaXTceDEHMmPECSfLx
+DB_NAME=railway
+DB_PORT=36780
+
+
+VITE_API_URL=https://universidadquantum-production.up.railway.app
+FRONT_URL=https://quantum.grupo-digital-nextri.com
+
+
+# 🔥 BASE DE DATOS PRODUCCION PRUEBAS STANTING (Railway)
+DATABASE_URL=mysql://root:WwqolPOGsMCNARPSgNaKrGjAkkcXZrwZ@metro.proxy.rlwy.net:26077/railway
+
+DB_HOST=metro.proxy.rlwy.net
+DB_USER=root
+DB_PASSWORD=WwqolPOGsMCNARPSgNaKrGjAkkcXZrwZ
+DB_NAME=railway
+DB_PORT=26077
+
+VITE_API_URL=https://u-quantum-pruebas-production.up.railway.app
+FRONT_URL=https://pruebasquantum.grupo-digital-nextri.com
+
+
+
+# URLs DEL PROYECTO
+VITE_API_URL=http://localhost:3000
+FRONT_URL=http://localhost:5173
+
+
+
+
+# URL PARA DESARROLLO LOCAL
 
 DB_HOST=localhost
 DB_USER=root
@@ -12,11 +43,24 @@ DB_PASSWORD=erickMV123@
 DB_NAME=universidad_quantum
 DB_PORT=3306
 
+VITE_API_URL=http://localhost:3000
+FRONT_URL=http://localhost:5173
+
+
+
+JWT_SECRET=tu_jwt_secreto
+
+PAYPAL_CLIENT_ID=TU_PAYPAL_CLIENT_ID
+PAYPAL_SECRET=TU_PAYPAL_SECRET
+YAPE_API_KEY=TU_YAPE_KEY
+
+
+
+
 MP_ACCESS_TOKEN=APP_USR-4666642801529670-112300-8746c0c4c390ca93499e27d7b823910b-3010610894
 MP_PUBLIC_KEY=APP_USR-8d43e022-d8e9-4e4b-83f8-4699de2d3357
 
-VITE_API_URL=http://localhost:3000
-FRONT_URL=http://localhost:5173
+
 
 VITE_API_URL=https://universidadquantum-production.up.railway.app
 FRONT_URL=https://quantum.grupo-digital-nextri.com
