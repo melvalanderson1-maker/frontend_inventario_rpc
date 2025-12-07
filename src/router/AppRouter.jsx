@@ -15,7 +15,7 @@ import RegistrarPago from "../components/secretaria/RegistrarPago";
 import GestionCursos from "../components/secretaria/CrearCurso";
 
 import PagoExitoso from "../components/pagos/PagoExitoso";
-import MpRedirect from "../components/pagos/MpRedirect";
+import MpRedirect from "../components/pages/MpRedirect";
 
 import { AuthContext } from "../context/AuthContext";
 
@@ -38,6 +38,9 @@ export default function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/curso/:id" element={<DetalleCursoPublico />} />
         <Route path="/checkout/:cursoId" element={<CheckoutCurso />} />
+
+        <Route path="/mp-redirect" element={<MpRedirect />} />
+
 
         {/* ESTUDIANTE */}
         <Route

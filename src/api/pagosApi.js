@@ -1,13 +1,11 @@
-import axiosClient from "./axiosClient"; // tu cliente configurado de axios
+import axiosClient from "./axiosClient"; // cliente axios configurado con baseURL y auth si aplica
 
-// =========================
-// MERCADO PAGO
-// =========================
-export const iniciarPagoMercadoPago = (seccion_id, alumno, curso) =>
+export const iniciarPagoMercadoPago = (seccion_id, alumno) =>
   axiosClient.post("/pagos/mercadopago", {
+    seccion_id,
     alumno,
-    curso: { ...curso, seccion_id },
   });
+
 
 // =========================
 // YAPE SIMULADO
