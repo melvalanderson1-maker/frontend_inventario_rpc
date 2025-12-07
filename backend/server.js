@@ -25,28 +25,19 @@ console.log("FRONT_URL usando:", process.env.FRONT_URL);
 
 
 // CORS
-const allowedOrigins = [
-  "https://pruebasquantum.grupo-digital-nextri.com", // tu frontend real
-  "http://localhost:5173"                     // para desarrollo
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.log("❌ CORS bloqueado para:", origin);
-        return callback(new Error("Not allowed by CORS"), false);
-      }
-    },
+    origin: [
+      "https://pruebasquantum.grupo-digital-nextri.com",
+      "https://u-quantum-pruebas-production.up.railway.app",
+      "http://localhost:5173"
+    ],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
 
 
 app.use(bodyParser.json());
