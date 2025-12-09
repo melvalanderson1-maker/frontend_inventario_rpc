@@ -58,27 +58,13 @@ router.post("/mercadopago", express.json(), async (req, res) => {
           currency_id: "PEN",
         },
       ],
+
       payer: {
         email: alumno.correo,
-        first_name: alumno.nombre,
-        last_name:
+        name: alumno.nombre,
+        surname:
           alumno.apellido_paterno +
           (alumno.apellido_materno ? " " + alumno.apellido_materno : ""),
-        identification: alumno.numero_documento
-          ? { type: "DNI", number: String(alumno.numero_documento) }
-          : undefined,
-        phone: alumno.telefono
-          ? { area_code: "51", number: String(alumno.telefono) }
-          : undefined,
-      },
-
-      // 🔥 EVITA QUE MERCADO LIBRE OBLIGUE A INICIAR SESIÓN
-      marketplace: "UQUANTUM",
-      payment_methods: {
-        default_payment_method_id: null,
-        installments: 1,
-        excluded_payment_types: [],
-        excluded_payment_methods: [],
       },
 
       back_urls: {
@@ -87,10 +73,11 @@ router.post("/mercadopago", express.json(), async (req, res) => {
         pending: `${FRONT_URL}/mp-redirect?status=pending`,
       },
 
-      auto_return: IS_DEV ? undefined : "approved",
-      binary_mode: false,
-    };
+      auto_return: "approved", // Devuelve automáticamente al usuario
 
+      // 🔥 Checkout PRO *sin iniciar sesión*
+      purpose: "wallet_purchase",
+    };
 
     // ============================================================
     // Consumir API de Mercado Pago
