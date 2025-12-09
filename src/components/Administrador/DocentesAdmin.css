@@ -1,0 +1,7 @@
+/* DocentesAdmin.css */
+.docentes-admin { padding:18px; background:#fff; border-radius:8px;}
+.list { display:flex; flex-direction:column; gap:10px; }
+.card { display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:6px; }
+.meta { color:#666; font-size:13px; margin-top:6px; }
+.btn { padding:8px 10px; border-radius:6px; cursor:pointer; }
+.btn.danger { background:#ff4d4f; color:#fff; border:none; }

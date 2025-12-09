@@ -1,0 +1,12 @@
+/* UsuariosAdmin.css */
+.usuarios-admin { padding:20px; background:#fff; border-radius:8px; }
+.usuario-form { background:#f8f9fb; padding:16px; border-radius:8px; margin-bottom:16px; }
+.usuario-form .row { display:flex; gap:12px; margin-bottom:10px; }
+.usuario-form input, .usuario-form select { flex:1; padding:8px; border-radius:6px; border:1px solid #ddd; }
+.actions { display:flex; gap:8px; }
+.btn { padding:8px 12px; border-radius:6px; cursor:pointer; border:1px solid #ccc; background:#fff; }
+.btn.primary { background:#276ef1; color:#fff; border-color:#276ef1; }
+.btn.danger { background:#ff4d4f; color:#fff; border-color:#ff4d4f; }
+.btn.small { padding:6px 8px; font-size:13px; margin-right:6px; }
+.table { width:100%; border-collapse:collapse; margin-top:10px; }
+.table th, .table td { padding:8px 10px; border-bottom:1px solid #eee; text-align:left; }

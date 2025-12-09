@@ -1,0 +1,6 @@
+/* SeccionesAdmin.css */
+.secciones-admin { padding:18px; background:#fff; border-radius:8px;}
+.seccion-form { display:flex; gap:8px; margin-bottom:12px; }
+.seccion-form input { padding:8px; border-radius:6px; border:1px solid #ddd; }
+.list .card { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:6px; margin-bottom:8px; }
+.meta { color:#666; font-size:13px; }

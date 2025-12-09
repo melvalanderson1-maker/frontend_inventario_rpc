@@ -1,0 +1,5 @@
+/* AlumnosAdmin.css */
+.alumnos-admin { padding:18px; background:#fff; border-radius:8px;}
+.table { width:100%; border-collapse:collapse; }
+.table th, .table td { padding:10px; border-bottom:1px solid #eee; }
+.table-wrap { overflow:auto; }

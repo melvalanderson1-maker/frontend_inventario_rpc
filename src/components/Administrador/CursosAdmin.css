@@ -1,0 +1,8 @@
+/* CursosAdmin.css */
+.cursos-admin { padding:18px; background:#fff; border-radius:8px;}
+.curso-form { display:flex; gap:10px; margin-bottom:12px; align-items:center; }
+.curso-form input { padding:8px; border-radius:6px; border:1px solid #ddd; }
+.list .card { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:6px; margin-bottom:8px; }
+.meta { color:#666; font-size:13px; margin-top:6px; }
+.btn.primary { background:#276ef1; color:#fff; }
+.btn.danger { background:#ff4d4f; color:#fff; border:none; }

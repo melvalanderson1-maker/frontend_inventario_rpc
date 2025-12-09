@@ -1,0 +1,37 @@
+.dashboard-admin {
+  display: flex;
+}
+
+.admin-menu {
+  width: 250px;
+  background: #1a1a1a;
+  color: white;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.admin-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-menu li {
+  margin: 12px 0;
+}
+
+.admin-menu a {
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 8px;
+  display: block;
+  border-radius: 4px;
+}
+
+.admin-menu a:hover {
+  background: #333;
+}
+
+.admin-content {
+  padding: 30px;
+  width: 100%;
+}

@@ -76,6 +76,9 @@ app.use("/matriculas", matriculasRoutes);
 
 // ⚠ REGISTRAR RUTAS DE USUARIOS AQUÍ
 app.use("/usuarios", require("./routes/usuarios.routes"));
+
+app.use("/admin", require("./routes/admin.routes"));
+
 // ⚠ IZIPAY DEBE IR DESPUÉS PARA NO ROMPER /pagos/yape/iniciar
 app.use("/pagos/izipay", izipayRoutes);
 

@@ -1,0 +1,6 @@
+/* AuditoriaAdmin.css */
+.aud-admin { padding:18px; background:#fff; border-radius:8px;}
+.list .row { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:6px; margin-bottom:8px; }
+.action { font-weight:600; }
+.meta { color:#666; font-size:13px; margin-top:4px; }
+.time { color:#999; font-size:13px; align-self:center; }

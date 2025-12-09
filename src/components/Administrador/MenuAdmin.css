@@ -1,0 +1,15 @@
+/* MenuAdmin.css */
+.menu-admin {
+  width:240px;
+  background:#0f1724;
+  color:#fff;
+  min-height:100vh;
+  padding:18px;
+  box-sizing:border-box;
+  position:fixed;
+  left:0; top:0;
+}
+.menu-admin .brand { font-weight:700; margin-bottom:18px; }
+.menu-admin nav { display:flex; flex-direction:column; gap:8px; }
+.menu-admin a { color:#cbd5e1; text-decoration:none; padding:8px 10px; border-radius:6px; }
+.menu-admin a.active, .menu-admin a:hover { background:#14213d; color:#fff; }

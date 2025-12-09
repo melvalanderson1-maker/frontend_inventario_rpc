@@ -1,0 +1,4 @@
+/* FacturasAdmin.css */
+.facturas-admin { padding:18px; background:#fff; border-radius:8px;}
+.card { display:flex; justify-content:space-between; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:10px; }
+.meta { color:#666; font-size:13px; }

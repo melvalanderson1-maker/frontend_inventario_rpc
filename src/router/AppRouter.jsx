@@ -100,9 +100,105 @@ export default function AppRouter() {
           }
         />
 
+
+        <Route
+          path="/dashboard/admin"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <DashboardAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/usuarios"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <UsuariosAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/docentes"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <DocentesAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/secretarias"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <SecretariasAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/alumnos"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <AlumnosAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/cursos"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <CursosAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/secciones"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <SeccionesAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/pagos"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <PagosAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/facturas"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <FacturasAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/admin/auditoria"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <AuditoriaAdmin />
+            </PrivateRoute>
+          }
+        />
+
+
+
         {/* PAGO */}
         <Route path="/mp-redirect" element={<MpRedirect />} />
         <Route path="/pago-exitoso" element={<PagoExitoso />} />
+
+
+
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
