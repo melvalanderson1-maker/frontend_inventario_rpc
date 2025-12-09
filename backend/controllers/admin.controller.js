@@ -132,13 +132,22 @@ eliminarUsuario: async (req, res) => {
     try {
         const docenteId = req.params.id;
         const [rows] = await pool.query(
-        `SELECT c.id, c.codigo, c.periodo, c.modalidad, s.codigo AS seccion_codigo, s.id AS seccion_id, 
+        `SELECT 
+            s.id AS seccion_id,
+            s.codigo AS seccion_codigo,
+            s.periodo,
+            s.modalidad,
+            s.docente_id,
+            c.id AS curso_id,
+            c.titulo AS curso_titulo,
+            c.codigo AS curso_codigo,
             (SELECT COUNT(*) FROM matriculas m WHERE m.seccion_id = s.id AND m.estado='ACTIVO') AS alumnos_count
-        FROM cursos c
-        LEFT JOIN secciones s ON s.curso_id = c.id
-        WHERE c.docente_id = ?`,
+        FROM secciones s
+        JOIN cursos c ON s.curso_id = c.id
+        WHERE s.docente_id = ?`,
         [docenteId]
         );
+
         res.json({ ok: true, cursos: rows });
     } catch (err) {
         res.status(500).json({ ok: false, msg: err.message });
