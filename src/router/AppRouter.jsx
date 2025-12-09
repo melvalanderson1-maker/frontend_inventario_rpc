@@ -17,7 +17,24 @@ import GestionCursos from "../components/secretaria/CrearCurso";
 import PagoExitoso from "../components/pagos/PagoExitoso";
 import MpRedirect from "../pages/MpRedirect";
 
+
+// ADMIN PAGES
+import DashboardAdmin from "../pages/DashboardAdmin";
+
+// ADMIN MODULES
+import UsuariosAdmin from "../components/Administrador/UsuariosAdmin";
+import DocentesAdmin from "../components/Administrador/DocentesAdmin";
+import SecretariasAdmin from "../components/Administrador/SecretariasAdmin";
+import AlumnosAdmin from "../components/Administrador/AlumnosAdmin";
+import CursosAdmin from "../components/Administrador/CursosAdmin";
+import SeccionesAdmin from "../components/Administrador/SeccionesAdmin";
+import PagosAdmin from "../components/Administrador/PagosAdmin";
+import FacturasAdmin from "../components/Administrador/FacturasAdmin";
+import AuditoriaAdmin from "../components/Administrador/AuditoriaAdmin";
+
 import { AuthContext } from "../context/AuthContext";
+
+
 
 const PrivateRoute = ({ children, roles }) => {
   const { usuario, loading } = useContext(AuthContext);
