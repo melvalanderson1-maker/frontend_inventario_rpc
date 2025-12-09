@@ -63,7 +63,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/estudiante"
           element={
-            <PrivateRoute roles={["ESTUDIANTE","DOCENTE","SECRETARIA","ADMIN"]}>
+            <PrivateRoute roles={["ESTUDIANTE","DOCENTE","SECRETARIA"]}>
               <DashboardEstudiante />
             </PrivateRoute>
           }
@@ -73,7 +73,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/docente"
           element={
-            <PrivateRoute roles={["DOCENTE","ADMIN"]}>
+            <PrivateRoute roles={["DOCENTE"]}>
               <DashboardDocente />
             </PrivateRoute>
           }
@@ -83,7 +83,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/secretaria"
           element={
-            <PrivateRoute roles={["SECRETARIA","ADMIN"]}>
+            <PrivateRoute roles={["SECRETARIA"]}>
               <DashboardSecretaria />
             </PrivateRoute>
           }
@@ -93,7 +93,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/secretaria/matriculas"
           element={
-            <PrivateRoute roles={["SECRETARIA","ADMIN"]}>
+            <PrivateRoute roles={["SECRETARIA"]}>
               <MatricularAlumno />
             </PrivateRoute>
           }
@@ -102,7 +102,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/secretaria/pagos"
           element={
-            <PrivateRoute roles={["SECRETARIA","ADMIN"]}>
+            <PrivateRoute roles={["SECRETARIA"]}>
               <RegistrarPago />
             </PrivateRoute>
           }
@@ -111,7 +111,7 @@ export default function AppRouter() {
         <Route
           path="/dashboard/secretaria/cursos"
           element={
-            <PrivateRoute roles={["SECRETARIA","ADMIN"]}>
+            <PrivateRoute roles={["SECRETARIA"]}>
               <GestionCursos />
             </PrivateRoute>
           }
