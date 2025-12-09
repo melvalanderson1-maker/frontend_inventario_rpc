@@ -5,3 +5,24 @@
 .meta { color:#666; font-size:13px; margin-top:6px; }
 .btn { padding:8px 10px; border-radius:6px; cursor:pointer; }
 .btn.danger { background:#ff4d4f; color:#fff; border:none; }
+.docentes-admin { padding: 20px; font-family: 'Arial', sans-serif; }
+.docentes-admin h2 { margin-bottom: 20px; }
+
+.list { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 20px; }
+
+.card { background: #fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 15px; cursor: pointer; transition: 0.2s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.meta { font-size: 0.9rem; color: #555; margin-top: 4px; }
+.indicators span { margin-left: 8px; font-size: 0.9rem; color: #333; display: inline-flex; align-items: center; }
+.indicators span svg { margin-right: 4px; }
+
+.actions { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.actions .btn { margin-left: 5px; }
+
+.card-body { padding-top: 10px; border-top: 1px solid #eee; }
+.curso-card { background: #f9f9f9; padding: 8px; border-radius: 6px; margin-bottom: 6px; }
+.curso-header { display: flex; justify-content: space-between; align-items: center; }
+.curso-info span { margin-left: 10px; font-size: 0.85rem; display: inline-flex; align-items: center; }
+.curso-info span svg { margin-right: 4px; }

@@ -31,6 +31,8 @@ router.delete("/usuarios/:id", adminController.eliminarUsuario);
 router.get("/docentes", adminController.listarDocentes);
 router.get("/secretarias", adminController.listarSecretarias);
 router.get("/alumnos", adminController.listarAlumnos);
+// Cursos de un docente
+router.get("/docentes/:id/cursos", adminController.listarCursosDocente);
 
 // ─────────────────────────────────────────────
 // CURSOS
@@ -54,5 +56,7 @@ router.delete("/secciones/:id", adminController.eliminarSeccion);
 router.get("/pagos", adminController.listarPagos);
 router.get("/facturas", adminController.listarFacturas);
 router.get("/auditoria", adminController.listarAuditoria);
+
+
 
 module.exports = router;

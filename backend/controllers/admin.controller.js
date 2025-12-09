@@ -126,6 +126,25 @@ eliminarUsuario: async (req, res) => {
     res.json({ ok: true, docentes: rows });
   },
 
+
+  // Listar cursos que dicta un docente
+    listarCursosDocente: async (req, res) => {
+    try {
+        const docenteId = req.params.id;
+        const [rows] = await pool.query(
+        `SELECT c.id, c.codigo, c.periodo, c.modalidad, s.codigo AS seccion_codigo, s.id AS seccion_id, 
+            (SELECT COUNT(*) FROM matriculas m WHERE m.seccion_id = s.id AND m.estado='ACTIVO') AS alumnos_count
+        FROM cursos c
+        LEFT JOIN secciones s ON s.curso_id = c.id
+        WHERE c.docente_id = ?`,
+        [docenteId]
+        );
+        res.json({ ok: true, cursos: rows });
+    } catch (err) {
+        res.status(500).json({ ok: false, msg: err.message });
+    }
+    },
+
   listarSecretarias: async (req, res) => {
     const [rows] = await pool.query(
       "SELECT * FROM usuarios WHERE rol='SECRETARIA'"
