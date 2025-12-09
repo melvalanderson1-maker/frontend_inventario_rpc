@@ -71,14 +71,26 @@ router.post("/mercadopago", express.json(), async (req, res) => {
           ? { area_code: "51", number: String(alumno.telefono) }
           : undefined,
       },
+
+      // 🔥 EVITA QUE MERCADO LIBRE OBLIGUE A INICIAR SESIÓN
+      marketplace: "UQUANTUM",
+      payment_methods: {
+        default_payment_method_id: null,
+        installments: 1,
+        excluded_payment_types: [],
+        excluded_payment_methods: [],
+      },
+
       back_urls: {
         success: `${FRONT_URL}/mp-redirect?status=success`,
         failure: `${FRONT_URL}/mp-redirect?status=failure`,
         pending: `${FRONT_URL}/mp-redirect?status=pending`,
       },
+
       auto_return: IS_DEV ? undefined : "approved",
       binary_mode: false,
     };
+
 
     // ============================================================
     // Consumir API de Mercado Pago
