@@ -93,15 +93,29 @@ module.exports = {
     },
 
 
-  eliminarUsuario: async (req, res) => {
-    try {
-      await pool.query("DELETE FROM usuarios WHERE id=?", [req.params.id]);
-      res.json({ ok: true, msg: "Usuario eliminado" });
-    } catch (err) {
+eliminarUsuario: async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Intentamos eliminar directamente
+    await pool.query("DELETE FROM usuarios WHERE id=?", [id]);
+
+    res.json({ ok: true, msg: "Usuario eliminado correctamente" });
+  } catch (err) {
+    // Si falla por foreign key (código 1451 en MySQL)
+    if (err.errno === 1451) {
+      try {
+        // Marcamos usuario como INACTIVO
+        await pool.query("UPDATE usuarios SET estado='INACTIVO' WHERE id=?", [id]);
+        res.json({ ok: true, msg: "El usuario no se puede eliminar porque tiene registros asociados, pero ha sido marcado como INACTIVO" });
+      } catch (err2) {
+        res.status(500).json({ ok: false, msg: err2.message });
+      }
+    } else {
       res.status(500).json({ ok: false, msg: err.message });
     }
-  },
-
+  }
+},
   // ─────────────────────────────────────────────
   // DOCENTES, SECRETARIAS, ALUMNOS
   // ─────────────────────────────────────────────
