@@ -73,11 +73,12 @@ router.post("/mercadopago", express.json(), async (req, res) => {
         pending: `${FRONT_URL}/mp-redirect?status=pending`,
       },
 
-      auto_return: "approved", // Devuelve automáticamente al usuario
+      auto_return: "approved",
 
-      // 🔥 Checkout PRO *sin iniciar sesión*
-      purpose: "wallet_purchase",
+      // ⚠️ QUITAR ESTO porque causa el error
+      // purpose: "wallet_purchase",
     };
+
 
     // ============================================================
     // Consumir API de Mercado Pago
