@@ -15,7 +15,7 @@ import RegistrarPago from "../components/secretaria/RegistrarPago";
 import GestionCursos from "../components/secretaria/CrearCurso";
 
 import PagoExitoso from "../components/pagos/PagoExitoso";
-import MpRedirect from "../components/pages/MpRedirect";
+import MpRedirect from "../pages/MpRedirect";
 
 import { AuthContext } from "../context/AuthContext";
 
