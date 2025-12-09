@@ -63,7 +63,8 @@ export default function AppRouter() {
         <Route
           path="/dashboard/estudiante"
           element={
-            <PrivateRoute roles={["ESTUDIANTE","DOCENTE","SECRETARIA"]}>
+            <PrivateRoute roles={["ESTUDIANTE","DOCENTE","SECRETARIA","ADMIN"]}>
+
               <DashboardEstudiante />
             </PrivateRoute>
           }

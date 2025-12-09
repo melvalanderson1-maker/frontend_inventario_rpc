@@ -20,7 +20,8 @@ export default function Login() {
       if (user.rol === "ESTUDIANTE") navigate("/dashboard/estudiante");
       else if (user.rol === "DOCENTE") navigate("/dashboard/docente");
       else if (user.rol === "SECRETARIA") navigate("/dashboard/secretaria");
-      else if (user.rol === "ADMIN") navigate("/dashboard/secretaria"); // o a donde quieras
+      else if (user.rol === "ADMIN") navigate("/dashboard/admin");
+
       else navigate("/");
 
     } catch (err) {
