@@ -1,4 +1,3 @@
-// src/pages/CheckoutCurso.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -6,7 +5,7 @@ import PublicHeader from "../components/layout/PublicHeader";
 import PublicFooter from "../components/layout/PublicFooter";
 import ModalMensaje from "../components/UI/ModalMensaje";
 
-import { iniciarPagoMercadoPago } from "../api/pagosApi";
+import { iniciarPagoMercadoPago, pagoYapeSimulado } from "../api/pagosApi";
 import { obtenerSeccionesPorCurso } from "../api/seccionesApi";
 
 import "./CheckoutCurso.css";
@@ -17,10 +16,12 @@ export default function CheckoutCurso() {
 
   const [curso, setCurso] = useState(null);
   const [secciones, setSecciones] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [procesando, setProcesando] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMensaje, setModalMensaje] = useState("");
+  const [tipoModal, setTipoModal] = useState("error");
 
   const [form, setForm] = useState({
     nombre: "",
@@ -34,16 +35,15 @@ export default function CheckoutCurso() {
 
   useEffect(() => {
     const cargar = async () => {
-      if (!cursoId) return console.error("cursoId es undefined");
+      if (!cursoId) return;
       setLoading(true);
       try {
         const res = await obtenerSeccionesPorCurso(cursoId);
-        const cursoData = res.data;
-        setCurso(cursoData);
-        setSecciones(cursoData.secciones || []);
+        setCurso(res.data);
+        setSecciones(res.data.secciones || []);
       } catch (error) {
         console.error("Error al cargar curso:", error);
-        mostrarModal("Error al cargar curso. Revisa la consola.");
+        mostrarModal("Error al cargar curso.", "error");
       } finally {
         setLoading(false);
       }
@@ -54,39 +54,33 @@ export default function CheckoutCurso() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const mostrarModal = (msg) => {
+  const mostrarModal = (msg, tipo = "error") => {
     setModalMensaje(msg);
+    setTipoModal(tipo);
     setModalVisible(true);
   };
 
-  // Validación básica y segura en cliente
   const validarFormulario = () => {
     if (!form.nombre || !form.apellido_paterno || !form.correo || !form.dni || !form.seccion_id) {
-      mostrarModal("Complete los campos obligatorios: nombre, apellido paterno, correo, DNI y sección.");
+      mostrarModal("Complete los campos obligatorios.", "error");
       return false;
     }
-    // validación de email sencilla
     if (!/^\S+@\S+\.\S+$/.test(form.correo)) {
-      mostrarModal("Ingrese un correo válido.");
+      mostrarModal("Ingrese un correo válido.", "error");
       return false;
     }
-    // DNI numérico tentativo
     if (!/^\d{6,12}$/.test(form.dni)) {
-      mostrarModal("DNI inválido. Use solo números (6-12 dígitos).");
+      mostrarModal("DNI inválido.", "error");
       return false;
     }
     return true;
   };
 
-  // ================================
-  // MERCADO PAGO (solo botón)
-  // ================================
-  const handlePayMercadoPago = async () => {
+  const handlePagar = async () => {
     if (!validarFormulario()) return;
-    setLoading(true);
+    setProcesando(true);
 
     try {
-      // Enviamos solo seccion_id + alumno (no mandes precio desde el cliente)
       const payloadAlumno = {
         nombre: form.nombre,
         apellido_paterno: form.apellido_paterno,
@@ -98,19 +92,44 @@ export default function CheckoutCurso() {
 
       const res = await iniciarPagoMercadoPago(form.seccion_id, payloadAlumno);
 
-      // Respuesta: { init_point, preference_id }
       if (res?.data?.init_point) {
-        // Redirige al init_point de MercadoPago para que el usuario pague
         window.location.href = res.data.init_point;
       } else {
-        mostrarModal("No se pudo iniciar el pago. Intente nuevamente.");
-        console.error("MP respuesta inesperada:", res);
+        mostrarModal("No se pudo iniciar el pago.", "error");
       }
     } catch (err) {
       console.error("Error iniciando pago MP:", err);
-      mostrarModal("Error iniciando pago. Revisa la consola.");
+      mostrarModal("Error iniciando pago.", "error");
     } finally {
-      setLoading(false);
+      setProcesando(false);
+    }
+  };
+
+  const handleYapeSimulado = async () => {
+    if (!validarFormulario()) return;
+    setProcesando(true);
+    try {
+      const payloadAlumno = {
+        nombre: form.nombre,
+        apellido_paterno: form.apellido_paterno,
+        apellido_materno: form.apellido_materno,
+        correo: form.correo,
+        numero_documento: form.dni,
+        telefono: form.telefono,
+      };
+
+      const res = await pagoYapeSimulado(form.seccion_id, payloadAlumno);
+
+      if (res.data.ok) {
+        mostrarModal("Pago Yape simulado exitoso.", "success");
+        setTimeout(() => navigate(`/mi-curso/${form.seccion_id}`), 1200);
+      } else {
+        mostrarModal("Error en pago Yape.", "error");
+      }
+    } catch (err) {
+      mostrarModal("Error con Yape simulado.", "error");
+    } finally {
+      setProcesando(false);
     }
   };
 
@@ -130,33 +149,32 @@ export default function CheckoutCurso() {
         </div>
 
         <div className="form">
-          <select
-            name="seccion_id"
-            value={form.seccion_id}
-            onChange={handleChange}
-          >
+          <h3>1. Datos del alumno</h3>
+
+          <select name="seccion_id" value={form.seccion_id} onChange={handleChange}>
             <option value="">Seleccione una sección</option>
             {secciones.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.codigo || `Sección ${s.id}`} — {s.modalidad} — {s.periodo}
+                {s.codigo} — {s.modalidad} — {s.periodo}
               </option>
             ))}
           </select>
 
-          <input name="nombre" placeholder="Nombre" onChange={handleChange} value={form.nombre} />
-          <input name="apellido_paterno" placeholder="Apellido paterno" onChange={handleChange} value={form.apellido_paterno} />
-          <input name="apellido_materno" placeholder="Apellido materno" onChange={handleChange} value={form.apellido_materno} />
-          <input name="correo" placeholder="Correo" onChange={handleChange} value={form.correo} />
-          <input name="dni" placeholder="DNI" onChange={handleChange} value={form.dni} />
-          <input name="telefono" placeholder="Teléfono" onChange={handleChange} value={form.telefono} />
+          <input name="nombre" placeholder="Nombre" value={form.nombre} onChange={handleChange} />
+          <input name="apellido_paterno" placeholder="Apellido paterno" value={form.apellido_paterno} onChange={handleChange} />
+          <input name="apellido_materno" placeholder="Apellido materno" value={form.apellido_materno} onChange={handleChange} />
+          <input name="correo" placeholder="Correo" value={form.correo} onChange={handleChange} />
+          <input name="dni" placeholder="DNI" value={form.dni} onChange={handleChange} />
+          <input name="telefono" placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
 
-          <button
-            className="btn mp"
-            onClick={handlePayMercadoPago}
-            disabled={loading}
-            aria-busy={loading}
-          >
-            {loading ? "Procesando..." : "Pagar con Tarjeta (Mercado Pago)"}
+          <h3>2. Confirmar pago</h3>
+
+          <button className="btn btn-primary" onClick={handlePagar} disabled={procesando}>
+            {procesando ? "Procesando..." : "Pagar"}
+          </button>
+
+          <button className="btn btn-secondary" onClick={handleYapeSimulado} disabled={procesando}>
+            {procesando ? "Procesando..." : "Simular Yape (test)"}
           </button>
         </div>
 
@@ -165,17 +183,16 @@ export default function CheckoutCurso() {
           {secciones.length > 0 ? (
             secciones.map((s) => (
               <div key={s.id} className="card seccion-card">
-                <p><strong>Código:</strong> {s.codigo || s.id}</p>
+                <p><strong>Código:</strong> {s.codigo}</p>
                 <p><strong>Modalidad:</strong> {s.modalidad}</p>
                 <p><strong>Periodo:</strong> {s.periodo}</p>
                 <p><strong>Capacidad:</strong> {s.capacidad}</p>
               </div>
             ))
           ) : (
-            <p>No hay secciones disponibles</p>
+            <p>No hay secciones disponibles.</p>
           )}
         </div>
-
       </main>
 
       <PublicFooter />
@@ -183,6 +200,7 @@ export default function CheckoutCurso() {
       <ModalMensaje
         visible={modalVisible}
         mensaje={modalMensaje}
+        tipo={tipoModal}
         onClose={() => setModalVisible(false)}
       />
     </>
