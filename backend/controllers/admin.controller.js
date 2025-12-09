@@ -74,17 +74,24 @@ module.exports = {
     },
 
 
-  actualizarUsuario: async (req, res) => {
+    actualizarUsuario: async (req, res) => {
     try {
-      await pool.query("UPDATE usuarios SET ? WHERE id=?", [
-        req.body,
-        req.params.id,
-      ]);
-      res.json({ ok: true, msg: "Usuario actualizado" });
+        const { contraseña, ...resto } = req.body;
+        let data = { ...resto };
+
+        if (contraseña) {
+        const salt = await bcrypt.genSalt(10);
+        const contraseña_hash = await bcrypt.hash(contraseña, salt);
+        data.contraseña_hash = contraseña_hash;
+        }
+
+        await pool.query("UPDATE usuarios SET ? WHERE id=?", [data, req.params.id]);
+        res.json({ ok: true, msg: "Usuario actualizado" });
     } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
+        res.status(500).json({ ok: false, msg: err.message });
     }
-  },
+    },
+
 
   eliminarUsuario: async (req, res) => {
     try {

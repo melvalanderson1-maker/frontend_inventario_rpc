@@ -54,33 +54,53 @@ export default function UsuariosAdmin() {
     setEditingId(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+e.preventDefault();
 
-    // Validaciones básicas
-    if (!form.correo || !form.nombre || !form.apellido_paterno || (!editingId && !form.contraseña)) {
-      Swal.fire("Error", "Faltan datos obligatorios", "warning");
-      return;
-    }
+// Validaciones básicas
+if (!form.correo || !form.nombre || !form.apellido_paterno || (!editingId && !form.contraseña)) {
+    Swal.fire("Error", "Faltan datos obligatorios", "warning");
+    return;
+}
 
-    try {
-      if (editingId) {
-        const payload = { ...form };
-        // no enviar contraseña vacía al editar
-        if (!payload.contraseña) delete payload.contraseña;
-        await adminApi.actualizarUsuario(editingId, payload);
-        Swal.fire("Éxito", "Usuario actualizado", "success");
-      } else {
-        await adminApi.crearUsuario(form);
-        Swal.fire("Éxito", "Usuario creado", "success");
-      }
-      resetForm();
-      fetchUsuarios();
-    } catch (err) {
-      console.error(err);
-      Swal.fire("Error", err.response?.data?.msg || "Error guardando usuario", "error");
+// Validación DNI (8 dígitos)
+if (form.numero_documento && form.tipo_documento === "DNI" && !/^\d{8}$/.test(form.numero_documento)) {
+    Swal.fire("Error", "El DNI debe tener 8 dígitos", "warning");
+    return;
+}
+
+// Teléfono / celular (9 dígitos)
+if (form.telefono && !/^\d{9}$/.test(form.telefono)) {
+    Swal.fire("Error", "El teléfono debe tener 9 dígitos", "warning");
+    return;
+}
+
+// Validación de correo
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(form.correo)) {
+    Swal.fire("Error", "Correo inválido", "warning");
+    return;
+}
+
+try {
+    if (editingId) {
+    const payload = { ...form };
+    // no enviar contraseña vacía al editar
+    if (!payload.contraseña) delete payload.contraseña;
+    await adminApi.actualizarUsuario(editingId, payload);
+    Swal.fire("Éxito", "Usuario actualizado", "success");
+    } else {
+    await adminApi.crearUsuario(form);
+    Swal.fire("Éxito", "Usuario creado", "success");
     }
-  };
+    resetForm();
+    fetchUsuarios();
+} catch (err) {
+    console.error(err);
+    Swal.fire("Error", err.response?.data?.msg || "Error guardando usuario", "error");
+}
+};
+
 
   const handleEdit = (u) => {
     setEditingId(u.id);
@@ -120,25 +140,26 @@ export default function UsuariosAdmin() {
     }
   };
 
-  const handleResetPassword = async (usuario) => {
+    const handleResetPassword = async (usuario) => {
     const { value: nueva } = await Swal.fire({
-      title: `Resetear contraseña para ${usuario.correo}`,
-      input: "password",
-      inputLabel: "Nueva contraseña",
-      inputPlaceholder: "Ingrese nueva contraseña",
-      showCancelButton: true,
+        title: `Resetear contraseña para ${usuario.correo}`,
+        input: "password",
+        inputLabel: "Nueva contraseña",
+        inputPlaceholder: "Ingrese nueva contraseña",
+        showCancelButton: true,
     });
 
     if (nueva) {
-      try {
+        try {
         await adminApi.actualizarUsuario(usuario.id, { contraseña: nueva });
         Swal.fire("Éxito", "Contraseña reseteada correctamente", "success");
-      } catch (err) {
+        } catch (err) {
         console.error(err);
         Swal.fire("Error", "No se pudo resetear la contraseña", "error");
-      }
+        }
     }
-  };
+    };
+
 
   return (
     <div className="usuarios-admin">
