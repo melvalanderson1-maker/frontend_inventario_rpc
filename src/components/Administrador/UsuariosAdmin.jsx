@@ -1,15 +1,17 @@
-// src/components/Administrador/UsuariosAdmin.jsx
 import React, { useEffect, useState } from "react";
 import adminApi from "../../api/adminApi";
 import "./UsuariosAdmin.css";
+import Swal from "sweetalert2";
 
 export default function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // form state (create / edit)
   const [form, setForm] = useState({
     correo: "",
+    contraseña: "",
     nombre: "",
     apellido_paterno: "",
     apellido_materno: "",
@@ -28,10 +30,10 @@ export default function UsuariosAdmin() {
     setLoading(true);
     try {
       const res = await adminApi.listarUsuarios();
-      setUsuarios(res.data.usuarios || res.data); // según backend
+      setUsuarios(res.data.usuarios || res.data);
     } catch (err) {
       console.error(err);
-      alert("Error cargando usuarios");
+      Swal.fire("Error", "No se pudieron cargar los usuarios", "error");
     } finally {
       setLoading(false);
     }
@@ -40,6 +42,7 @@ export default function UsuariosAdmin() {
   const resetForm = () => {
     setForm({
       correo: "",
+      contraseña: "",
       nombre: "",
       apellido_paterno: "",
       apellido_materno: "",
@@ -53,19 +56,29 @@ export default function UsuariosAdmin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validaciones básicas
+    if (!form.correo || !form.nombre || !form.apellido_paterno || (!editingId && !form.contraseña)) {
+      Swal.fire("Error", "Faltan datos obligatorios", "warning");
+      return;
+    }
+
     try {
       if (editingId) {
-        await adminApi.actualizarUsuario(editingId, form);
-        alert("Usuario actualizado");
+        const payload = { ...form };
+        // no enviar contraseña vacía al editar
+        if (!payload.contraseña) delete payload.contraseña;
+        await adminApi.actualizarUsuario(editingId, payload);
+        Swal.fire("Éxito", "Usuario actualizado", "success");
       } else {
         await adminApi.crearUsuario(form);
-        alert("Usuario creado");
+        Swal.fire("Éxito", "Usuario creado", "success");
       }
       resetForm();
       fetchUsuarios();
     } catch (err) {
       console.error(err);
-      alert("Error guardando usuario");
+      Swal.fire("Error", err.response?.data?.msg || "Error guardando usuario", "error");
     }
   };
 
@@ -73,6 +86,7 @@ export default function UsuariosAdmin() {
     setEditingId(u.id);
     setForm({
       correo: u.correo || "",
+      contraseña: "",
       nombre: u.nombre || "",
       apellido_paterno: u.apellido_paterno || "",
       apellido_materno: u.apellido_materno || "",
@@ -85,14 +99,44 @@ export default function UsuariosAdmin() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar usuario?")) return;
-    try {
-      await adminApi.eliminarUsuario(id);
-      alert("Usuario eliminado");
-      fetchUsuarios();
-    } catch (err) {
-      console.error(err);
-      alert("Error eliminando usuario");
+    const result = await Swal.fire({
+      title: "Eliminar usuario",
+      text: "¿Desea eliminar este usuario?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+    });
+    if (result.isConfirmed) {
+      try {
+        await adminApi.eliminarUsuario(id);
+        Swal.fire("Eliminado", "Usuario eliminado correctamente", "success");
+        fetchUsuarios();
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "No se pudo eliminar el usuario", "error");
+      }
+    }
+  };
+
+  const handleResetPassword = async (usuario) => {
+    const { value: nueva } = await Swal.fire({
+      title: `Resetear contraseña para ${usuario.correo}`,
+      input: "password",
+      inputLabel: "Nueva contraseña",
+      inputPlaceholder: "Ingrese nueva contraseña",
+      showCancelButton: true,
+    });
+
+    if (nueva) {
+      try {
+        await adminApi.actualizarUsuario(usuario.id, { contraseña: nueva });
+        Swal.fire("Éxito", "Contraseña reseteada correctamente", "success");
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "No se pudo resetear la contraseña", "error");
+      }
     }
   };
 
@@ -108,6 +152,20 @@ export default function UsuariosAdmin() {
             onChange={(e) => setForm({ ...form, correo: e.target.value })} required/>
           <input name="nombre" placeholder="Nombre" value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })} required/>
+        </div>
+
+        <div className="row">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="contraseña"
+            placeholder="Contraseña"
+            value={form.contraseña || ""}
+            onChange={(e) => setForm({ ...form, contraseña: e.target.value })}
+            required={!editingId}
+          />
+          <button type="button" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? "🙈" : "👁️"}
+          </button>
         </div>
 
         <div className="row">
@@ -153,7 +211,7 @@ export default function UsuariosAdmin() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th><th>Correo</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Acciones</th>
+              <th>ID</th><th>Correo</th><th>Contraseña</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -161,6 +219,10 @@ export default function UsuariosAdmin() {
               <tr key={u.id}>
                 <td>{u.id}</td>
                 <td>{u.correo}</td>
+                <td>
+                  {u.contraseña_hash ? "*****" : ""}
+                  <button onClick={() => handleResetPassword(u)} className="btn small">🔑</button>
+                </td>
                 <td>{u.nombre} {u.apellido_paterno}</td>
                 <td>{u.rol}</td>
                 <td>{u.estado}</td>

@@ -5,6 +5,8 @@ let pool;
   pool = await initDB();
 })();
 
+const bcrypt = require("bcrypt");
+
 module.exports = {
   // ─────────────────────────────────────────────
   // USUARIOS
@@ -30,15 +32,47 @@ module.exports = {
     }
   },
 
-  crearUsuario: async (req, res) => {
+
+
+    crearUsuario: async (req, res) => {
     try {
-      const data = req.body;
-      await pool.query("INSERT INTO usuarios SET ?", data);
-      res.json({ ok: true, msg: "Usuario creado" });
+        const { correo, nombre, apellido_paterno, apellido_materno, numero_documento, telefono, rol, estado, contraseña } = req.body;
+
+        // Validaciones básicas
+        if (!correo || !nombre || !apellido_paterno || !contraseña) {
+        return res.status(400).json({ ok: false, msg: "Faltan datos obligatorios" });
+        }
+
+        // Validar email único
+        const [existing] = await pool.query("SELECT id FROM usuarios WHERE correo=?", [correo]);
+        if (existing.length > 0) {
+        return res.status(400).json({ ok: false, msg: "Correo ya registrado" });
+        }
+
+        // Hashear contraseña
+        const salt = await bcrypt.genSalt(10);
+        const contraseña_hash = await bcrypt.hash(contraseña, salt);
+
+        const data = {
+        correo,
+        nombre,
+        apellido_paterno,
+        apellido_materno,
+        numero_documento,
+        telefono,
+        rol: rol || "ESTUDIANTE",
+        estado: estado || "ACTIVO",
+        contraseña_hash,
+        };
+
+        await pool.query("INSERT INTO usuarios SET ?", data);
+        res.json({ ok: true, msg: "Usuario creado" });
     } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
+        console.error(err);
+        res.status(500).json({ ok: false, msg: err.message });
     }
-  },
+    },
+
 
   actualizarUsuario: async (req, res) => {
     try {
