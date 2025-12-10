@@ -26,6 +26,17 @@ const adminApi = {
   actualizarSeccion: (id, data) => axiosClient.put(`/admin/secciones/${id}`, data),
   eliminarSeccion: (id) => axiosClient.delete(`/admin/secciones/${id}`),
 
+  listarSesiones: (id) => axiosClient.get(`/admin/secciones/${id}/sesiones`),
+  crearSesion: (d) => axiosClient.post(`/admin/sesiones`, d),
+  actualizarSesion: (id, d) => axiosClient.put(`/admin/sesiones/${id}`, d),
+  eliminarSesion: (id) => axiosClient.delete(`/admin/sesiones/${id}`),
+
+  listarHorarios: (id) => axiosClient.get(`/admin/secciones/${id}/horarios`),
+  crearHorario: (d) => axiosClient.post(`/admin/horarios`, d),
+
+  generarSesiones: (id) => axiosClient.post(`/admin/secciones/${id}/generar-sesiones`),
+
+
   listarPagos: () => axiosClient.get("/admin/pagos"),
   listarFacturas: () => axiosClient.get("/admin/facturas"),
   listarAuditoria: () => axiosClient.get("/admin/auditoria"),

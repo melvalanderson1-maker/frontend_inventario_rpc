@@ -1,96 +1,102 @@
-.admin-container {
-  padding: 20px;
-  font-family: "Segoe UI", sans-serif;
-}
-
-.panel-title {
-  font-size: 26px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 25px;
-}
-
-/* CARD */
-.card {
-  padding: 18px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-}
-
-.card.full {
-  grid-column: span 2;
-}
-
-/* FORM */
-.form input,
-.form textarea,
-.form select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-}
-
-textarea {
-  min-height: 60px;
-}
-
-.btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn.primary {
-  background: #5b21b6;
-  color: white;
-}
-
-.btn.secondary {
-  background: #e5e7eb;
-}
-
-.btn.danger {
-  background: #dc2626;
-  color: white;
-}
-
-/* LISTAS */
-.list {
-  margin-top: 10px;
-}
-
-.row {
+.admin-wrapper {
   display: flex;
-  justify-content: space-between;
-  background: #f9fafb;
+  height: 100vh;
+  background: #f4f6fa;
+}
+
+/* -------- PANEL IZQUIERDO -------- */
+.panel-cursos {
+  width: 35%;
+  padding: 20px;
+  overflow-y: auto;
+  background: white;
+  border-right: 1px solid #ddd;
+}
+
+.curso-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.curso-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  border: 1px solid #e3e3e3;
+}
+.curso-card:hover {
+  transform: scale(1.02);
+  border-color: #8a2be2;
+}
+
+.precio {
+  color: #8a2be2;
+  font-weight: bold;
+}
+
+.desc {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* -------- PANEL DERECHO -------- */
+.panel-detalle {
+  width: 65%;
+  padding: 25px;
+  background: #fafafa;
+  overflow-y: auto;
+  transition: 0.4s ease;
+  transform: translateX(100%);
+}
+
+.panel-detalle.open {
+  transform: translateX(0);
+}
+
+/* Secciones */
+.seccion-list {
+  border-left: 3px solid #8a2be2;
+  margin: 12px 0;
+}
+
+.seccion-item {
   padding: 12px;
+  border: 1px solid #e5e5e5;
+  background: white;
   border-radius: 10px;
   margin-bottom: 10px;
+  transition: 0.2s;
+  cursor: pointer;
 }
 
-/* HORARIOS */
-.horario-list {
-  background: #f3f4f6;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 12px;
+.seccion-item:hover {
+  background: #f3e8ff;
 }
 
-.horario-item {
-  background: white;
-  padding: 6px 10px;
-  border-radius: 8px;
-  margin-bottom: 6px;
-  border: 1px solid #ddd;
+.seccion-item.active {
+  background: #d8b8ff;
+  border-color: #8a2be2;
+}
+
+/* Placeholder */
+.placeholder {
+  margin-top: 80px;
+  text-align: center;
+  color: #666;
+}
+.fc {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .fc {
+    font-size: 12px;
+  }
+  .fc-header-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
 }

@@ -44,6 +44,22 @@ router.delete("/cursos/:id", adminController.eliminarCurso);
 // backend/routes/admin.routes.js
 router.get("/secciones/:id/alumnos", adminController.listarAlumnosSeccion);
 
+// SESIONES
+
+router.get("/secciones/:id/sesiones", adminController.listarSesiones);
+router.post("/sesiones", adminController.crearSesion);
+router.put("/sesiones/:id", adminController.actualizarSesion);
+router.delete("/sesiones/:id", adminController.eliminarSesion);
+
+// HORARIOS
+// HORARIOS
+router.get("/secciones/:id/horarios", adminController.listarHorarios);
+router.post("/horarios", adminController.crearHorario);
+
+// GENERAR SESIONES
+router.post("/secciones/:id/generar-sesiones", adminController.generarSesionesAutomaticas);
+
+
 
 // ─────────────────────────────────────────────
 // SECCIONES

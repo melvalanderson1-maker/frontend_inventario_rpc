@@ -172,6 +172,170 @@ listarAlumnosSeccion: async (req, res) => {
 },
 
 
+  listarSesiones: async (req, res) => {
+    const [rows] = await pool.query(
+      "SELECT * FROM sesiones WHERE seccion_id=?",
+      [req.params.id]
+    );
+    res.json({ ok: true, sesiones: rows });
+  },
+
+
+
+
+
+
+  // ─────────────────────────────────────────────
+  // SESIONES (Google Calendar Level)
+  // ─────────────────────────────────────────────
+  crearSesion : async (req, res) => {
+    try {
+      const {
+        seccion_id,
+        titulo,
+        descripcion,
+        inicia_en,
+        termina_en,
+        tipo_sesion,
+        aula,
+        enlace_meet
+      } = req.body;
+
+      await pool.query("INSERT INTO sesiones SET ?", {
+        seccion_id,
+        titulo,
+        descripcion,
+        inicia_en,
+        termina_en,
+        tipo_sesion,
+        aula,
+        enlace_meet
+      });
+
+      res.json({ ok: true, msg: "Sesión creada correctamente" });
+    } catch (err) {
+      res.status(500).json({ ok: false, msg: err.message });
+    }
+  },
+
+  actualizarSesion : async (req, res) => {
+    try {
+      const data = req.body;
+
+      await pool.query("UPDATE sesiones SET ? WHERE id=?", [
+        data,
+        req.params.id,
+      ]);
+
+      res.json({ ok: true, msg: "Sesión actualizada" });
+    } catch (err) {
+      res.status(500).json({ ok: false, msg: err.message });
+    }
+  },
+
+  eliminarSesion : async (req, res) => {
+    try {
+      await pool.query("DELETE FROM sesiones WHERE id=?", [req.params.id]);
+      res.json({ ok: true, msg: "Sesión eliminada" });
+    } catch (err) {
+      res.status(500).json({ ok: false, msg: err.message });
+    }
+  },
+
+
+  // ─────────────────────────────────────────────
+// HORARIOS (para generar sesiones)
+// ─────────────────────────────────────────────
+listarHorarios : async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const [rows] = await pool.query(
+      "SELECT * FROM horarios WHERE seccion_id=?",
+      [seccionId]
+    );
+    res.json({ ok: true, horarios: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+crearHorario : async (req, res) => {
+  try {
+    const { seccion_id, dia_semana, hora_inicio, hora_fin, lugar } = req.body;
+
+    await pool.query("INSERT INTO horarios SET ?", {
+      seccion_id,
+      dia_semana,
+      hora_inicio,
+      hora_fin,
+      lugar
+    });
+
+    res.json({ ok: true, msg: "Horario creado correctamente" });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+generarSesionesAutomaticas : async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+
+    // 1. Obtener sección
+    const [[seccion]] = await pool.query(
+      "SELECT * FROM secciones WHERE id=?", [seccionId]
+    );
+
+    // 2. Obtener horarios
+    const [horarios] = await pool.query(
+      "SELECT * FROM horarios WHERE seccion_id=?", [seccionId]
+    );
+
+    if (horarios.length === 0)
+      return res.json({ ok: false, msg: "No hay horarios configurados" });
+
+    const fechaInicio = new Date(seccion.fecha_inicio);
+    const fechaFin = new Date(seccion.fecha_fin);
+
+    let sesionesCreadas = 0;
+
+    while (fechaInicio <= fechaFin) {
+      const diaSemana = fechaInicio.getDay(); // 0-6
+
+      horarios.forEach((h) => {
+        if (h.dia_semana === diaSemana) {
+          const inicia = new Date(
+            `${fechaInicio.toISOString().split("T")[0]} ${h.hora_inicio}`
+          );
+          const termina = new Date(
+            `${fechaInicio.toISOString().split("T")[0]} ${h.hora_fin}`
+          );
+
+          pool.query("INSERT INTO sesiones SET ?", {
+            seccion_id: seccionId,
+            titulo: `Clase ${seccionesCreadas + 1}`,
+            inicia_en: inicia,
+            termina_en: termina,
+            tipo_sesion: "PRESENCIAL",
+            aula: h.lugar
+          });
+
+          sesionesCreadas++;
+        }
+      });
+
+      fechaInicio.setDate(fechaInicio.getDate() + 1);
+    }
+
+    res.json({ ok: true, msg: "Sesiones generadas", cantidad: sesionesCreadas });
+
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
+
 
   listarSecretarias: async (req, res) => {
     const [rows] = await pool.query(

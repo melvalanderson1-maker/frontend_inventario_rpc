@@ -1,243 +1,143 @@
-// src/components/Administrador/CursosAdmin.jsx
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import adminApi from "../../api/adminApi";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 import "./CursosAdmin.css";
 
 export default function CursosAdmin() {
   const [cursos, setCursos] = useState([]);
   const [secciones, setSecciones] = useState([]);
-  const [docentes, setDocentes] = useState([]);
+
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
+  const [seccionSeleccionada, setSeccionSeleccionada] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
-  // FORMULARIO CURSO
-  const [cursoForm, setCursoForm] = useState({ titulo: "", descripcion: "", precio: 0 });
-
-  // FORMULARIO SECCION
-  const [seccionForm, setSeccionForm] = useState({
-    curso_id: "",
-    docente_id: "",
-    modalidad: "PRESENCIAL",
-    fecha_inicio: "",
-    horas_totales: 0,
-    horario_semana: []
-  });
-
   useEffect(() => {
-    cargarDatos();
+    cargarCursos();
+    cargarSecciones();
   }, []);
 
-  const cargarDatos = async () => {
-    setLoading(true);
-    try {
-      const [cursosRes, seccionesRes, docentesRes] = await Promise.all([
-        adminApi.listarCursos(),
-        adminApi.listarSecciones(),
-        adminApi.listarDocentes()
-      ]);
-
-      setCursos(cursosRes.data.cursos);
-      setSecciones(seccionesRes.data.secciones);
-      setDocentes(docentesRes.data.docentes);
-    } catch (err) {
-      console.error(err);
-      alert("Error cargando datos.");
-    }
+  const cargarCursos = async () => {
+    const res = await adminApi.listarCursos();
+    setCursos(res.data.cursos);
     setLoading(false);
   };
 
-  // CREAR CURSO
-  const crearCurso = async (e) => {
-    e.preventDefault();
-    try {
-      await adminApi.crearCurso(cursoForm);
-      setCursoForm({ titulo: "", descripcion: "", precio: 0 });
-      cargarDatos();
-    } catch (err) {
-      console.error(err);
-      alert("Error creando curso");
-    }
+  const cargarSecciones = async () => {
+    const res = await adminApi.listarSecciones();
+    setSecciones(res.data.secciones);
   };
 
-  // CREAR SECCION
-  const crearSeccion = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        ...seccionForm,
-        horario_semana: JSON.stringify(seccionForm.horario_semana)
-      };
-
-      await adminApi.crearSeccion(payload);
-      alert("Sección creada con éxito");
-      setSeccionForm({
-        curso_id: "",
-        docente_id: "",
-        modalidad: "PRESENCIAL",
-        fecha_inicio: "",
-        horas_totales: 0,
-        horario_semana: []
-      });
-      cargarDatos();
-    } catch (err) {
-      console.error(err);
-      alert("Error creando sección");
-    }
+  const abrirCurso = (curso) => {
+    setCursoSeleccionado(curso);
+    setSeccionSeleccionada(null);
   };
 
-  // AGREGAR HORARIO
-  const agregarHorario = () => {
-    const dia = prompt("Día (LUNES/MARTES/MIERCOLES/JUEVES/VIERNES/SABADO/DOMINGO)");
-    const inicio = prompt("Hora inicio (HH:MM)");
-    const fin = prompt("Hora fin (HH:MM)");
-
-    if (!dia || !inicio || !fin) return;
-
-    setSeccionForm({
-      ...seccionForm,
-      horario_semana: [...seccionForm.horario_semana, { dia, inicio, fin }]
-    });
+  const abrirSeccion = (seccion) => {
+    setSeccionSeleccionada(seccion);
   };
 
   return (
-    <div className="admin-container">
-      <h1 className="panel-title">Gestión de Cursos y Secciones</h1>
+    <div className="admin-wrapper">
 
-      {loading ? <p>Cargando...</p> : (
-        <div className="grid">
-          {/* ---------------------------------------- */}
-          {/* FORMULARIO CURSOS */}
-          {/* ---------------------------------------- */}
-          <div className="card">
-            <h2>Crear Curso</h2>
-            <form onSubmit={crearCurso} className="form">
-              <input 
-                placeholder="Título" 
-                required 
-                value={cursoForm.titulo}
-                onChange={(e)=>setCursoForm({...cursoForm, titulo:e.target.value})}
-              />
+      {/* PANEL DE CURSOS */}
+      <div className="panel-cursos">
+        <h2>Cursos</h2>
 
-              <textarea 
-                placeholder="Descripción"
-                value={cursoForm.descripcion}
-                onChange={(e)=>setCursoForm({...cursoForm, descripcion:e.target.value})}
-              />
+        {loading && <p>Cargando...</p>}
 
-              <input 
-                type="number"
-                placeholder="Precio"
-                value={cursoForm.precio}
-                onChange={(e)=>setCursoForm({...cursoForm, precio:Number(e.target.value)})}
-              />
-
-              <button className="btn primary">Crear Curso</button>
-            </form>
-          </div>
-
-          {/* ---------------------------------------- */}
-          {/* FORM SECCION */}
-          {/* ---------------------------------------- */}
-          <div className="card">
-            <h2>Crear Sección</h2>
-
-            <form onSubmit={crearSeccion} className="form">
-
-              <select
-                required
-                value={seccionForm.curso_id}
-                onChange={(e)=>setSeccionForm({...seccionForm, curso_id:e.target.value})}
-              >
-                <option value="">Seleccione Curso</option>
-                {cursos.map(c => <option key={c.id} value={c.id}>{c.titulo}</option>)}
-              </select>
-
-              <select
-                required
-                value={seccionForm.docente_id}
-                onChange={(e)=>setSeccionForm({...seccionForm, docente_id:e.target.value})}
-              >
-                <option value="">Seleccione Docente</option>
-                {docentes.map(d => <option key={d.id} value={d.id}>{d.nombre} {d.apellido_paterno}</option>)}
-              </select>
-
-              <select
-                value={seccionForm.modalidad}
-                onChange={(e)=>setSeccionForm({...seccionForm, modalidad:e.target.value})}
-              >
-                <option value="PRESENCIAL">Presencial</option>
-                <option value="VIRTUAL">Virtual</option>
-                <option value="HIBRIDO">Híbrido</option>
-              </select>
-
-              <label>Fecha Inicio</label>
-              <input 
-                type="date"
-                value={seccionForm.fecha_inicio}
-                onChange={(e)=>setSeccionForm({...seccionForm, fecha_inicio:e.target.value})}
-              />
-
-              <input 
-                type="number"
-                placeholder="Horas Totales"
-                value={seccionForm.horas_totales}
-                onChange={(e)=>setSeccionForm({...seccionForm, horas_totales:Number(e.target.value)})}
-              />
-
-              <button type="button" className="btn secondary" onClick={agregarHorario}>
-                + Agregar Horario
-              </button>
-
-              <div className="horario-list">
-                {seccionForm.horario_semana.map((h,i)=>(
-                  <div className="horario-item" key={i}>
-                    <b>{h.dia}</b>: {h.inicio} - {h.fin}
-                  </div>
-                ))}
-              </div>
-
-              <button className="btn primary">Crear Sección</button>
-            </form>
-          </div>
-
-          {/* ---------------------------------------- */}
-          {/* LISTADO DE CURSOS */}
-          {/* ---------------------------------------- */}
-          <div className="card full">
-            <h2>Cursos Registrados</h2>
-            <div className="list">
-              {cursos.map(c => (
-                <div className="row" key={c.id}>
-                  <div>
-                    <b>{c.titulo}</b>
-                    <p>S/ {c.precio}</p>
-                  </div>
-                </div>
-              ))}
+        <div className="curso-grid">
+          {cursos.map((c) => (
+            <div
+              key={c.id}
+              className="curso-card"
+              onClick={() => abrirCurso(c)}
+            >
+              <h3>{c.titulo}</h3>
+              <p className="precio">S/ {c.precio}</p>
+              <p className="desc">{c.descripcion}</p>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* ---------------------------------------- */}
-          {/* LISTADO DE SECCIONES */}
-          {/* ---------------------------------------- */}
-          <div className="card full">
-            <h2>Secciones Registradas</h2>
-            <div className="list">
-              {secciones.map(s => (
-                <div className="row" key={s.id}>
-                  <div>
-                    <b>Curso ID: {s.curso_id}</b>
+      {/* PANEL DERECHO */}
+      <div className={`panel-detalle ${cursoSeleccionado ? "open" : ""}`}>
+
+        {!cursoSeleccionado && (
+          <div className="placeholder">
+            <p>Selecciona un curso</p>
+          </div>
+        )}
+
+        {cursoSeleccionado && (
+          <>
+            <h2>{cursoSeleccionado.titulo}</h2>
+
+            <h3>Secciones</h3>
+            <div className="seccion-list">
+              {secciones
+                .filter((s) => s.curso_id === cursoSeleccionado.id)
+                .map((s) => (
+                  <div
+                    key={s.id}
+                    className={`seccion-item ${
+                      seccionSeleccionada?.id === s.id ? "active" : ""
+                    }`}
+                    onClick={() => abrirSeccion(s)}
+                  >
+                    <strong>Sección {s.id}</strong>
                     <p>Modalidad: {s.modalidad}</p>
                     <p>Inicio: {s.fecha_inicio}</p>
-                    <p>Horas Totales: {s.horas_totales}</p>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
-          </div>
 
-        </div>
-      )}
+            {/* CALENDARIO */}
+            {seccionSeleccionada && (
+              <>
+                <h3>Calendario de Sesiones</h3>
+                <FullCalendar
+                  plugins={[dayGridPlugin, interactionPlugin]}
+                  initialView="dayGridMonth"
+                  editable={true}
+                  selectable={true}
+                  events={sesiones}
+                  
+                  dateClick={(info) => {
+                    const titulo = prompt("Título de la sesión:");
+                    if (!titulo) return;
+
+                    adminApi.crearSesion({
+                      seccion_id: seccionSeleccionada.id,
+                      titulo,
+                      inicia_en: info.date,
+                      termina_en: info.date,
+                      tipo_sesion: "PRESENCIAL",
+                    }).then(() => cargarSesiones());
+                  }}
+
+                  eventDrop={(info) => {
+                    adminApi.actualizarSesion(info.event.id, {
+                      inicia_en: info.event.start,
+                      termina_en: info.event.end
+                    }).then(() => cargarSesiones());
+                  }}
+
+                  eventClick={(info) => {
+                    if (confirm("¿Eliminar sesión?")) {
+                      adminApi.eliminarSesion(info.event.id).then(() => cargarSesiones());
+                    }
+                  }}
+                />
+
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
