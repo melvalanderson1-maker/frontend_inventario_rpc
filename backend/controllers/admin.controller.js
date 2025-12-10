@@ -159,7 +159,7 @@ listarAlumnosSeccion: async (req, res) => {
   try {
     const seccionId = req.params.id;
     const [rows] = await pool.query(
-      `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo
+      `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, u.numero_documento
        FROM matriculas m
        JOIN usuarios u ON m.usuario_id = u.id
        WHERE m.seccion_id = ? AND m.estado='ACTIVO'`,
@@ -170,6 +170,7 @@ listarAlumnosSeccion: async (req, res) => {
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
+
 
 
   listarSecretarias: async (req, res) => {
