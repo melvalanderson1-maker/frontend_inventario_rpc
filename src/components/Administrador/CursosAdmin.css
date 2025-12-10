@@ -1,8 +1,96 @@
-/* CursosAdmin.css */
-.cursos-admin { padding:18px; background:#fff; border-radius:8px;}
-.curso-form { display:flex; gap:10px; margin-bottom:12px; align-items:center; }
-.curso-form input { padding:8px; border-radius:6px; border:1px solid #ddd; }
-.list .card { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:6px; margin-bottom:8px; }
-.meta { color:#666; font-size:13px; margin-top:6px; }
-.btn.primary { background:#276ef1; color:#fff; }
-.btn.danger { background:#ff4d4f; color:#fff; border:none; }
+.admin-container {
+  padding: 20px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.panel-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+/* CARD */
+.card {
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.card.full {
+  grid-column: span 2;
+}
+
+/* FORM */
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 60px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn.primary {
+  background: #5b21b6;
+  color: white;
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+}
+
+.btn.danger {
+  background: #dc2626;
+  color: white;
+}
+
+/* LISTAS */
+.list {
+  margin-top: 10px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+/* HORARIOS */
+.horario-list {
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.horario-item {
+  background: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid #ddd;
+}
