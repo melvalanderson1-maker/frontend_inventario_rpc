@@ -1,6 +1,3 @@
-/* =========================
-   Contenedor principal
-========================= */
 .docentes-admin {
   max-width: 1400px;
   margin: 2rem auto;
@@ -16,36 +13,28 @@
   color: #1a73e8;
 }
 
-/* =========================
-   GRID docentes y cursos
-========================= */
+/* GRID docentes: hasta 6 columnas */
 .grid-docentes, .grid-cursos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
-/* =========================
-   Card docente y curso
-========================= */
+/* Card docente y curso */
 .card, .curso-card {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .card:hover, .curso-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-/* =========================
-   Header de Card
-========================= */
 .card-header, .curso-header {
   padding: 1rem;
   display: flex;
@@ -66,42 +55,39 @@
 }
 
 .indicators span, .curso-info span {
+  margin-left: 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
   font-size: 0.85rem;
   color: #555;
 }
 
 .indicators span svg, .curso-info span svg {
+  margin-right: 0.25rem;
   color: #1a73e8;
 }
 
-/* =========================
-   Botones de acción
-========================= */
+/* Acciones */
 .actions {
   padding: 0.5rem 1rem;
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
   justify-content: flex-end;
 }
 
 .actions .btn {
-  padding: 0.35rem 0.9rem;
+  padding: 0.35rem 0.8rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   background: #1a73e8;
   color: #fff;
   font-size: 0.85rem;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .actions .btn:hover {
   background: #155ab6;
-  transform: scale(1.05);
 }
 
 .actions .btn.danger {
@@ -110,12 +96,9 @@
 
 .actions .btn.danger:hover {
   background: #b71c1c;
-  transform: scale(1.05);
 }
 
-/* =========================
-   Detalle docente
-========================= */
+/* Detalle docente */
 .detalle-docente {
   padding: 1rem 0;
 }
@@ -124,21 +107,13 @@
   margin-bottom: 1rem;
   background: #1a73e8;
   color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: background 0.2s, transform 0.2s;
 }
 
 .detalle-docente .regresar:hover {
   background: #155ab6;
-  transform: scale(1.05);
 }
 
-/* =========================
-   Cursos
-========================= */
+/* Cursos */
 .curso-header {
   cursor: pointer;
   display: flex;
@@ -146,11 +121,6 @@
   align-items: flex-start;
   padding: 1rem;
   border-bottom: 1px solid #eee;
-  transition: background 0.2s;
-}
-
-.curso-header:hover {
-  background: #f0f4ff;
 }
 
 .curso-header .curso-titulo {
@@ -158,14 +128,12 @@
   color: #1a1a1a;
   font-weight: 600;
   margin-bottom: 0.6rem;
-  word-break: break-word;
 }
 
 .curso-info {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0.5rem;
+  justify-content: space-between; /* simetría perfecta */
+  width: 100%;
   font-size: 0.9rem;
   color: #555;
 }
@@ -175,17 +143,12 @@
   align-items: center;
   gap: 0.3rem;
   background: #f1f7ff;
-  padding: 0.4rem 0.6rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 6px;
-  min-width: 90px;
+  min-width: 80px;
   text-align: center;
-  font-size: 0.9rem;
-  flex-shrink: 0;
 }
 
-/* =========================
-   Lista de alumnos
-========================= */
 .alumnos-list {
   margin-top: 0.8rem;
   padding: 0.6rem;
@@ -205,230 +168,34 @@
 }
 
 .alumno-item span {
+  margin-right: 1rem;
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  margin-right: 1rem;
-  min-width: 120px;
-  word-break: break-word;
 }
 
-/* =========================
-   Modal
-========================= */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  background: #fff;
+.curso-card {
   border-radius: 12px;
-  width: 100%;
-  max-width: 600px;
-  padding: 1rem;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #eee;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
   margin-bottom: 1rem;
-  flex-wrap: wrap;
 }
 
-.modal-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  word-break: break-word;
-  flex: 1 1 70%;
+.curso-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-.modal-header .cerrar {
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  cursor: pointer;
-  color: #555;
-}
 
-.modal-body .alumno-item {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.modal-body .alumno-item span {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-right: 1rem;
-  min-width: 100px;
-  word-break: break-word;
-}
-
-/* =========================
-   Animaciones
-========================= */
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(-20px);}
-  to {opacity: 1; transform: translateY(0);}
-}
-
-/* =========================
-   Responsive
-========================= */
-/* =========================
-   Responsive completo
-========================= */
-
-/* Pantallas grandes: hasta 1400px */
-@media (max-width: 1400px) {
-  .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-
-  .curso-info span {
-    min-width: 80px;
-    font-size: 0.85rem;
-  }
-
-  .card, .curso-card {
-    padding: 1.5rem;
-  }
-
-  .card-header div b, .curso-header b {
-    font-size: 1.2rem;
-  }
-}
-
-/* Laptops medianas: hasta 1200px */
 @media (max-width: 1200px) {
   .grid-docentes, .grid-cursos {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
-
-  .curso-info span {
-    min-width: 75px;
-    font-size: 0.83rem;
-  }
-
-  /* Botones de acción en fila 1x2 */
-  .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    justify-content: start;
-  }
-
-  .actions .btn {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Iconos más visibles */
-  .indicators span, .curso-info span {
-    font-size: 1rem;
-    gap: 0.5rem;
-    min-width: 100px;
-  }
-
-  .indicators span svg, .curso-info span svg {
-    width: 20px;
-    height: 20px;
-  }
 }
 
-/* Tablets grandes: hasta 992px */
-@media (max-width: 992px) {
-  .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
-
-  .curso-info span {
-    min-width: 70px;
-    font-size: 0.82rem;
-  }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-start;
-  }
-
-  .actions .btn {
-    width: auto;
-    min-width: 100px;
-  }
-}
-
-/* Tablets pequeñas: hasta 768px */
 @media (max-width: 768px) {
   .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-
-  .curso-info span {
-    min-width: 65px;
-    font-size: 0.8rem;
-  }
-
-  .actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 0.5rem;
-  }
-
-  .actions .btn {
-    width: 100%;
-    text-align: center;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
-
-/* Móviles: hasta 576px */
-@media (max-width: 576px) {
-  .grid-docentes, .grid-cursos {
-    grid-template-columns: 1fr;
-  }
-
-  .curso-info span {
-    min-width: 60px;
-    font-size: 0.78rem;
-  }
-
-  .alumno-item span {
-    min-width: 90px;
-    font-size: 0.78rem;
-  }
-
-  .modal-content {
-    width: 95%;
-    padding: 0.8rem;
-  }
-
-  .actions {
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .actions .btn {
-    width: 100%;
-    text-align: center;
-  }
-}
-
