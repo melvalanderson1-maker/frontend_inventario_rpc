@@ -1,3 +1,6 @@
+/* =========================
+   Contenedor principal
+========================= */
 .docentes-admin {
   max-width: 1400px;
   margin: 2rem auto;
@@ -13,14 +16,18 @@
   color: #1a73e8;
 }
 
-/* GRID docentes: hasta 6 columnas */
+/* =========================
+   GRID docentes y cursos
+========================= */
 .grid-docentes, .grid-cursos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
-/* Card docente y curso */
+/* =========================
+   Card docente y curso
+========================= */
 .card, .curso-card {
   background: #fff;
   border-radius: 12px;
@@ -35,6 +42,9 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
+/* =========================
+   Header de Card
+========================= */
 .card-header, .curso-header {
   padding: 1rem;
   display: flex;
@@ -67,7 +77,9 @@
   color: #1a73e8;
 }
 
-/* Acciones */
+/* =========================
+   Botones de acción
+========================= */
 .actions {
   padding: 0.5rem 1rem;
   display: flex;
@@ -98,7 +110,9 @@
   background: #b71c1c;
 }
 
-/* Detalle docente */
+/* =========================
+   Detalle docente
+========================= */
 .detalle-docente {
   padding: 1rem 0;
 }
@@ -107,13 +121,19 @@
   margin-bottom: 1rem;
   background: #1a73e8;
   color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
 }
 
 .detalle-docente .regresar:hover {
   background: #155ab6;
 }
 
-/* Cursos */
+/* =========================
+   Cursos
+========================= */
 .curso-header {
   cursor: pointer;
   display: flex;
@@ -132,13 +152,13 @@
 
 .curso-info {
   display: flex;
-  justify-content: space-between; /* simetría perfecta */
-  width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
   font-size: 0.9rem;
   color: #555;
 }
 
-/* Ajustes para iconos y cursos */
 .curso-info span {
   display: flex;
   align-items: center;
@@ -151,6 +171,9 @@
   font-size: 0.9rem;
 }
 
+/* =========================
+   Lista de alumnos
+========================= */
 .alumnos-list {
   margin-top: 0.8rem;
   padding: 0.6rem;
@@ -170,12 +193,17 @@
 }
 
 .alumno-item span {
-  margin-right: 1rem;
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  margin-right: 1rem;
+  min-width: 120px;
+  word-break: break-word;
 }
 
+/* =========================
+   Cards individuales
+========================= */
 .curso-card {
   border-radius: 12px;
   background: #fff;
@@ -189,8 +217,9 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-
-/* Modal */
+/* =========================
+   Modal
+========================= */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -225,6 +254,7 @@
 .modal-header h3 {
   font-size: 1.25rem;
   font-weight: 600;
+  word-break: break-word;
 }
 
 .modal-header .cerrar {
@@ -248,21 +278,54 @@
   align-items: center;
   gap: 0.3rem;
   margin-right: 1rem;
+  min-width: 120px;
+  word-break: break-word;
 }
 
+/* =========================
+   Animaciones
+========================= */
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(-20px);}
   to {opacity: 1; transform: translateY(0);}
 }
 
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 1400px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  .curso-info span { min-width: 80px; font-size: 0.85rem; }
+}
+
 @media (max-width: 1200px) {
   .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    .curso-info span { min-width: 80px; font-size: 0.85rem; }
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
+  .curso-info span { min-width: 75px; font-size: 0.83rem; }
+}
+
+@media (max-width: 992px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  .curso-info span { min-width: 70px; font-size: 0.82rem; }
 }
 
 @media (max-width: 768px) {
-  .grid-docentes, .grid-cursos { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-  .curso-info span { min-width: 70px; font-size: 0.83rem; }
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .curso-info span { min-width: 65px; font-size: 0.8rem; }
+}
+
+@media (max-width: 576px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: 1fr;
+  }
+  .curso-info span { min-width: 60px; font-size: 0.78rem; }
+  .alumno-item span { min-width: 100px; font-size: 0.78rem; }
+  .modal-content { width: 95%; padding: 0.8rem; }
 }
