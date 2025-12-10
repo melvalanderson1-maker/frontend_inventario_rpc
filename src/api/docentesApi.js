@@ -5,8 +5,9 @@ const docentesApi = {
   listarDocentes: () => axiosClient.get("/docentes"),
   listarSeccionesDocente: (docenteId) => axiosClient.get(`/docentes/${docenteId}/secciones`),
   listarSesionesDocente: (docenteId) => axiosClient.get(`/docentes/${docenteId}/sesiones`),
-  listarAlumnosSeccion: (seccionId) => axiosClient.get(`/docentes/secciones/${seccionId}/alumnos`),
-  registrarAsistencia: (seccionId, payload) => axiosClient.post(`/docentes/secciones/${seccionId}/asistencia`, payload),
+  listarAlumnosSesion: (sesionId) => axios.get(`/docente/sesiones/${sesionId}/alumnos`),
+  
+  registrarAsistencia: (sesionId, data) =>axios.post(`/docente/sesiones/${sesionId}/asistencias`, data),
   registrarNotas: (seccionId, payload) => axiosClient.post(`/docentes/secciones/${seccionId}/notas`, payload),
 };
 

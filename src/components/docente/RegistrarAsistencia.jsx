@@ -10,27 +10,31 @@ import DashboardFooter from "../../components/layout/DashboardFooter";
 const ESTADOS = ["PRESENTE", "TARDANZA", "AUSENTE", "JUSTIFICADO", "REMOTO"];
 
 export default function RegistrarAsistencia() {
+
+  // --- Obtener sesion desde la URL (?sesion=15)
   const [searchParams] = useSearchParams();
-  const seccionIdFromQuery = searchParams.get("seccion");
-  const [seccionId, setSeccionId] = useState(seccionIdFromQuery || "");
+  const sesionIdFromQuery = searchParams.get("sesion");
+  const [sesionId, setSesionId] = useState(sesionIdFromQuery || "");
+
   const [alumnos, setAlumnos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
+  // --- Cargar alumnos cuando cambie la sesión
   useEffect(() => {
-    if (seccionId) fetchAlumnos(seccionId);
-  }, [seccionId]);
+    if (sesionId) fetchAlumnos(sesionId);
+  }, [sesionId]);
 
+  // --- API: Cargar alumnos de la sesión
   const fetchAlumnos = async (id) => {
     setLoading(true);
     try {
-      const res = await docentesApi.listarAlumnosSeccion(id);
+      const res = await docentesApi.listarAlumnosSesion(id);
 
-      // estado inicial: PRESENTE
       setAlumnos(
         (res.data.alumnos || []).map((a) => ({
           ...a,
-          estado: "PRESENTE",
+          estado: "PRESENTE", // estado inicial
         }))
       );
     } catch (err) {
@@ -41,13 +45,20 @@ export default function RegistrarAsistencia() {
     }
   };
 
+  // --- Cambiar estado de un alumno
   const cambiarEstado = (idx, nuevoEstado) => {
     const copy = [...alumnos];
     copy[idx].estado = nuevoEstado;
     setAlumnos(copy);
   };
 
+  // --- Guardar asistencia
   const guardar = async () => {
+    if (!sesionId) {
+      alert("Debes ingresar un ID de sesión");
+      return;
+    }
+
     setGuardando(true);
     try {
       const payload = {
@@ -57,7 +68,7 @@ export default function RegistrarAsistencia() {
         })),
       };
 
-      await docentesApi.registrarAsistencia(seccionId, payload);
+      await docentesApi.registrarAsistencia(sesionId, payload);
       alert("Asistencias registradas correctamente");
     } catch (err) {
       console.error(err);
@@ -74,27 +85,29 @@ export default function RegistrarAsistencia() {
       <div className="asistencia-container">
         <header>
           <h2>Registrar Asistencia</h2>
-          <p className="muted">Selecciona el estado de cada estudiante.</p>
+          <p className="muted">Selecciona el estado para cada estudiante.</p>
         </header>
 
+        {/* Selección de sesión */}
         <div className="form-row">
-          <label>Sección ID</label>
+          <label>ID de Sesión</label>
           <input
-            value={seccionId}
-            onChange={(e) => setSeccionId(e.target.value)}
-            placeholder="Ingresa la sección o usa Mis Secciones"
+            value={sesionId}
+            onChange={(e) => setSesionId(e.target.value)}
+            placeholder="Ejemplo: 15"
           />
-          <button className="btn" onClick={() => seccionId && fetchAlumnos(seccionId)}>
+          <button className="btn" onClick={() => sesionId && fetchAlumnos(sesionId)}>
             Cargar alumnos
           </button>
         </div>
 
+        {/* Lista de alumnos */}
         {loading ? (
           <p>Cargando alumnos...</p>
         ) : (
           <div className="alumnos-list">
             {alumnos.length === 0 ? (
-              <div className="empty">No hay alumnos</div>
+              <div className="empty">No hay alumnos para esta sesión</div>
             ) : (
               alumnos.map((a, i) => (
                 <div className="alumno-card" key={a.id}>
@@ -111,9 +124,7 @@ export default function RegistrarAsistencia() {
                     {ESTADOS.map((e) => (
                       <button
                         key={e}
-                        className={
-                          "estado-pill " + (a.estado === e ? "active" : "")
-                        }
+                        className={`estado-pill ${a.estado === e ? "active" : ""}`}
                         onClick={() => cambiarEstado(i, e)}
                       >
                         {e}
@@ -126,8 +137,13 @@ export default function RegistrarAsistencia() {
           </div>
         )}
 
+        {/* Botón guardar */}
         <div className="save-section">
-          <button className="btn primary" onClick={guardar} disabled={guardando}>
+          <button
+            className="btn primary"
+            onClick={guardar}
+            disabled={guardando}
+          >
             {guardando ? "Guardando..." : "Guardar asistencia"}
           </button>
         </div>

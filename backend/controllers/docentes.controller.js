@@ -72,20 +72,35 @@ module.exports = {
 
 registrarAsistencia: async (req, res) => {
   try {
-    const seccionId = req.params.id;
+    const sesionId = req.params.sesionId; 
     const { asistencias } = req.body;
+    const docenteId = req.user.id; // quien marcó la asistencia
 
     if (!Array.isArray(asistencias))
       return res.status(400).json({ ok: false, msg: "Formato inválido" });
 
+    // PREVENIR DUPLICADOS
+    await pool.query(
+      "DELETE FROM asistencias WHERE sesion_id = ?",
+      [sesionId]
+    );
+
     const values = asistencias.map(a => [
-      seccionId,
+      sesionId,
       a.usuario_id,
       a.estado,
+      docenteId
     ]);
 
     await pool.query(
-      "INSERT INTO asistencias (seccion_id, usuario_id, estado) VALUES ?",
+      `
+      INSERT INTO asistencias (
+        sesion_id,
+        usuario_id,
+        estado,
+        marcado_por
+      ) VALUES ?
+      `,
       [values]
     );
 
