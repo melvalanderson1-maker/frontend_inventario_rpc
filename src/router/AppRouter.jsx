@@ -35,10 +35,11 @@ import AuditoriaAdmin from "../components/Administrador/AuditoriaAdmin";
 
 
 // rutas/docente (ajusta paths según dónde pongas los archivos)
-import GestionSesiones from "../pages/docente/GestionSesiones";
-import MisSecciones from "../pages/docente/MisSecciones";
-import RegistrarAsistencia from "../pages/docente/RegistrarAsistencia";
-import RegistrarNotas from "../pages/docente/RegistrarNotas";
+import GestionSesiones from "../components/docente/GestionSesiones";
+import MisSecciones from "../components/docente/MisSecciones";
+import RegistrarAsistencia from "../components/docente/RegistrarAsistencia";
+import RegistrarNotas from "../components/docente/RegistrarNotas";
+
 
 
 import { AuthContext } from "../context/AuthContext";
