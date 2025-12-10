@@ -79,7 +79,7 @@ export default function DocentesAdmin() {
 
   return (
     <div className="docentes-admin">
-      <h2>Gestión de Docentes</h2>
+
 
       {loading ? (
         <p>Cargando docentes...</p>
