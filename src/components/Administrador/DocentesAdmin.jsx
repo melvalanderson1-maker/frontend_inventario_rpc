@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import adminApi from "../../api/adminApi";
 import "./DocentesAdmin.css";
-import { FaUserGraduate, FaBook, FaLayerGroup, FaIdCard } from "react-icons/fa";
+import { FaUserGraduate, FaBook, FaLayerGroup, FaIdCard, FaTimes } from "react-icons/fa";
 
 export default function DocentesAdmin() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expandedCurso, setExpandedCurso] = useState(null); // SOLO un curso expandido
   const [viewDetalle, setViewDetalle] = useState(false);
   const [selectedDocente, setSelectedDocente] = useState(null);
+  const [modalCurso, setModalCurso] = useState(null); // curso que se muestra en modal
+  const [alumnosCurso, setAlumnosCurso] = useState([]);
 
   useEffect(() => {
     fetchDocentes();
@@ -47,25 +48,20 @@ export default function DocentesAdmin() {
       const cursos = res.data.cursos || [];
       setSelectedDocente({ ...docente, cursos });
       setViewDetalle(true);
-      setExpandedCurso(null); // Reinicia la expansión
     } catch (err) {
       console.error("Error fetchCursosDetalle:", err);
       alert("Error cargando cursos del docente");
     }
   };
 
-  const toggleExpandSeccion = async (c) => {
-    // Si ya está expandido, colapsar
-    if (expandedCurso === c.seccion_id) {
-      setExpandedCurso(null);
-    } else {
-      // Expandir solo este curso
-      if (!c.alumnos) {
-        // Fetch alumnos si no existen
-        const res = await adminApi.lumnosSeccion(c.seccion_id);
-        c.alumnos = res.data.alumnos;
-      }
-      setExpandedCurso(c.seccion_id);
+  const abrirModalAlumnos = async (curso) => {
+    try {
+      const res = await adminApi.lumnosSeccion(curso.seccion_id);
+      setAlumnosCurso(res.data.alumnos || []);
+      setModalCurso(curso);
+    } catch (err) {
+      console.error("Error fetch alumnos:", err);
+      alert("Error cargando alumnos del curso");
     }
   };
 
@@ -98,11 +94,9 @@ export default function DocentesAdmin() {
             ) : (
               selectedDocente.cursos.map((c) => {
                 const cursoTitulo = c.codigo ? `${c.curso_titulo} (${c.codigo})` : c.curso_titulo;
-                const alumnosVisible = expandedCurso === c.seccion_id;
-
                 return (
                   <div key={c.seccion_id} className="curso-card">
-                    <div className="curso-header" onClick={() => toggleExpandSeccion(c)}>
+                    <div className="curso-header" onClick={() => abrirModalAlumnos(c)}>
                       <b className="curso-titulo">{cursoTitulo}</b>
                       <div className="curso-info">
                         <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
@@ -110,20 +104,6 @@ export default function DocentesAdmin() {
                         <span title="Modalidad"><FaBook /> {c.modalidad || "-"}</span>
                       </div>
                     </div>
-
-                    {alumnosVisible && (
-                      <div className="alumnos-list">
-                        {(!c.alumnos || c.alumnos.length === 0) ? <p>No hay alumnos</p> :
-                          c.alumnos.map(a => (
-                            <div key={a.id} className="alumno-item">
-                              <span className="alumno-nombre">{a.nombre} {a.apellido_paterno} {a.apellido_materno}</span>
-                              <span className="alumno-dni"><FaIdCard /> {a.numero_documento}</span>
-                              <span className="alumno-correo">{a.correo}</span>
-                            </div>
-                          ))
-                        }
-                      </div>
-                    )}
                   </div>
                 );
               })
@@ -155,6 +135,29 @@ export default function DocentesAdmin() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal de alumnos */}
+      {modalCurso && (
+        <div className="modal-overlay" onClick={() => setModalCurso(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{modalCurso.curso_titulo} - {modalCurso.seccion_codigo}</h3>
+              <button className="btn cerrar" onClick={() => setModalCurso(null)}><FaTimes /></button>
+            </div>
+            <div className="modal-body">
+              {alumnosCurso.length === 0 ? <p>No hay alumnos matriculados</p> :
+                alumnosCurso.map(a => (
+                  <div key={a.id} className="alumno-item">
+                    <span className="alumno-nombre">{a.nombre} {a.apellido_paterno} {a.apellido_materno}</span>
+                    <span className="alumno-dni"><FaIdCard /> {a.numero_documento}</span>
+                    <span className="alumno-correo">{a.correo}</span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
         </div>
       )}
     </div>
