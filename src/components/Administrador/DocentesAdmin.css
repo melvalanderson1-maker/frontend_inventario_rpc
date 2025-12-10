@@ -214,15 +214,71 @@
   animation: fadeIn 0.3s ease;
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1rem;
+  flex-wrap: wrap; /* se ajusta en pantallas pequeñas */
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  word-break: break-word; /* título no se desborde */
+  flex: 1 1 70%;          /* ocupa el espacio disponible */
+}
+
+.modal-header .cerrar {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #555;
+  margin-left: 0.5rem;
+}
+
+.modal-body .alumno-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;  /* los spans se mueven si la pantalla es pequeña */
+}
+
+.modal-body .alumno-item span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem; /* separación entre filas si se envuelven */
+  min-width: 100px;      /* evita que se rompa el contenido */
+  word-break: break-word;
+}
+
+
+
 
 @media (max-width: 1200px) {
   .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   .grid-docentes, .grid-cursos {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
+@media (max-width: 520px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 400px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
