@@ -6,8 +6,8 @@ import { FaChalkboardTeacher, FaUserGraduate, FaBook, FaLayerGroup } from "react
 export default function DocentesAdmin() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState({}); // cursos por docente o alumnos por sección
-  const [viewDetalle, setViewDetalle] = useState(false); // para mostrar detalle de un docente
+  const [expanded, setExpanded] = useState({}); 
+  const [viewDetalle, setViewDetalle] = useState(false); 
   const [selectedDocente, setSelectedDocente] = useState(null);
 
   useEffect(() => {
@@ -18,8 +18,24 @@ export default function DocentesAdmin() {
     setLoading(true);
     try {
       const res = await adminApi.listarDocentes();
-      console.log("Docentes cargados:", res.data.docentes || res.data);
-      setDocentes(res.data.docentes || res.data);
+      const lista = res.data.docentes || res.data;
+      console.log("Docentes cargados:", lista);
+
+      // Traer los cursos de todos los docentes para calcular indicadores iniciales
+      const docentesConCursos = await Promise.all(
+        lista.map(async (d) => {
+          try {
+            const cursosRes = await adminApi.listarCursosDocente(d.id);
+            const cursos = cursosRes.data.cursos || [];
+            return { ...d, cursos };
+          } catch {
+            return { ...d, cursos: [] };
+          }
+        })
+      );
+
+      setDocentes(docentesConCursos);
+
     } catch (err) {
       console.error("Error fetchDocentes:", err);
       alert("Error cargando docentes");
@@ -28,14 +44,14 @@ export default function DocentesAdmin() {
     }
   };
 
-  const fetchCursos = async (docente) => {
-    console.log("Cargando cursos del docente:", docente.id);
+  const fetchCursosDetalle = async (docente) => {
+    console.log("Detalle cursos del docente:", docente.id);
     try {
       const res = await adminApi.listarCursosDocente(docente.id);
-      console.log("Cursos obtenidos:", res.data.cursos);
+      const cursos = res.data.cursos || [];
       setExpanded((prev) => ({
         ...prev,
-        [docente.id]: { cursos: res.data.cursos, visible: true },
+        [docente.id]: { cursos, visible: true },
       }));
       setSelectedDocente(docente);
       setViewDetalle(true);
@@ -81,7 +97,7 @@ export default function DocentesAdmin() {
         <div className="detalle-docente">
           <button className="btn regresar" onClick={() => setViewDetalle(false)}>← Regresar</button>
           <h3>{selectedDocente.nombre} {selectedDocente.apellido_paterno}</h3>
-          <div className="list-cursos">
+          <div className="grid-cursos">
             {expanded[selectedDocente.id]?.cursos.length === 0 ? (
               <p>No tiene cursos asignados</p>
             ) : (
@@ -118,8 +134,8 @@ export default function DocentesAdmin() {
       ) : (
         <div className="grid-docentes">
           {docentes.map((d) => {
-            const totalAlumnos = expanded[d.id]?.cursos?.reduce((acc, c) => acc + (c.alumnos_count || 0), 0) || 0;
-            const totalCursos = expanded[d.id]?.cursos?.length || 0;
+            const totalAlumnos = d.cursos?.reduce((acc, c) => acc + (c.alumnos_count || 0), 0) || 0;
+            const totalCursos = d.cursos?.length || 0;
             return (
               <div key={d.id} className="card">
                 <div className="card-header">
@@ -134,7 +150,7 @@ export default function DocentesAdmin() {
                   </div>
                 </div>
                 <div className="actions">
-                  <button className="btn" onClick={() => fetchCursos(d)}>Ver Cursos</button>
+                  <button className="btn" onClick={() => fetchCursosDetalle(d)}>Ver Cursos</button>
                   <button className="btn danger" onClick={() => handleDelete(d.id)}>Eliminar/Inactivar</button>
                 </div>
               </div>

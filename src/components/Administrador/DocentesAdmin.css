@@ -12,14 +12,14 @@
   color: #1a73e8;
 }
 
-/* GRID para docentes */
+/* GRID docentes: 6 columnas */
 .grid-docentes {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 1.5rem;
 }
 
-/* Tarjeta docente */
+/* Cards docentes */
 .card {
   background: #fff;
   border-radius: 12px;
@@ -97,7 +97,7 @@
   background: #b71c1c;
 }
 
-/* Detalle de docente */
+/* Detalle docente */
 .detalle-docente {
   padding: 1rem;
 }
@@ -106,13 +106,14 @@
   margin-bottom: 1rem;
 }
 
-/* Cursos */
-.list-cursos {
-  display: flex;
-  flex-direction: column;
+/* GRID Cursos */
+.grid-cursos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
 }
 
+/* Cards cursos */
 .curso-card {
   background: #fff;
   border-radius: 8px;
