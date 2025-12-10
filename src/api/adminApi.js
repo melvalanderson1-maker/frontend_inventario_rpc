@@ -9,6 +9,7 @@ const adminApi = {
   eliminarUsuario: (id) => axiosClient.delete(`/admin/usuarios/${id}`),
 
   listarDocentes: () => axiosClient.get("/admin/docentes"),
+  listarCursosDocente: (id) => axiosClient.get(`/admin/docentes/${id}/cursos`), // <--- AGREGAR ESTO
   listarSecretarias: () => axiosClient.get("/admin/secretarias"),
   listarAlumnos: () => axiosClient.get("/admin/alumnos"),
 
