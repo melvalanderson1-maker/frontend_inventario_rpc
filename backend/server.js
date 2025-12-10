@@ -88,6 +88,10 @@ app.use("/secretaria", require("./routes/secretaria.routes"));
 
 app.use("/cursos", require("./routes/cursos.routes"));
 
+// registrar rutas docentes (colócalo junto a las otras `app.use(...)`)
+app.use("/docentes", require("./routes/docentes.routes"));
+
+
 
 
 // RUTA BASE

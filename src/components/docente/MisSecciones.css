@@ -1,0 +1,13 @@
+.mis-secciones { padding: 1.5rem; }
+.mis-secciones header h2 { color: #214d9f; }
+.muted { color:#6b7582; }
+
+.secciones-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-top:1rem; }
+.seccion-card { background:#fff; padding:1rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 6px 12px rgba(0,0,0,0.05); }
+.seccion-title { font-weight:700; color:#1d3557; }
+.seccion-sub { color:#6b7582; font-size:0.9rem; margin-top:0.25rem; }
+.seccion-count { margin-top:0.5rem; color:#333; }
+.seccion-actions { display:flex; gap:0.6rem; align-items:center; }
+.btn { background:#1a73e8; color:#fff; padding:0.5rem 0.8rem; border-radius:8px; text-decoration:none; }
+.btn.outline { background:#fff; color:#1a73e8; border:1px solid #1a73e8; }
+@media(max-width:600px){ .secciones-grid { grid-template-columns:1fr; } .seccion-card { flex-direction:column; align-items:flex-start; gap:0.6rem; } }

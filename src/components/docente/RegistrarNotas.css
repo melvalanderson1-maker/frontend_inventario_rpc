@@ -1,0 +1,11 @@
+.registrar-notas { padding:1.5rem; }
+.form-row { display:flex; gap:0.6rem; align-items:center; margin-top:0.6rem; flex-wrap:wrap; }
+.form-row input { padding:0.5rem 0.6rem; border-radius:6px; border:1px solid #dfe6ee; }
+
+.notas-list { margin-top:1rem; display:flex; flex-direction:column; gap:0.6rem; }
+.nota-row { display:flex; justify-content:space-between; align-items:center; padding:0.9rem; background:#fff; border-radius:8px; }
+.alumno-info { }
+.alumno-input input { width:120px; padding:0.45rem; border-radius:6px; border:1px solid #dfe6ee; }
+.save-row { margin-top:1rem; }
+.btn.primary { background:#8c52ff; color:#fff; padding:0.6rem 1rem; border-radius:8px; border:none; }
+@media(max-width:600px){ .nota-row{ flex-direction:column; align-items:flex-start; gap:0.5rem; } .alumno-input input{ width:100%; } }

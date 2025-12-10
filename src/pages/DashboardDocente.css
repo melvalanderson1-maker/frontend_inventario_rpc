@@ -1,0 +1,92 @@
+.docente-container {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.docente-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3e50;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #5a6b7b;
+  margin-top: 0.2rem;
+}
+
+.docente-grid {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.docente-card {
+  background: white;
+  padding: 1.8rem;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+  border: 1px solid #e2e6ea;
+  transition: 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.docente-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+
+.docente-card h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 600;
+  color: #1d3557;
+}
+
+.docente-card p {
+  font-size: 0.93rem;
+  color: #4f5d75;
+}
+
+.icon-container {
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.7rem;
+  color: white;
+}
+
+.sessions {
+  background: #4267b2; /* azul Microsoft */
+}
+
+.sections {
+  background: #5b9bd5;
+}
+
+.asistencia {
+  background: #2f7d32;
+}
+
+.notas {
+  background: #8c52ff;
+}
+
+@media (max-width: 576px) {
+  .docente-container {
+    padding: 1rem;
+  }
+
+  .docente-card {
+    padding: 1.2rem;
+  }
+}

@@ -32,6 +32,15 @@ import PagosAdmin from "../components/Administrador/PagosAdmin";
 import FacturasAdmin from "../components/Administrador/FacturasAdmin";
 import AuditoriaAdmin from "../components/Administrador/AuditoriaAdmin";
 
+
+
+// rutas/docente (ajusta paths según dónde pongas los archivos)
+import GestionSesiones from "../pages/docente/GestionSesiones";
+import MisSecciones from "../pages/docente/MisSecciones";
+import RegistrarAsistencia from "../pages/docente/RegistrarAsistencia";
+import RegistrarNotas from "../pages/docente/RegistrarNotas";
+
+
 import { AuthContext } from "../context/AuthContext";
 
 
@@ -79,6 +88,44 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
+
+        {/* DOCENTE: SUBRUTAS */}
+        <Route
+          path="/docente/sesiones"
+          element={
+            <PrivateRoute roles={["DOCENTE"]}>
+              <GestionSesiones />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/docente/secciones"
+          element={
+            <PrivateRoute roles={["DOCENTE"]}>
+              <MisSecciones />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/docente/asistencia"
+          element={
+            <PrivateRoute roles={["DOCENTE"]}>
+              <RegistrarAsistencia />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/docente/notas"
+          element={
+            <PrivateRoute roles={["DOCENTE"]}>
+              <RegistrarNotas />
+            </PrivateRoute>
+          }
+        />
+
 
         {/* SECRETARIA MENU */}
         <Route

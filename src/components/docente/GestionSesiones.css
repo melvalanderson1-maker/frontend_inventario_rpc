@@ -1,0 +1,17 @@
+.gestion-sesiones {
+  padding: 1.5rem;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.gestion-sesiones header h2 { color: #214d9f; }
+.muted { color: #6b7582; }
+
+.sesiones-list { margin-top: 1rem; display:flex; flex-direction:column; gap:0.9rem; }
+.sesion-card {
+  display:flex; justify-content:space-between; align-items:center;
+  background:#fff; padding:0.9rem; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05);
+}
+.sesion-title { font-weight:600; color:#21364f; }
+.sesion-meta { color:#6b7582; font-size:0.9rem; margin-top:0.25rem; }
+.btn.small { padding:0.4rem 0.7rem; background:#1a73e8; color:#fff; border-radius:6px; text-decoration:none; }
+@media (max-width:600px){ .sesion-card { flex-direction:column; align-items:flex-start; gap:0.6rem; } }

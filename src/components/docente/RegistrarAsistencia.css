@@ -1,0 +1,11 @@
+.registrar-asistencia { padding:1.5rem; }
+.form-row { display:flex; gap:0.6rem; align-items:center; margin-top:0.6rem; flex-wrap:wrap; }
+.form-row input { padding:0.5rem 0.6rem; border-radius:6px; border:1px solid #dfe6ee; }
+.alumnos-table { margin-top:1rem; display:flex; flex-direction:column; gap:0.6rem; }
+.alumno-row { display:flex; justify-content:space-between; align-items:center; padding:0.8rem; background:#fff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.03); }
+.alumno-name { font-weight:600; color:#20334a; }
+.alumno-doc { font-size:0.9rem; color:#6b7582; }
+.toggle { display:flex; gap:0.5rem; align-items:center; }
+.save-row { margin-top:1rem; }
+.btn.primary { background:#2e7d32; color:#fff; padding:0.6rem 1rem; border-radius:8px; border:none; }
+@media (max-width:600px){ .alumno-row { flex-direction:column; align-items:flex-start; gap:0.4rem; } }
