@@ -5,6 +5,9 @@ import { AuthContext } from "../../context/AuthContext";
 import "./MisSecciones.css";
 import { Link } from "react-router-dom";
 
+import DashboardHeader from "../../components/layout/DashboardHeader";
+import DashboardFooter from "../../components/layout/DashboardFooter";
+
 export default function MisSecciones() {
   const { usuario } = useContext(AuthContext);
   const [secciones, setSecciones] = useState([]);
@@ -29,32 +32,51 @@ export default function MisSecciones() {
   };
 
   return (
-    <div className="mis-secciones">
-      <header>
-        <h2>Mis Secciones</h2>
-        <p className="muted">Lista de cursos y secciones que dictas.</p>
-      </header>
+    <>
+      <DashboardHeader />
 
-      {loading ? <p>Cargando...</p> : (
-        <div className="secciones-grid">
-          {secciones.length === 0 ? <div className="empty">No tienes secciones asignadas</div> :
-            secciones.map(s => (
-              <div className="seccion-card" key={s.seccion_id}>
-                <div className="seccion-info">
-                  <div className="seccion-title">{s.curso_titulo}</div>
-                  <div className="seccion-sub">{s.seccion_codigo} • {s.periodo} • {s.modalidad}</div>
-                  <div className="seccion-count">Alumnos: <b>{s.alumnos_count}</b></div>
-                </div>
+      <div className="mis-secciones">
+        <header>
+          <h2>Mis Secciones</h2>
+          <p className="muted">Lista de cursos y secciones que dictas.</p>
+        </header>
 
-                <div className="seccion-actions">
-                  <Link to={`/docente/asistencia?seccion=${s.seccion_id}`} className="btn">Asistencia</Link>
-                  <Link to={`/docente/notas?seccion=${s.seccion_id}`} className="btn outline">Notas</Link>
+        {loading ? (
+          <p>Cargando...</p>
+        ) : (
+          <div className="secciones-grid">
+            {secciones.length === 0 ? (
+              <div className="empty">No tienes secciones asignadas</div>
+            ) : (
+              secciones.map((s) => (
+                <div className="seccion-card" key={s.seccion_id}>
+                  <div className="seccion-info">
+                    <div className="seccion-title">{s.curso_titulo}</div>
+                    <div className="seccion-sub">
+                      {s.seccion_codigo} • {s.periodo} • {s.modalidad}
+                    </div>
+                    <div className="seccion-count">
+                      Alumnos: <b>{s.alumnos_count}</b>
+                    </div>
+                  </div>
+
+                  <div className="seccion-actions">
+                    <Link to={`/docente/asistencia?seccion=${s.seccion_id}`} className="btn">
+                      Asistencia
+                    </Link>
+
+                    <Link to={`/docente/notas?seccion=${s.seccion_id}`} className="btn outline">
+                      Notas
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))
-          }
-        </div>
-      )}
-    </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      <DashboardFooter />
+    </>
   );
 }
