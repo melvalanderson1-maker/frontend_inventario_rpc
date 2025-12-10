@@ -254,66 +254,6 @@
   min-width: 100px;      /* evita que se rompa el contenido */
   word-break: break-word;
 }
-/* Tablets grandes: hasta 992px */
-@media (max-width: 992px) {
-  .modal-content {
-    max-width: 500px;
-    padding: 0.8rem;
-  }
-
-  .modal-header h3 {
-    font-size: 1.1rem;
-  }
-
-  .modal-body .alumno-item span {
-    font-size: 0.82rem;
-    min-width: 90px;
-  }
-}
-
-/* Tablets pequeñas: hasta 768px */
-@media (max-width: 768px) {
-  .modal-content {
-    max-width: 400px;
-    padding: 0.7rem;
-  }
-
-  .modal-header h3 {
-    font-size: 1rem;
-  }
-
-  .modal-body .alumno-item span {
-    font-size: 0.8rem;
-    min-width: 80px;
-  }
-}
-
-/* Móviles: hasta 576px */
-@media (max-width: 576px) {
-  .modal-content {
-    width: 95%;
-    padding: 0.6rem;
-  }
-
-  .modal-header h3 {
-    font-size: 0.95rem;
-  }
-
-  .modal-body .alumno-item {
-    flex-direction: column; /* apilar info del alumno verticalmente */
-    align-items: flex-start;
-  }
-
-  .modal-body .alumno-item span {
-    font-size: 0.78rem;
-    min-width: auto;
-    margin-bottom: 0.25rem;
-  }
-
-  .modal-header .cerrar {
-    font-size: 1.2rem;
-  }
-}
 
 
 
