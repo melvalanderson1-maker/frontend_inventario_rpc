@@ -297,6 +297,14 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
   .curso-info span { min-width: 80px; font-size: 0.85rem; }
+
+    .card, .curso-card {
+    padding: 1rem.5; /* un poquito más de padding */
+  }
+
+  .card-header div b, .curso-header b {
+    font-size: 1.2rem;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -304,6 +312,29 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
   .curso-info span { min-width: 75px; font-size: 0.83rem; }
+
+    .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columnas iguales */
+    gap: 0.5rem;
+    justify-content: start; /* alineados al inicio */
+  }
+
+  .actions .btn {
+    width: 100%; /* llenan cada columna */
+    text-align: center; /* centrado del texto */
+  }
+
+    .indicators span, .curso-info span {
+    font-size: 1rem; /* un poquito más grande */
+    gap: 0.5rem;     /* separación icono-texto mayor */
+    min-width: 100px; /* evitar que se corte el texto */
+  }
+
+  .indicators span svg, .curso-info span svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (max-width: 992px) {
