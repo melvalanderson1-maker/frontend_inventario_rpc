@@ -8,7 +8,9 @@ let pool;
 module.exports = {
   listarDocentes: async (req, res) => {
     try {
-      const [rows] = await pool.query("SELECT id, nombre, apellido_paterno, apellido_materno, correo, telefono FROM usuarios WHERE rol='DOCENTE'");
+      const [rows] = await pool.query(
+        "SELECT id, nombre, apellido_paterno, apellido_materno, correo, telefono FROM usuarios WHERE rol='DOCENTE'"
+      );
       res.json({ ok: true, docentes: rows });
     } catch (err) {
       console.error(err);
@@ -20,7 +22,7 @@ module.exports = {
     try {
       const docenteId = req.params.id;
       const [rows] = await pool.query(
-        `SELECT s.id AS seccion_id, s.codigo AS seccion_codigo, s.periodo, s.modalidad, s.capacidad, 
+        `SELECT s.id AS seccion_id, s.codigo AS seccion_codigo, s.periodo, s.modalidad, s.capacidad,
                 c.id AS curso_id, c.titulo AS curso_titulo, c.codigo AS curso_codigo,
                 (SELECT COUNT(*) FROM matriculas m WHERE m.seccion_id = s.id AND m.estado='ACTIVO') AS alumnos_count
          FROM secciones s
@@ -39,7 +41,8 @@ module.exports = {
     try {
       const docenteId = req.params.id;
       const [rows] = await pool.query(
-        `SELECT se.id, se.seccion_id, se.titulo, se.inicia_en, se.termina_en, se.tipo_sesion, se.aula, se.enlace_meet
+        `SELECT se.id, se.seccion_id, se.titulo, se.inicia_en, se.termina_en, 
+                se.tipo_sesion, se.aula, se.enlace_meet
          FROM sesiones se
          JOIN secciones s ON se.seccion_id = s.id
          WHERE s.docente_id = ?
@@ -57,7 +60,8 @@ module.exports = {
     try {
       const seccionId = req.params.id;
       const [rows] = await pool.query(
-        `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, u.numero_documento
+        `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, 
+                u.correo, u.numero_documento
          FROM matriculas m
          JOIN usuarios u ON m.usuario_id = u.id
          WHERE m.seccion_id = ? AND m.estado='ACTIVO'`,
@@ -70,59 +74,65 @@ module.exports = {
     }
   },
 
-registrarAsistencia: async (req, res) => {
-  try {
-    const sesionId = req.params.sesionId; 
-    const { asistencias } = req.body;
-    const docenteId = req.user.id; // quien marcó la asistencia
+  registrarAsistencia: async (req, res) => {
+    try {
+      const seccionId = req.params.id;
+      const { asistencias } = req.body;
+      const docenteId = req.user?.id || null;
 
-    if (!Array.isArray(asistencias))
-      return res.status(400).json({ ok: false, msg: "Formato inválido" });
+      if (!Array.isArray(asistencias)) {
+        return res.status(400).json({ ok: false, msg: "Formato inválido" });
+      }
 
-    // PREVENIR DUPLICADOS
-    await pool.query(
-      "DELETE FROM asistencias WHERE sesion_id = ?",
-      [sesionId]
-    );
+      // PREVENIR DUPLICADOS POR SECCION
+      await pool.query("DELETE FROM asistencias WHERE seccion_id = ?", [seccionId]);
 
-    const values = asistencias.map(a => [
-      sesionId,
-      a.usuario_id,
-      a.estado,
-      docenteId
-    ]);
+      const values = asistencias.map((a) => [
+        seccionId,
+        a.usuario_id,
+        a.estado,
+        docenteId,
+      ]);
 
-    await pool.query(
-      `
-      INSERT INTO asistencias (
-        sesion_id,
-        usuario_id,
-        estado,
-        marcado_por
-      ) VALUES ?
-      `,
-      [values]
-    );
+      await pool.query(
+        `
+        INSERT INTO asistencias (
+          seccion_id,
+          usuario_id,
+          estado,
+          marcado_por
+        ) VALUES ?
+        `,
+        [values]
+      );
 
-    res.json({ ok: true, msg: "Asistencia registrada" });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok: false, msg: err.message });
-  }
-},
-
+      res.json({ ok: true, msg: "Asistencia registrada correctamente" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, msg: err.message });
+    }
+  },
 
   registrarNotas: async (req, res) => {
-    // payload: { notas: [{ usuario_id, actividad_id (opcional), nota }] }
     try {
       const seccionId = req.params.id;
       const { notas } = req.body;
-      if (!Array.isArray(notas)) return res.status(400).json({ ok: false, msg: "Formato inválido" });
 
-      // Para simplicidad, guardamos en tabla 'notas' con columnas: seccion_id, usuario_id, actividad_id, nota, creado_en
-      const values = notas.map(n => [seccionId, n.usuario_id, n.actividad_id || null, n.nota]);
-      await pool.query("INSERT INTO notas (seccion_id, usuario_id, actividad_id, nota) VALUES ?", [values]);
+      if (!Array.isArray(notas)) {
+        return res.status(400).json({ ok: false, msg: "Formato inválido" });
+      }
+
+      const values = notas.map((n) => [
+        seccionId,
+        n.usuario_id,
+        n.actividad_id || null,
+        n.nota,
+      ]);
+
+      await pool.query(
+        "INSERT INTO notas (seccion_id, usuario_id, actividad_id, nota) VALUES ?",
+        [values]
+      );
 
       res.json({ ok: true, msg: "Notas registradas" });
     } catch (err) {
