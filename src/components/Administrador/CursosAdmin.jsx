@@ -2,9 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import adminApi from "../../api/adminApi";
 
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import dayjs from "dayjs";
+import weekday from "dayjs/plugin/weekday";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(weekday);
+dayjs.extend(isoWeek);
 
 import "./CursosAdmin.css";
 
@@ -17,16 +21,16 @@ export default function CursosAdmin() {
 
   const [sesiones, setSesiones] = useState([]); // eventos reales
   const [horarios, setHorarios] = useState([]); // horarios guardados en backend
-  const [plantillaBloques, setPlantillaBloques] = useState([]); // temporal para plantilla semanal
+  const [plantillaBloques, setPlantillaBloques] = useState([]); // bloques temporales {dia_semana, hora_inicio, hora_fin}
 
   const [modalEditar, setModalEditar] = useState(null);
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modePlantilla, setModePlantilla] = useState(false); // true = plantilla semanal (selección por bloques)
-  const calendarRef = useRef(null);
+  const [modePlantilla, setModePlantilla] = useState(false);
+  const plantillaCalRef = useRef(null);
 
   // -------------------
-  // Cargar datos iniciales
+  // Cargar datos
   // -------------------
   useEffect(() => {
     cargarCursos();
@@ -49,7 +53,6 @@ export default function CursosAdmin() {
   const cargarSecciones = async () => {
     try {
       const res = await adminApi.listarSecciones();
-      console.log("listarSecciones ->", res);
       setSecciones(res.data.secciones || []);
     } catch (err) {
       console.error("Error cargar secciones", err);
@@ -59,7 +62,6 @@ export default function CursosAdmin() {
   const cargarDocentes = async () => {
     try {
       const res = await adminApi.listarDocentes();
-      console.log("listarDocentes ->", res);
       setDocentes(res.data.docentes || []);
     } catch (err) {
       console.error("Error cargar docentes", err);
@@ -67,16 +69,15 @@ export default function CursosAdmin() {
   };
 
   // -------------------
-  // Cargar sesiones + horarios de una sección
+  // Cargar sesiones + horarios
   // -------------------
   const cargarSesiones = async (seccionId) => {
     try {
       console.log("cargarSesiones seccion:", seccionId);
       const res = await adminApi.listarSesiones(seccionId);
-      console.log("listarSesiones ->", res);
       const eventos = (res.data.sesiones || []).map((s) => ({
         id: s.id,
-        title: `${s.titulo}`,
+        title: s.titulo,
         start: s.inicia_en,
         end: s.termina_en,
       }));
@@ -89,9 +90,7 @@ export default function CursosAdmin() {
 
   const cargarHorarios = async (seccionId) => {
     try {
-      console.log("cargarHorarios seccion:", seccionId);
       const res = await adminApi.listarHorarios(seccionId);
-      console.log("listarHorarios ->", res);
       setHorarios(res.data.horarios || []);
     } catch (err) {
       console.error("Error listar horarios", err);
@@ -103,6 +102,8 @@ export default function CursosAdmin() {
     if (seccionSeleccionada) {
       cargarSesiones(seccionSeleccionada.id);
       cargarHorarios(seccionSeleccionada.id);
+      setPlantillaBloques([]); // limpiar plantilla al abrir
+      setModePlantilla(false);
     }
   }, [seccionSeleccionada]);
 
@@ -112,82 +113,140 @@ export default function CursosAdmin() {
   const abrirCurso = (curso) => {
     setCursoSeleccionado(curso);
     setSeccionSeleccionada(null);
-    setSesiones([]);
-    setHorarios([]);
-    setModePlantilla(false);
-    setPlantillaBloques([]);
   };
 
   const abrirSeccion = (s) => {
     setSeccionSeleccionada(s);
-    setPlantillaBloques([]);
-    setModePlantilla(false);
   };
 
   // -------------------
-  // Docente
+  // Actualizar docente / fechas / horas
   // -------------------
-  const actualizarDocente = async (docenteId) => {
+  const actualizarSeccionField = async (patch) => {
     try {
-      console.log("actualizarDocente ->", docenteId);
-      await adminApi.actualizarSeccion(seccionSeleccionada.id, {
-        docente_id: docenteId,
-      });
-      setSeccionSeleccionada({
-        ...seccionSeleccionada,
-        docente_id: docenteId,
-      });
-      console.log("Docente actualizado OK");
-      alert("Docente actualizado correctamente");
+      await adminApi.actualizarSeccion(seccionSeleccionada.id, patch);
+      setSeccionSeleccionada({ ...seccionSeleccionada, ...patch });
+      console.log("Sección actualizada:", patch);
+      alert("Sección actualizada");
     } catch (err) {
-      console.error("Error actualizar docente", err);
-      alert("Error al actualizar docente");
+      console.error("Error actualizar sección", err);
+      alert("Error actualizando sección. Ver consola.");
     }
   };
 
   // -------------------
-  // Plantilla semanal: selección de bloques repetitivos
+  // Helpers para plantilla
   // -------------------
-  // Usamos FullCalendar en vista timeGridWeek para que el usuario haga select de bloques.
-  // Cuando selecciona, guardamos en plantillaBloques: { id, dia_semana, hora_inicio, hora_fin, label }
-  const onSelectPlantilla = (selectInfo) => {
-    // selectInfo.start/end are JS Dates
-    const start = selectInfo.start;
-    const end = selectInfo.end;
+  const pad = (n) => (n < 10 ? "0" + n : "" + n);
 
-    // calcular dia_semana (lunes=1...domingo=0 según JS) -> lo normalizamos: 0=domingo..6=sabado
-    const diaSemana = start.getDay(); // 0-6
+  // Merge intervals on same day: devuelve array de intervalos no solapados ordenados
+  const mergeIntervals = (intervals) => {
+    if (!intervals.length) return [];
+    // intervals: [{start: "09:00:00", end: "11:00:00"}]
+    const conv = intervals
+      .map((i) => ({ s: toMinutes(i.hora_inicio), e: toMinutes(i.hora_fin) }))
+      .sort((a, b) => a.s - b.s);
+    const res = [];
+    let cur = conv[0];
+    for (let i = 1; i < conv.length; i++) {
+      const it = conv[i];
+      if (it.s <= cur.e) {
+        cur.e = Math.max(cur.e, it.e);
+      } else {
+        res.push(cur);
+        cur = it;
+      }
+    }
+    res.push(cur);
+    return res.map((r) => ({ hora_inicio: fromMinutes(r.s), hora_fin: fromMinutes(r.e) }));
+  };
 
-    // obtener horas en formato HH:MM:SS
-    const pad = (n) => (n < 10 ? "0" + n : "" + n);
-    const horaInicio = `${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
-    const horaFin = `${pad(end.getHours())}:${pad(end.getMinutes())}:00`;
+  const toMinutes = (hhmmss) => {
+    const [hh, mm] = hhmmss.split(":").map(Number);
+    return hh * 60 + mm;
+  };
+  const fromMinutes = (m) => {
+    const hh = Math.floor(m / 60);
+    const mm = m % 60;
+    return `${pad(hh)}:${pad(mm)}:00`;
+  };
 
-    const newBloque = {
-      id: Date.now(),
-      dia_semana: diaSemana,
-      hora_inicio: horaInicio,
-      hora_fin: horaFin,
-      label: `${["Dom","Lun","Mar","Mie","Jue","Vie","Sab"][diaSemana]} ${horaInicio.slice(0,5)} - ${horaFin.slice(0,5)}`
-    };
-
-    console.log("Bloque seleccionado plantilla:", newBloque);
-    setPlantillaBloques((b) => [...b, newBloque]);
+  // Añadir bloque a plantilla, pero mergear con existentes en mismo día
+  const addBloquePlantilla = (dia_semana, hora_inicio, hora_fin) => {
+    setPlantillaBloques((prev) => {
+      const byDay = prev.filter((b) => b.dia_semana === dia_semana);
+      const others = prev.filter((b) => b.dia_semana !== dia_semana);
+      const merged = mergeIntervals([...byDay, { hora_inicio, hora_fin }]);
+      const newBlocksDay = merged.map((m) => ({
+        id: `${dia_semana}-${m.hora_inicio}-${m.hora_fin}`,
+        dia_semana,
+        hora_inicio: m.hora_inicio,
+        hora_fin: m.hora_fin,
+      }));
+      return [...others, ...newBlocksDay].sort((a, b) => a.dia_semana - b.dia_semana || a.hora_inicio.localeCompare(b.hora_inicio));
+    });
   };
 
   const quitarBloquePlantilla = (id) => {
     setPlantillaBloques((b) => b.filter((x) => x.id !== id));
   };
 
-  // Enviar plantilla -> crear horarios y generar sesiones
+  // -------------------
+  // Selección en calendario plantilla (FullCalendar select)
+  // -------------------
+  // convertimos selectInfo.start,end a hora y dia.
+  const onSelectPlantilla = (selectInfo) => {
+    // FullCalendar selection gives real dates; solo usamos día de la semana + horas
+    const start = selectInfo.start;
+    const end = selectInfo.end;
+    const diaSemana = start.getDay(); // 0 Domingo .. 6 Sabado
+    const horaInicio = `${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
+    const horaFin = `${pad(end.getHours())}:${pad(end.getMinutes())}:00`;
+
+    addBloquePlantilla(diaSemana, horaInicio, horaFin);
+    // prevent selection highlight linger
+    if (selectInfo.view) {
+      selectInfo.view.calendar.unselect();
+    }
+  };
+
+  // -------------------
+  // Mostrar bloques de plantilla en el calendario (paint)
+  // -------------------
+  const plantillaEventos = () => {
+    // queremos pintar en la semana de referencia: usamos la semana que contiene la fecha de inicio de la sección o la semana actual
+    const baseDate = seccionSeleccionada?.fecha_inicio ? dayjs(seccionSeleccionada.fecha_inicio) : dayjs();
+    const monday = baseDate.isoWeekday(1); // Monday
+    // Para cada bloque, computes a date in that week with correct time
+    return plantillaBloques.map((b) => {
+      const weekdayIndex = b.dia_semana; // 0..6
+      // dayjs weekday: 0 = Sunday, isoWeekday(1) = Monday
+      // compute offset from monday: monday.add(offset)
+      // convert sunday(0) to offset 6? easier: map JS day index to ISO weekday: Sunday(0)->7
+      const isoDay = b.dia_semana === 0 ? 7 : b.dia_semana; // 1..7
+      const date = monday.isoWeekday(isoDay);
+      const startStr = `${date.format("YYYY-MM-DD")}T${b.hora_inicio.slice(0,8)}`;
+      const endStr = `${date.format("YYYY-MM-DD")}T${b.hora_fin.slice(0,8)}`;
+      return {
+        id: b.id,
+        title: "Bloque",
+        start: startStr,
+        end: endStr,
+        rendering: "background",
+      };
+    });
+  };
+
+  // -------------------
+  // Generar horarios+sesiones (respeta fecha_inicio de la sección)
+  // -------------------
   const generarSesionesDesdePlantilla = async () => {
     if (!seccionSeleccionada) return alert("Selecciona una sección primero");
     if (plantillaBloques.length === 0) return alert("No hay bloques seleccionados");
 
     try {
       console.log("Generando horarios (plantilla) ->", plantillaBloques);
-
-      // 1) crear cada horario en backend
+      // 1) crear horarios en backend (el backend guardará dia_semana 0..6 y horas)
       for (const b of plantillaBloques) {
         const payload = {
           seccion_id: seccionSeleccionada.id,
@@ -204,38 +263,31 @@ export default function CursosAdmin() {
       // 2) recargar horarios
       await cargarHorarios(seccionSeleccionada.id);
 
-      // 3) llamar a generar-sesiones (backend crea todas las sesiones entre fecha_inicio y fecha_fin)
+      // 3) llamar a generar-sesiones (backend crea entre fecha_inicio y fecha_fin)
       console.log("POST /secciones/:id/generar-sesiones ->", seccionSeleccionada.id);
       const gen = await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
       console.log("generarSesionesAutomaticas response:", gen);
 
-      // 4) recargar sesiones para mostrar en calendario de sesiones
       await cargarSesiones(seccionSeleccionada.id);
 
-      // cambiar a modo calendario de sesiones
       setModePlantilla(false);
-
       alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
     } catch (err) {
       console.error("Error generando sesiones desde plantilla", err);
-      alert("Ocurrió un error al generar sesiones. Mira la consola.");
+      alert("Ocurrió un error al generar sesiones. Revisa consola.");
     }
   };
 
   // -------------------
-  // Si la sección ya tiene sesiones, puedes crear sesión con dateClick
+  // Crear sesión manual (calendario de sesiones)
   // -------------------
   const onDateClickCrearSesion = async (info) => {
     if (!seccionSeleccionada) return;
     const titulo = prompt("Título de la sesión:");
     if (!titulo) return;
-
     try {
-      console.log("Crear sesión manual ->", info.dateStr);
-      // Por defecto dejamos 1 hora; el backend acepta ISO datetime
-      const startISO = info.dateStr + "T09:00:00"; // o usar info.dateStr + "T08:00:00"
+      const startISO = info.dateStr + "T09:00:00";
       const endISO = info.dateStr + "T10:00:00";
-
       const res = await adminApi.crearSesion({
         seccion_id: seccionSeleccionada.id,
         titulo,
@@ -251,7 +303,7 @@ export default function CursosAdmin() {
   };
 
   // -------------------
-  // Eventos: click -> editar modal
+  // Edición sesión
   // -------------------
   const abrirModalEdicion = (evento) => {
     setModalEditar({
@@ -261,10 +313,8 @@ export default function CursosAdmin() {
       fin: evento.endStr,
     });
   };
-
   const guardarCambiosSesion = async () => {
     try {
-      console.log("guardarCambiosSesion:", modalEditar);
       await adminApi.actualizarSesion(modalEditar.id, {
         titulo: modalEditar.titulo,
         inicia_en: modalEditar.inicio,
@@ -278,12 +328,8 @@ export default function CursosAdmin() {
     }
   };
 
-  // -------------------
-  // eventDrop / eventResize -> actualizar backend
-  // -------------------
   const onEventDropOrResize = async (info) => {
     try {
-      console.log("eventDrop/Resize ->", info.event.id, info.event.startStr, info.event.endStr);
       await adminApi.actualizarSesion(info.event.id, {
         inicia_en: info.event.startStr,
         termina_en: info.event.endStr,
@@ -296,15 +342,13 @@ export default function CursosAdmin() {
   };
 
   // -------------------
-  // UI render
+  // Render
   // -------------------
   return (
-    <div className="admin-wrapper">
+    <div className="admin-wrapper modern">
       <div className="panel-cursos">
         <h2>Cursos</h2>
-
         {loading && <p>Cargando...</p>}
-
         <div className="curso-grid">
           {cursos.map((c) => (
             <div key={c.id} className="curso-card" onClick={() => abrirCurso(c)}>
@@ -316,136 +360,129 @@ export default function CursosAdmin() {
       </div>
 
       <div className={`panel-detalle ${cursoSeleccionado ? "open" : ""}`}>
-        {!cursoSeleccionado && (
-          <div className="placeholder">
-            <p>Selecciona un curso</p>
-          </div>
-        )}
+        {!cursoSeleccionado && <div className="placeholder"><p>Selecciona un curso</p></div>}
 
         {cursoSeleccionado && (
           <>
             <h2>{cursoSeleccionado.titulo}</h2>
 
-            {/* ================= SECCIONES ================= */}
             <h3>Secciones</h3>
             <div className="seccion-list">
-              {secciones
-                .filter((s) => s.curso_id === cursoSeleccionado.id)
-                .map((s) => (
-                  <div
-                    key={s.id}
-                    className={`seccion-item ${seccionSeleccionada?.id === s.id ? "active" : ""}`}
-                    onClick={() => abrirSeccion(s)}
-                  >
-                    <strong>Sección {s.codigo || s.id}</strong>
-                    <p>Modalidad: {s.modalidad}</p>
-                    <p>Inicio: {s.fecha_inicio} - Fin: {s.fecha_fin}</p>
-                  </div>
-                ))}
+              {secciones.filter((s) => s.curso_id === cursoSeleccionado.id).map((s) => (
+                <div key={s.id}
+                  className={`seccion-item ${seccionSeleccionada?.id === s.id ? "active" : ""}`}
+                  onClick={() => abrirSeccion(s)}
+                >
+                  <strong>Sección {s.codigo || s.id}</strong>
+                  <p>Modalidad: {s.modalidad}</p>
+                  <p>Inicio: {s.fecha_inicio} • Fin: {s.fecha_fin}</p>
+                </div>
+              ))}
             </div>
 
-            {/* ================= DETALLE DE SECCIÓN ================= */}
             {seccionSeleccionada && (
               <>
-                <h3>Docente asignado</h3>
-
-                <select
-                  value={seccionSeleccionada.docente_id || ""}
-                  onChange={(e) => actualizarDocente(e.target.value)}
-                  className="select-docente"
-                >
-                  <option value="">— Seleccionar docente —</option>
-                  {docentes.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.nombre} {d.apellido_paterno}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="seccion-headers">
+                <h3>Configuración de sección</h3>
+                <div className="config-row">
                   <div>
-                    <p><strong>Fechas sección:</strong> {seccionSeleccionada.fecha_inicio} → {seccionSeleccionada.fecha_fin}</p>
-                    <p><strong>Horas totales previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>
+                    <label>Docente</label>
+                    <select value={seccionSeleccionada.docente_id || ""} onChange={(e) => actualizarSeccionField({ docente_id: e.target.value })}>
+                      <option value="">— Seleccionar docente —</option>
+                      {docentes.map((d) => (
+                        <option key={d.id} value={d.id}>{d.nombre} {d.apellido_paterno}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  <div className="btns-mode">
-                    <button
-                      className={`btn ${modePlantilla ? "active" : ""}`}
-                      onClick={() => {
-                        // Si hay sesiones existentes, permitimos cambiar a plantilla solo si usuario quiere reconfigurar
-                        if (sesiones.length > 0) {
-                          if (!window.confirm("Esta sección ya tiene sesiones creadas. Cambiar a plantilla semanal puede generar duplicados. ¿Continuar?")) return;
-                        }
-                        setModePlantilla(true);
-                        setPlantillaBloques([]);
-                      }}
-                    >
-                      Configurar plantilla semanal
-                    </button>
+                  <div>
+                    <label>Fecha inicio</label>
+                    <input
+                      type="date"
+                      value={seccionSeleccionada.fecha_inicio || ""}
+                      onChange={(e) => actualizarSeccionField({ fecha_inicio: e.target.value })}
+                    />
+                  </div>
 
-                    <button
-                      className={`btn ${!modePlantilla ? "active" : ""}`}
-                      onClick={() => setModePlantilla(false)}
-                    >
-                      Ver calendario de sesiones
-                    </button>
+                  <div>
+                    <label>Fecha fin</label>
+                    <input
+                      type="date"
+                      value={seccionSeleccionada.fecha_fin || ""}
+                      onChange={(e) => actualizarSeccionField({ fecha_fin: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label>Horas totales</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={seccionSeleccionada.horas_totales || ""}
+                      onChange={(e) => actualizarSeccionField({ horas_totales: Number(e.target.value) })}
+                    />
                   </div>
                 </div>
 
-                <h3>{modePlantilla ? "Plantilla semanal (selección repetitiva)" : "Calendario de sesiones"}</h3>
+                <div className="seccion-headers">
+                  <div className="left-info">
+                    <p><strong>Periodo:</strong> {seccionSeleccionada.fecha_inicio} → {seccionSeleccionada.fecha_fin}</p>
+                    <p><strong>Horas previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>
+                  </div>
+
+                  <div className="btns-mode">
+                    <button className={`btn ${modePlantilla ? "active" : ""}`} onClick={() => { if (sesiones.length > 0 && !confirm("Esta sección ya tiene sesiones creadas. Cambiar a plantilla puede duplicar. ¿Continuar?")) return; setModePlantilla(true); }}>
+                      Plantilla semanal
+                    </button>
+                    <button className={`btn ${!modePlantilla ? "active" : ""}`} onClick={() => setModePlantilla(false)}>Calendario de sesiones</button>
+                  </div>
+                </div>
+
+                <h3>{modePlantilla ? "Plantilla semanal" : "Calendario"}</h3>
 
                 {modePlantilla ? (
                   <>
-                    <p className="info">
-                      Selecciona bloques en la cuadrícula semanal (por ejemplo Lunes 09:00-10:00). Esos bloques se guardarán como <strong>horarios</strong> y luego se generarán sesiones entre la <em>fecha inicio</em> y la <em>fecha fin</em> de la sección.
-                    </p>
+                    <p className="info">Selecciona los bloques que se repetirán cada semana. Luego pulsa <strong>Generar sesiones</strong>.</p>
 
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                         <FullCalendar
-                          ref={calendarRef}
+                          ref={plantillaCalRef}
                           plugins={[timeGridPlugin, interactionPlugin]}
                           initialView="timeGridWeek"
+                          firstDay={1} /* Lunes */
                           allDaySlot={false}
-                          editable={false}
                           selectable={true}
-                          selectMirror={true}
+                          select={onSelectPlantilla}
                           slotMinTime="07:00:00"
                           slotMaxTime="22:00:00"
                           slotDuration="01:00:00"
-                          hiddenDays={[]}
-                          // inicializamos en la semana actual (es simplemente plantilla visual)
-                          initialDate={new Date()}
-                          select={onSelectPlantilla}
-                          headerToolbar={{
-                            left: "",
-                            center: "title",
-                            right: ""
-                          }}
-                          locale="es"
+                          events={plantillaEventos()}
+                          headerToolbar={{ left: "", center: "title", right: "" }}
                         />
                       </div>
 
                       <aside className="plantilla-right">
                         <h4>Bloques seleccionados</h4>
-                        {plantillaBloques.length === 0 && <p>No hay bloques. Haz selección en la cuadrícula.</p>}
+                        {plantillaBloques.length === 0 && <p>No hay bloques seleccionados.</p>}
                         <ul className="bloques-list">
                           {plantillaBloques.map((b) => (
                             <li key={b.id}>
-                              <span>{b.label}</span>
-                              <button className="small" onClick={() => quitarBloquePlantilla(b.id)}>Eliminar</button>
+                              <span>{["Dom","Lun","Mar","Mie","Jue","Vie","Sab"][b.dia_semana]} {b.hora_inicio.slice(0,5)} - {b.hora_fin.slice(0,5)}</span>
+                              <div>
+                                <button className="small" onClick={() => quitarBloquePlantilla(b.id)}>Eliminar</button>
+                              </div>
                             </li>
                           ))}
                         </ul>
 
                         <div className="acciones-plantilla">
-                          <button onClick={generarSesionesDesdePlantilla} className="btn primary">Generar sesiones</button>
-                          <button onClick={() => { setPlantillaBloques([]); }} className="btn">Limpiar</button>
+                          <button className="btn primary" onClick={generarSesionesDesdePlantilla}>Generar sesiones</button>
+                          <button className="btn" onClick={() => setPlantillaBloques([])}>Limpiar</button>
                         </div>
 
                         <div className="debug">
-                          <h5>Debug / logs</h5>
-                          <p>Revisa la consola del navegador para ver las respuestas de los endpoints (GET/POST) y errores.</p>
+                          <h5>Logs</h5>
+                          <p>Revisa la consola para los POST/GET y errores.</p>
                         </div>
                       </aside>
                     </div>
@@ -453,8 +490,9 @@ export default function CursosAdmin() {
                 ) : (
                   <>
                     <FullCalendar
-                      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                      plugins={[timeGridPlugin, interactionPlugin]}
                       initialView="timeGridWeek"
+                      firstDay={1}
                       editable={true}
                       selectable={true}
                       events={sesiones}
@@ -462,34 +500,23 @@ export default function CursosAdmin() {
                       eventClick={(info) => abrirModalEdicion(info.event)}
                       eventDrop={onEventDropOrResize}
                       eventResize={onEventDropOrResize}
-                      headerToolbar={{
-                        left: "prev,next today",
-                        center: "title",
-                        right: "timeGridWeek,dayGridMonth"
-                      }}
+                      headerToolbar={{ left: "prev,next today", center: "title", right: "timeGridWeek,dayGridMonth" }}
                       slotMinTime="07:00:00"
                       slotMaxTime="22:00:00"
                     />
                     <div className="horarios-listado">
-                      <h4>Horarios configurados</h4>
-                      {horarios.length === 0 ? (
-                        <p>No hay horarios guardados para esta sección.</p>
-                      ) : (
+                      <h4>Horarios guardados</h4>
+                      {horarios.length === 0 ? <p>No hay horarios.</p> : (
                         <ul>
                           {horarios.map((h) => (
                             <li key={h.id}>
                               <strong>{["Dom","Lun","Mar","Mie","Jue","Vie","Sab"][h.dia_semana]}</strong> {h.hora_inicio.slice(0,5)} - {h.hora_fin.slice(0,5)}
                               <button className="small" onClick={async () => {
-                                // eliminar horario (si lo deseas)
-                                if (!window.confirm("Eliminar horario?")) return;
+                                if (!confirm("Eliminar horario?")) return;
                                 try {
-                                  console.log("DELETE horario", h.id);
-                                  await adminApi.eliminarHorario(h.id); // necesitarás este endpoint en backend
+                                  await adminApi.eliminarHorario(h.id);
                                   await cargarHorarios(seccionSeleccionada.id);
-                                } catch (err) {
-                                  console.error("Error eliminar horario", err);
-                                  alert("Error eliminando horario");
-                                }
+                                } catch (err) { console.error(err); alert("Error eliminando horario"); }
                               }}>Eliminar</button>
                             </li>
                           ))}
@@ -504,43 +531,20 @@ export default function CursosAdmin() {
         )}
       </div>
 
-      {/* ================= MODAL DE EDICIÓN ================= */}
+      {/* Modal editar sesión */}
       {modalEditar && (
         <div className="modal-overlay">
           <div className="modal">
             <h2>Editar sesión</h2>
-
             <label>Título</label>
-            <input
-              value={modalEditar.titulo}
-              onChange={(e) =>
-                setModalEditar({ ...modalEditar, titulo: e.target.value })
-              }
-            />
-
+            <input value={modalEditar.titulo} onChange={(e) => setModalEditar({ ...modalEditar, titulo: e.target.value })} />
             <label>Inicio</label>
-            <input
-              type="datetime-local"
-              value={modalEditar.inicio}
-              onChange={(e) =>
-                setModalEditar({ ...modalEditar, inicio: e.target.value })
-              }
-            />
-
+            <input type="datetime-local" value={modalEditar.inicio} onChange={(e) => setModalEditar({ ...modalEditar, inicio: e.target.value })} />
             <label>Fin</label>
-            <input
-              type="datetime-local"
-              value={modalEditar.fin}
-              onChange={(e) =>
-                setModalEditar({ ...modalEditar, fin: e.target.value })
-              }
-            />
-
+            <input type="datetime-local" value={modalEditar.fin} onChange={(e) => setModalEditar({ ...modalEditar, fin: e.target.value })} />
             <div className="modal-buttons">
               <button onClick={guardarCambiosSesion}>Guardar</button>
-              <button className="cancel" onClick={() => setModalEditar(null)}>
-                Cancelar
-              </button>
+              <button className="cancel" onClick={() => setModalEditar(null)}>Cancelar</button>
             </div>
           </div>
         </div>

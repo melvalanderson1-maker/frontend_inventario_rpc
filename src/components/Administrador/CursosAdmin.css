@@ -1,147 +1,58 @@
-/* CursosAdmin.css */
-.admin-wrapper {
-  display: flex;
-  gap: 18px;
-  padding: 18px;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  color: #111827;
-  background: #f7f9fc;
-  min-height: calc(100vh - 40px);
-}
+/* CursosAdmin.css (estilo moderno tipo Teams) */
+.admin-wrapper { display:flex; gap:18px; padding:18px; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#0f172a; background:#f3f6fb; min-height:100vh; }
+.panel-cursos { width:320px; background:#fff; border-radius:12px; padding:16px; box-shadow:0 6px 20px rgba(15,23,42,0.06); }
+.panel-cursos h2{ margin:0 0 12px; font-size:18px; color:#0f172a; }
+.curso-grid{ display:grid; gap:10px; }
+.curso-card{ padding:12px; border-radius:8px; cursor:pointer; border:1px solid #e6eef8; background:linear-gradient(180deg,#fff,#fbfdff); transition:transform .12s, box-shadow .12s; }
+.curso-card:hover{ transform:translateY(-4px); box-shadow:0 8px 24px rgba(2,6,23,0.06); }
+.curso-card h3{ margin:0 0 6px; font-size:15px; }
+.curso-card .desc{ margin:0; color:#475569; font-size:13px; }
 
-.panel-cursos {
-  width: 320px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 6px 20px rgba(15,23,42,0.06);
-}
+.panel-detalle{ flex:1; overflow:auto; max-height:calc(100vh - 40px); padding:18px; border-radius:12px; background:#fff; box-shadow:0 6px 20px rgba(2,6,23,0.04); }
+.placeholder{ padding:40px; text-align:center; color:#64748b; }
 
-.panel-cursos h2 { margin: 0 0 12px 0; font-size: 18px; color: #0f172a; }
-.curso-grid { display: grid; gap: 10px; }
-.curso-card {
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  border: 1px solid #e6eef8;
-  transition: transform .12s, box-shadow .12s;
-  background: linear-gradient(180deg,#ffffff,#fbfdff);
-}
-.curso-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(2,6,23,0.06); }
-.curso-card h3 { margin: 0 0 6px 0; font-size: 15px; }
-.curso-card .desc { margin: 0; color: #475569; font-size: 13px; }
+.seccion-list{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.seccion-item{ border:1px solid #eef2ff; padding:10px; border-radius:10px; cursor:pointer; width:220px; background:#fbfdff; }
+.seccion-item.active{ border-color:#6366f1; box-shadow:0 8px 18px rgba(99,102,241,0.08); }
 
-.panel-detalle {
-  flex: 1;
-  overflow: auto;
-  max-height: calc(100vh - 60px);
-  padding: 18px;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 6px 20px rgba(2,6,23,0.04);
-  transition: width .15s;
-}
-.panel-detalle.open { }
+.select-docente{ padding:8px; border-radius:8px; border:1px solid #e6eef8; margin-bottom:12px; width:100%; }
 
-.placeholder { padding: 40px; text-align: center; color: #64748b; }
+.seccion-headers{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+.left-info p{ margin:0; color:#374151; }
 
-.seccion-list { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.seccion-item {
-  border: 1px solid #eef2ff;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 220px;
-  background: #fbfdff;
-}
-.seccion-item.active { border-color: #6366f1; box-shadow: 0 8px 18px rgba(99,102,241,0.08); }
+.btn { padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; cursor:pointer; }
+.btn.primary{ background:#0864ff; color:#fff; border:none; box-shadow:0 6px 18px rgba(8,100,255,0.12); }
+.btn.active{ background:#eef2ff; border-color:#c7d2fe; }
 
-.select-docente {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #e6eef8;
-  margin-bottom: 12px;
-}
+.config-row{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:12px; align-items:end; }
+.config-row label{ font-size:13px; color:#334155; display:block; margin-bottom:6px; }
+.config-row input[type="date"], .config-row input[type="number"], .config-row select{ width:100%; padding:8px; border-radius:8px; border:1px solid #e6eef8; }
 
-.seccion-headers {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+.plantilla-wrapper{ display:flex; gap:14px; align-items:flex-start; }
+.plantilla-left{ flex:1; background:#fff; border-radius:8px; padding:6px; box-shadow: inset 0 0 0 1px #f1f5f9; }
+.plantilla-right{ width:320px; background:#fbfcff; border-radius:10px; padding:12px; border:1px solid #eef2ff; }
 
-.btns-mode .btn { margin-left: 6px; }
+.plantilla-right h4{ margin-top:0; }
+.bloques-list{ list-style:none; padding:0; margin:8px 0; }
+.bloques-list li{ display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:8px; margin-bottom:6px; border:1px dashed #e6eef8; font-size:14px; background:#fff; }
+.bloques-list .small{ padding:6px 8px; font-size:12px; border-radius:6px; }
 
-.btn {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  cursor: pointer;
-}
-.btn.primary {
-  background: #4f46e5;
-  color: white;
-  border: none;
-}
-.btn.active {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-}
+.acciones-plantilla{ margin-top:12px; display:flex; gap:8px; flex-direction:column; }
+.info{ color:#475569; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #eef2ff; }
 
-/* Plantilla layout */
-.plantilla-wrapper {
-  display: flex;
-  gap: 14px;
-}
-.plantilla-left { flex: 1; background: #fff; border-radius: 8px; padding: 6px; }
-.plantilla-right { width: 320px; background: #fbfcff; border-radius: 10px; padding: 12px; border: 1px solid #eef2ff; }
-.plantilla-right h4 { margin-top: 0; }
-.bloques-list { list-style: none; padding: 0; margin: 8px 0; }
-.bloques-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  border-radius: 8px;
-  margin-bottom: 6px;
-  border: 1px dashed #e6eef8;
-  font-size: 14px;
-}
-.bloques-list .small { padding: 6px 8px; font-size: 12px; border-radius: 6px; }
+.horarios-listado{ margin-top:12px; background:#fff; padding:10px; border-radius:8px; border:1px solid #eef2ff; }
 
-.acciones-plantilla { margin-top: 12px; display: flex; gap: 8px; flex-direction: column; }
-.info { color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #eef2ff; }
+.modal-overlay{ position:fixed; inset:0; background:rgba(2,6,23,0.35); display:flex; justify-content:center; align-items:center; z-index:9999; }
+.modal{ width:420px; background:#fff; padding:18px; border-radius:12px; }
+.modal label{ display:block; margin-top:8px; font-size:13px; color:#374151; }
+.modal input[type="text"], .modal input[type="datetime-local"]{ width:100%; padding:8px; margin-top:6px; border-radius:8px; border:1px solid #e6eef8; }
+.modal-buttons{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.modal-buttons .cancel{ background:#f8fafc; border:1px solid #e6eef8; }
 
-.horarios-listado { margin-top: 12px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eef2ff; }
+.debug{ margin-top:10px; font-size:12px; color:#64748b; background:#fbfcff; padding:8px; border-radius:8px; }
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(2,6,23,0.35);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-.modal {
-  width: 420px;
-  background: white;
-  padding: 18px;
-  border-radius: 12px;
-}
-.modal label { display: block; margin-top: 8px; font-size: 13px; color: #374151; }
-.modal input[type="text"], .modal input[type="datetime-local"] {
-  width: 100%;
-  padding: 8px;
-  margin-top: 6px;
-  border-radius: 8px;
-  border: 1px solid #e6eef8;
-}
-.modal-buttons { display:flex; gap:8px; justify-content: flex-end; margin-top: 12px; }
-.modal-buttons .cancel { background: #f8fafc; border: 1px solid #e6eef8; }
+.small{ padding:6px 8px; border-radius:8px; font-size:12px; cursor:pointer; margin-left:6px; }
 
-.debug { margin-top: 10px; font-size: 12px; color: #64748b; background: #fbfcff; padding: 8px; border-radius: 8px; }
-
-.small { padding: 6px 8px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-left: 6px; }
+/* FullCalendar tweaks for nicer look */
+.fc .fc-toolbar-title{ font-weight:600; font-size:16px; color:#0f172a; }
+.fc .fc-timegrid-slot-label{ color:#64748b; font-size:12px; }
