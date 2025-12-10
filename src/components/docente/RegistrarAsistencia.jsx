@@ -7,6 +7,8 @@ import { useSearchParams } from "react-router-dom";
 import DashboardHeader from "../../components/layout/DashboardHeader";
 import DashboardFooter from "../../components/layout/DashboardFooter";
 
+const ESTADOS = ["PRESENTE", "TARDANZA", "AUSENTE", "JUSTIFICADO", "REMOTO"];
+
 export default function RegistrarAsistencia() {
   const [searchParams] = useSearchParams();
   const seccionIdFromQuery = searchParams.get("seccion");
@@ -23,7 +25,14 @@ export default function RegistrarAsistencia() {
     setLoading(true);
     try {
       const res = await docentesApi.listarAlumnosSeccion(id);
-      setAlumnos((res.data.alumnos || []).map((a) => ({ ...a, presente: true })));
+
+      // estado inicial: PRESENTE
+      setAlumnos(
+        (res.data.alumnos || []).map((a) => ({
+          ...a,
+          estado: "PRESENTE",
+        }))
+      );
     } catch (err) {
       console.error(err);
       alert("Error cargando alumnos");
@@ -32,9 +41,9 @@ export default function RegistrarAsistencia() {
     }
   };
 
-  const togglePresente = (idx) => {
+  const cambiarEstado = (idx, nuevoEstado) => {
     const copy = [...alumnos];
-    copy[idx].presente = !copy[idx].presente;
+    copy[idx].estado = nuevoEstado;
     setAlumnos(copy);
   };
 
@@ -44,12 +53,12 @@ export default function RegistrarAsistencia() {
       const payload = {
         asistencias: alumnos.map((a) => ({
           usuario_id: a.id,
-          presente: a.presente ? 1 : 0,
+          estado: a.estado,
         })),
       };
 
       await docentesApi.registrarAsistencia(seccionId, payload);
-      alert("Asistencias registradas");
+      alert("Asistencias registradas correctamente");
     } catch (err) {
       console.error(err);
       alert("Error guardando asistencias");
@@ -62,10 +71,10 @@ export default function RegistrarAsistencia() {
     <>
       <DashboardHeader />
 
-      <div className="registrar-asistencia">
+      <div className="asistencia-container">
         <header>
           <h2>Registrar Asistencia</h2>
-          <p className="muted">Selecciona los estudiantes presentes y guarda.</p>
+          <p className="muted">Selecciona el estado de cada estudiante.</p>
         </header>
 
         <div className="form-row">
@@ -83,13 +92,13 @@ export default function RegistrarAsistencia() {
         {loading ? (
           <p>Cargando alumnos...</p>
         ) : (
-          <div className="alumnos-table">
+          <div className="alumnos-list">
             {alumnos.length === 0 ? (
               <div className="empty">No hay alumnos</div>
             ) : (
               alumnos.map((a, i) => (
-                <div className="alumno-row" key={a.id}>
-                  <div className="alumno-data">
+                <div className="alumno-card" key={a.id}>
+                  <div className="alumno-info">
                     <div className="alumno-name">
                       {a.nombre} {a.apellido_paterno} {a.apellido_materno}
                     </div>
@@ -97,15 +106,19 @@ export default function RegistrarAsistencia() {
                       {a.numero_documento} • {a.correo}
                     </div>
                   </div>
-                  <div className="alumno-action">
-                    <label className="toggle">
-                      <input
-                        type="checkbox"
-                        checked={a.presente}
-                        onChange={() => togglePresente(i)}
-                      />
-                      <span>{a.presente ? "Presente" : "Ausente"}</span>
-                    </label>
+
+                  <div className="estado-selector">
+                    {ESTADOS.map((e) => (
+                      <button
+                        key={e}
+                        className={
+                          "estado-pill " + (a.estado === e ? "active" : "")
+                        }
+                        onClick={() => cambiarEstado(i, e)}
+                      >
+                        {e}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ))
@@ -113,7 +126,7 @@ export default function RegistrarAsistencia() {
           </div>
         )}
 
-        <div className="save-row">
+        <div className="save-section">
           <button className="btn primary" onClick={guardar} disabled={guardando}>
             {guardando ? "Guardando..." : "Guardar asistencia"}
           </button>

@@ -70,25 +70,33 @@ module.exports = {
     }
   },
 
-  registrarAsistencia: async (req, res) => {
-    // payload: { fecha?: 'YYYY-MM-DD', asistencias: [{ usuario_id, presente: 1|0 }] }
-    try {
-      const seccionId = req.params.id;
-      const { fecha, asistencias } = req.body;
-      if (!Array.isArray(asistencias)) return res.status(400).json({ ok: false, msg: "Formato inválido" });
+registrarAsistencia: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const { asistencias } = req.body;
 
-      const date = fecha || new Date().toISOString().slice(0, 10);
+    if (!Array.isArray(asistencias))
+      return res.status(400).json({ ok: false, msg: "Formato inválido" });
 
-      const values = asistencias.map(a => [seccionId, a.usuario_id, date, a.presente ? 1 : 0]);
-      // Inserta en tabla asistencias: id, seccion_id, usuario_id, fecha, presente, creado_en
-      await pool.query("INSERT INTO asistencias (seccion_id, usuario_id, fecha, presente) VALUES ?", [values]);
+    const values = asistencias.map(a => [
+      seccionId,
+      a.usuario_id,
+      a.estado,
+    ]);
 
-      res.json({ ok: true, msg: "Asistencias registradas" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
+    await pool.query(
+      "INSERT INTO asistencias (seccion_id, usuario_id, estado) VALUES ?",
+      [values]
+    );
+
+    res.json({ ok: true, msg: "Asistencia registrada" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
 
   registrarNotas: async (req, res) => {
     // payload: { notas: [{ usuario_id, actividad_id (opcional), nota }] }
