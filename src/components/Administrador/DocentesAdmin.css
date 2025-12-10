@@ -3,6 +3,7 @@
   margin: 2rem auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
+  padding: 0 1rem;
 }
 
 .docentes-admin h2 {
@@ -12,29 +13,29 @@
   color: #1a73e8;
 }
 
-/* GRID docentes: 6 columnas */
-.grid-docentes {
+/* GRID docentes: hasta 6 columnas */
+.grid-docentes, .grid-cursos {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
-/* Cards docentes */
-.card {
+/* Card docente y curso */
+.card, .curso-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
 }
 
-.card:hover {
+.card:hover, .curso-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-.card-header {
+.card-header, .curso-header {
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -42,7 +43,7 @@
   border-bottom: 1px solid #eee;
 }
 
-.card-header div b {
+.card-header div b, .curso-header b {
   font-size: 1.1rem;
   color: #1a1a1a;
 }
@@ -53,7 +54,7 @@
   margin-top: 0.25rem;
 }
 
-.indicators span {
+.indicators span, .curso-info span {
   margin-left: 0.8rem;
   display: flex;
   align-items: center;
@@ -61,7 +62,7 @@
   color: #555;
 }
 
-.indicators span svg {
+.indicators span svg, .curso-info span svg {
   margin-right: 0.25rem;
   color: #1a73e8;
 }
@@ -99,37 +100,25 @@
 
 /* Detalle docente */
 .detalle-docente {
-  padding: 1rem;
+  padding: 1rem 0;
 }
 
 .detalle-docente .regresar {
   margin-bottom: 1rem;
+  background: #1a73e8;
+  color: #fff;
 }
 
-/* GRID Cursos */
-.grid-cursos {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1rem;
+.detalle-docente .regresar:hover {
+  background: #155ab6;
 }
 
-/* Cards cursos */
-.curso-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 0.8rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
+/* Cursos */
 .curso-header {
+  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-}
-
-.curso-header b {
-  color: #1a73e8;
 }
 
 .curso-info {
@@ -139,28 +128,39 @@
   color: #555;
 }
 
-.curso-info span {
-  display: flex;
-  align-items: center;
-}
-
-.curso-info span svg {
-  margin-right: 0.25rem;
-  color: #1a73e8;
-}
-
-/* Lista alumnos */
 .alumnos-list {
   margin-top: 0.5rem;
-  padding-left: 1rem;
+  padding: 0.5rem;
   background: #f9f9f9;
-  border-left: 2px solid #1a73e8;
-  border-radius: 0 0 6px 6px;
+  border-left: 3px solid #1a73e8;
+  border-radius: 0 0 8px 8px;
 }
 
 .alumno-item {
-  padding: 0.3rem 0;
+  padding: 0.4rem 0;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
   font-size: 0.85rem;
   color: #333;
+}
+
+.alumno-item span {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+@media (max-width: 1200px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-docentes, .grid-cursos {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }
