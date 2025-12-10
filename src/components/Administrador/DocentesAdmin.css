@@ -117,35 +117,48 @@
 .curso-header {
   cursor: pointer;
   display: flex;
-  flex-direction: column; /* Cambiado a columna */
+  flex-direction: column;
   align-items: flex-start;
   padding: 1rem;
   border-bottom: 1px solid #eee;
 }
 
 .curso-header .curso-titulo {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: #1a1a1a;
-  margin-bottom: 0.5rem; /* separa del bloque de iconos */
+  font-weight: 600;
+  margin-bottom: 0.6rem;
 }
 
 .curso-info {
   display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
+  justify-content: space-between; /* simetría perfecta */
+  width: 100%;
+  font-size: 0.9rem;
   color: #555;
 }
 
+.curso-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #f1f7ff;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  min-width: 80px;
+  text-align: center;
+}
+
 .alumnos-list {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
+  margin-top: 0.8rem;
+  padding: 0.6rem;
   background: #f9f9f9;
   border-left: 3px solid #1a73e8;
   border-radius: 0 0 8px 8px;
 }
 
 .alumno-item {
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
@@ -160,6 +173,20 @@
   align-items: center;
   gap: 0.3rem;
 }
+
+.curso-card {
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 1rem;
+}
+
+.curso-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
 
 @media (max-width: 1200px) {
   .grid-docentes, .grid-cursos {

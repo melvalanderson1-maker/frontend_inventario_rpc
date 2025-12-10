@@ -6,7 +6,7 @@ import { FaUserGraduate, FaBook, FaLayerGroup, FaIdCard } from "react-icons/fa";
 export default function DocentesAdmin() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState({});
+  const [expandedCurso, setExpandedCurso] = useState(null); // SOLO un curso expandido
   const [viewDetalle, setViewDetalle] = useState(false);
   const [selectedDocente, setSelectedDocente] = useState(null);
 
@@ -45,12 +45,9 @@ export default function DocentesAdmin() {
     try {
       const res = await adminApi.listarCursosDocente(docente.id);
       const cursos = res.data.cursos || [];
-      setExpanded((prev) => ({
-        ...prev,
-        [docente.id]: { cursos, visible: true },
-      }));
-      setSelectedDocente(docente);
+      setSelectedDocente({ ...docente, cursos });
       setViewDetalle(true);
+      setExpandedCurso(null); // Reinicia la expansión
     } catch (err) {
       console.error("Error fetchCursosDetalle:", err);
       alert("Error cargando cursos del docente");
@@ -58,17 +55,17 @@ export default function DocentesAdmin() {
   };
 
   const toggleExpandSeccion = async (c) => {
-    if (!expanded[c.seccion_id]) {
-      const res = await adminApi.lumnosSeccion(c.seccion_id);
-      setExpanded((prev) => ({
-        ...prev,
-        [c.seccion_id]: { alumnos: res.data.alumnos, visible: true },
-      }));
+    // Si ya está expandido, colapsar
+    if (expandedCurso === c.seccion_id) {
+      setExpandedCurso(null);
     } else {
-      setExpanded((prev) => ({
-        ...prev,
-        [c.seccion_id]: { ...prev[c.seccion_id], visible: !prev[c.seccion_id].visible },
-      }));
+      // Expandir solo este curso
+      if (!c.alumnos) {
+        // Fetch alumnos si no existen
+        const res = await adminApi.lumnosSeccion(c.seccion_id);
+        c.alumnos = res.data.alumnos;
+      }
+      setExpandedCurso(c.seccion_id);
     }
   };
 
@@ -96,32 +93,28 @@ export default function DocentesAdmin() {
           <h3>{selectedDocente.nombre} {selectedDocente.apellido_paterno} {selectedDocente.apellido_materno || ""}</h3>
 
           <div className="grid-cursos">
-            {expanded[selectedDocente.id]?.cursos.length === 0 ? (
+            {selectedDocente.cursos.length === 0 ? (
               <p>No tiene cursos asignados</p>
             ) : (
-              expanded[selectedDocente.id]?.cursos.map((c) => {
-                const alumnos = expanded[c.seccion_id]?.alumnos || [];
-                const alumnosVisible = expanded[c.seccion_id]?.visible;
-
-                // Construir título sin paréntesis vacíos
+              selectedDocente.cursos.map((c) => {
                 const cursoTitulo = c.codigo ? `${c.curso_titulo} (${c.codigo})` : c.curso_titulo;
+                const alumnosVisible = expandedCurso === c.seccion_id;
 
                 return (
                   <div key={c.seccion_id} className="curso-card">
                     <div className="curso-header" onClick={() => toggleExpandSeccion(c)}>
                       <b className="curso-titulo">{cursoTitulo}</b>
-
                       <div className="curso-info">
                         <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
-                        <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count}</span>
-                        <span title="Modalidad"><FaBook /> {c.modalidad}</span>
+                        <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count || 0}</span>
+                        <span title="Modalidad"><FaBook /> {c.modalidad || "-"}</span>
                       </div>
                     </div>
 
                     {alumnosVisible && (
                       <div className="alumnos-list">
-                        {alumnos.length === 0 ? <p>No hay alumnos</p> :
-                          alumnos.map(a => (
+                        {(!c.alumnos || c.alumnos.length === 0) ? <p>No hay alumnos</p> :
+                          c.alumnos.map(a => (
                             <div key={a.id} className="alumno-item">
                               <span className="alumno-nombre">{a.nombre} {a.apellido_paterno} {a.apellido_materno}</span>
                               <span className="alumno-dni"><FaIdCard /> {a.numero_documento}</span>
