@@ -277,6 +277,16 @@ crearHorario : async (req, res) => {
   }
 },
 
+
+eliminarHorario: async (req, res) => {
+  try {
+    await pool.query("DELETE FROM horarios WHERE id=?", [req.params.id]);
+    res.json({ ok: true, msg: "Horario eliminado" });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
 generarSesionesAutomaticas : async (req, res) => {
   try {
     const seccionId = req.params.id;
@@ -304,16 +314,13 @@ generarSesionesAutomaticas : async (req, res) => {
 
       horarios.forEach((h) => {
         if (h.dia_semana === diaSemana) {
-          const inicia = new Date(
-            `${fechaInicio.toISOString().split("T")[0]} ${h.hora_inicio}`
-          );
-          const termina = new Date(
-            `${fechaInicio.toISOString().split("T")[0]} ${h.hora_fin}`
-          );
+          const fechaISO = fechaInicio.toISOString().split("T")[0];
+          const inicia = new Date(`${fechaISO} ${h.hora_inicio}`);
+          const termina = new Date(`${fechaISO} ${h.hora_fin}`);
 
           pool.query("INSERT INTO sesiones SET ?", {
             seccion_id: seccionId,
-            titulo: `Clase ${seccionesCreadas + 1}`,
+            titulo: `Clase ${sesionesCreadas + 1}`,
             inicia_en: inicia,
             termina_en: termina,
             tipo_sesion: "PRESENCIAL",
@@ -328,6 +335,7 @@ generarSesionesAutomaticas : async (req, res) => {
     }
 
     res.json({ ok: true, msg: "Sesiones generadas", cantidad: sesionesCreadas });
+
 
   } catch (err) {
     res.status(500).json({ ok: false, msg: err.message });

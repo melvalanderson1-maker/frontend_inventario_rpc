@@ -55,6 +55,8 @@ router.delete("/sesiones/:id", adminController.eliminarSesion);
 // HORARIOS
 router.get("/secciones/:id/horarios", adminController.listarHorarios);
 router.post("/horarios", adminController.crearHorario);
+router.delete("/horarios/:id", adminController.eliminarHorario);
+
 
 // GENERAR SESIONES
 router.post("/secciones/:id/generar-sesiones", adminController.generarSesionesAutomaticas);
