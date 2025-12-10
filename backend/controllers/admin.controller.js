@@ -154,6 +154,24 @@ eliminarUsuario: async (req, res) => {
     }
     },
 
+    // backend/controllers/admin.controller.js
+listarAlumnosSeccion: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const [rows] = await pool.query(
+      `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo
+       FROM matriculas m
+       JOIN usuarios u ON m.usuario_id = u.id
+       WHERE m.seccion_id = ? AND m.estado='ACTIVO'`,
+      [seccionId]
+    );
+    res.json({ ok: true, alumnos: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
   listarSecretarias: async (req, res) => {
     const [rows] = await pool.query(
       "SELECT * FROM usuarios WHERE rol='SECRETARIA'"

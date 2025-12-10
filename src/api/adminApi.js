@@ -10,6 +10,9 @@ const adminApi = {
 
   listarDocentes: () => axiosClient.get("/admin/docentes"),
   listarCursosDocente: (id) => axiosClient.get(`/admin/docentes/${id}/cursos`), // <--- AGREGAR ESTO
+  // src/api/adminApi.js
+  lumnosSeccion: (id) => axiosClient.get(`/admin/secciones/${id}/alumnos`),
+
   listarSecretarias: () => axiosClient.get("/admin/secretarias"),
   listarAlumnos: () => axiosClient.get("/admin/alumnos"),
 

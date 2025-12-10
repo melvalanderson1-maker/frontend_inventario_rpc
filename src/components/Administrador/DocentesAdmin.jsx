@@ -98,18 +98,48 @@ export default function DocentesAdmin() {
                     {cursosInfo.length === 0 ? (
                       <p>No tiene cursos asignados</p>
                     ) : (
-                      cursosInfo.map((c) => (
-                        <div key={c.id} className="curso-card">
-                          <div className="curso-header">
-                            <b>{c.codigo} - {c.periodo}</b>
-                            <div className="curso-info">
-                              <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
-                              <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count}</span>
-                              <span title="Modalidad"><FaBook /> {c.modalidad}</span>
+                        cursosInfo.map((c) => {
+                        const alumnos = expanded[c.seccion_id]?.alumnos || [];
+                        const alumnosVisible = expanded[c.seccion_id]?.visible;
+                        return (
+                            <div key={c.seccion_id} className="curso-card">
+                            <div className="curso-header" onClick={async () => {
+                                if (!expanded[c.seccion_id]) {
+                                // Fetch alumnos
+                                const res = await adminApi.listarAlumnosSeccion(c.seccion_id);
+                                setExpanded(prev => ({
+                                    ...prev,
+                                    [c.seccion_id]: { alumnos: res.data.alumnos, visible: true }
+                                }));
+                                } else {
+                                setExpanded(prev => ({
+                                    ...prev,
+                                    [c.seccion_id]: { ...prev[c.seccion_id], visible: !prev[c.seccion_id].visible }
+                                }));
+                                }
+                            }}>
+                                <b>{c.codigo} - {c.periodo}</b>
+                                <div className="curso-info">
+                                <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
+                                <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count}</span>
+                                <span title="Modalidad"><FaBook /> {c.modalidad}</span>
+                                </div>
                             </div>
-                          </div>
-                        </div>
-                      ))
+
+                            {alumnosVisible && (
+                                <div className="alumnos-list">
+                                {alumnos.length === 0 ? <p>No hay alumnos</p> :
+                                    alumnos.map(a => (
+                                    <div key={a.id} className="alumno-item">
+                                        {a.nombre} {a.apellido_paterno} ({a.correo})
+                                    </div>
+                                    ))
+                                }
+                                </div>
+                            )}
+                            </div>
+                        );
+                        })
                     )}
                   </div>
                 )}

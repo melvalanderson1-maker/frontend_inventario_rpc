@@ -41,6 +41,9 @@ router.get("/cursos", adminController.listarCursos);
 router.post("/cursos", adminController.crearCurso);
 router.put("/cursos/:id", adminController.actualizarCurso);
 router.delete("/cursos/:id", adminController.eliminarCurso);
+// backend/routes/admin.routes.js
+router.get("/secciones/:id/alumnos", adminController.listarAlumnosSeccion);
+
 
 // ─────────────────────────────────────────────
 // SECCIONES
