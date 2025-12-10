@@ -6,8 +6,9 @@ import { FaUserGraduate, FaBook, FaLayerGroup, FaIdCard } from "react-icons/fa";
 export default function DocentesAdmin() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expandedCursos, setExpandedCursos] = useState({});
-  const [expandedAlumnos, setExpandedAlumnos] = useState({});
+  const [expanded, setExpanded] = useState({});
+  const [viewDetalle, setViewDetalle] = useState(false);
+  const [selectedDocente, setSelectedDocente] = useState(null);
 
   useEffect(() => {
     fetchDocentes();
@@ -40,29 +41,33 @@ export default function DocentesAdmin() {
     }
   };
 
-  const toggleCursos = (docenteId) => {
-    setExpandedCursos((prev) => ({
-      ...prev,
-      [docenteId]: !prev[docenteId],
-    }));
+  const fetchCursosDetalle = async (docente) => {
+    try {
+      const res = await adminApi.listarCursosDocente(docente.id);
+      const cursos = res.data.cursos || [];
+      setExpanded((prev) => ({
+        ...prev,
+        [docente.id]: { cursos, visible: true },
+      }));
+      setSelectedDocente(docente);
+      setViewDetalle(true);
+    } catch (err) {
+      console.error("Error fetchCursosDetalle:", err);
+      alert("Error cargando cursos del docente");
+    }
   };
 
-  const toggleAlumnos = async (curso) => {
-    if (!expandedAlumnos[curso.seccion_id]) {
-      try {
-        const res = await adminApi.lumnosSeccion(curso.seccion_id);
-        setExpandedAlumnos((prev) => ({
-          ...prev,
-          [curso.seccion_id]: res.data.alumnos || [],
-        }));
-      } catch (err) {
-        console.error("Error al cargar alumnos:", err);
-        alert("Error cargando alumnos");
-      }
-    } else {
-      setExpandedAlumnos((prev) => ({
+  const toggleExpandSeccion = async (c) => {
+    if (!expanded[c.seccion_id]) {
+      const res = await adminApi.lumnosSeccion(c.seccion_id);
+      setExpanded((prev) => ({
         ...prev,
-        [curso.seccion_id]: prev[curso.seccion_id] ? null : [],
+        [c.seccion_id]: { alumnos: res.data.alumnos, visible: true },
+      }));
+    } else {
+      setExpanded((prev) => ({
+        ...prev,
+        [c.seccion_id]: { ...prev[c.seccion_id], visible: !prev[c.seccion_id].visible },
       }));
     }
   };
@@ -72,6 +77,7 @@ export default function DocentesAdmin() {
     try {
       await adminApi.eliminarUsuario(id);
       fetchDocentes();
+      setViewDetalle(false);
     } catch (err) {
       console.error(err);
       alert("Error eliminando");
@@ -84,18 +90,64 @@ export default function DocentesAdmin() {
 
       {loading ? (
         <p>Cargando docentes...</p>
+      ) : viewDetalle && selectedDocente ? (
+        <div className="detalle-docente">
+          <button className="btn regresar" onClick={() => setViewDetalle(false)}>← Regresar</button>
+          <h3>{selectedDocente.nombre} {selectedDocente.apellido_paterno} {selectedDocente.apellido_materno || ""}</h3>
+
+          <div className="grid-cursos">
+            {expanded[selectedDocente.id]?.cursos.length === 0 ? (
+              <p>No tiene cursos asignados</p>
+            ) : (
+              expanded[selectedDocente.id]?.cursos.map((c) => {
+                const alumnos = expanded[c.seccion_id]?.alumnos || [];
+                const alumnosVisible = expanded[c.seccion_id]?.visible;
+
+                // Construir título sin paréntesis vacíos
+                const cursoTitulo = c.codigo ? `${c.curso_titulo} (${c.codigo})` : c.curso_titulo;
+
+                return (
+                  <div key={c.seccion_id} className="curso-card">
+                    <div className="curso-header" onClick={() => toggleExpandSeccion(c)}>
+                      <b className="curso-titulo">{cursoTitulo}</b>
+
+                      <div className="curso-info">
+                        <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
+                        <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count}</span>
+                        <span title="Modalidad"><FaBook /> {c.modalidad}</span>
+                      </div>
+                    </div>
+
+                    {alumnosVisible && (
+                      <div className="alumnos-list">
+                        {alumnos.length === 0 ? <p>No hay alumnos</p> :
+                          alumnos.map(a => (
+                            <div key={a.id} className="alumno-item">
+                              <span className="alumno-nombre">{a.nombre} {a.apellido_paterno} {a.apellido_materno}</span>
+                              <span className="alumno-dni"><FaIdCard /> {a.numero_documento}</span>
+                              <span className="alumno-correo">{a.correo}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       ) : (
         <div className="grid-docentes">
           {docentes.map((d) => {
             const totalAlumnos = d.cursos?.reduce((acc, c) => acc + (c.alumnos_count || 0), 0) || 0;
             const totalCursos = d.cursos?.length || 0;
-            const cursosVisible = expandedCursos[d.id];
 
             return (
               <div key={d.id} className="card">
                 <div className="card-header">
                   <div>
-                    <b>{d.nombre} {d.apellido_paterno} {d.apellido_materno || ""}</b>
+                    <b>{d.nombre} {d.apellido_paterno}</b>
                     <div className="meta">{d.correo} • {d.telefono || "-"}</div>
                   </div>
                   <div className="indicators">
@@ -103,55 +155,10 @@ export default function DocentesAdmin() {
                     <span title="Alumnos"><FaUserGraduate /> {totalAlumnos}</span>
                   </div>
                 </div>
-
                 <div className="actions">
-                  {totalCursos > 0 && (
-                    <button className="btn" onClick={() => toggleCursos(d.id)}>
-                      {cursosVisible ? "Ocultar Cursos" : "Ver Cursos"}
-                    </button>
-                  )}
+                  <button className="btn" onClick={() => fetchCursosDetalle(d)}>Ver Cursos</button>
                   <button className="btn danger" onClick={() => handleDelete(d.id)}>Eliminar/Inactivar</button>
                 </div>
-
-                {cursosVisible && (
-                  <div className="grid-cursos">
-                    {d.cursos.map((c) => {
-                      const alumnos = expandedAlumnos[c.seccion_id] || [];
-                      const tituloCurso = c.curso_titulo + (c.codigo ? ` (${c.codigo})` : "");
-
-                      return (
-                        <div key={c.seccion_id} className="curso-card">
-                          <div className="curso-header" onClick={() => toggleAlumnos(c)}>
-                            <b>{tituloCurso}</b>
-                          </div>
-                          <div className="curso-info">
-                            <span title="Sección"><FaLayerGroup /> {c.seccion_codigo || "-"}</span>
-                            <span title="Alumnos"><FaUserGraduate /> {c.alumnos_count}</span>
-                            <span title="Modalidad"><FaBook /> {c.modalidad}</span>
-                          </div>
-
-                          {alumnos && alumnos.length > 0 && (
-                            <div className="alumnos-list">
-                              {alumnos.map((a) => (
-                                <div key={a.id} className="alumno-item">
-                                  <span className="alumno-nombre">{a.nombre} {a.apellido_paterno} {a.apellido_materno}</span>
-                                  <span className="alumno-dni"><FaIdCard /> {a.numero_documento}</span>
-                                  <span className="alumno-correo">{a.correo}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {alumnos && alumnos.length === 0 && (
-                            <div className="alumnos-list">
-                              <p>No hay alumnos</p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             );
           })}

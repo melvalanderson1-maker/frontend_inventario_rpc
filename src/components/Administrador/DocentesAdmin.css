@@ -13,12 +13,14 @@
   color: #1a73e8;
 }
 
+/* GRID docentes: hasta 6 columnas */
 .grid-docentes, .grid-cursos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
+/* Card docente y curso */
 .card, .curso-card {
   background: #fff;
   border-radius: 12px;
@@ -33,7 +35,7 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-.card-header {
+.card-header, .curso-header {
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -41,7 +43,7 @@
   border-bottom: 1px solid #eee;
 }
 
-.card-header div b, .curso-card b {
+.card-header div b, .curso-header b {
   font-size: 1.1rem;
   color: #1a1a1a;
 }
@@ -65,6 +67,7 @@
   color: #1a73e8;
 }
 
+/* Acciones */
 .actions {
   padding: 0.5rem 1rem;
   display: flex;
@@ -95,26 +98,42 @@
   background: #b71c1c;
 }
 
-.grid-cursos {
-  margin-top: 1rem;
+/* Detalle docente */
+.detalle-docente {
+  padding: 1rem 0;
 }
 
-.curso-card {
-  padding: 0.8rem;
+.detalle-docente .regresar {
+  margin-bottom: 1rem;
+  background: #1a73e8;
+  color: #fff;
 }
 
+.detalle-docente .regresar:hover {
+  background: #155ab6;
+}
+
+/* Cursos */
 .curso-header {
-  font-weight: bold;
   cursor: pointer;
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column; /* Cambiado a columna */
+  align-items: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.curso-header .curso-titulo {
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem; /* separa del bloque de iconos */
 }
 
 .curso-info {
   display: flex;
-  justify-content: flex-start;
   gap: 1rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #555;
 }
 
 .alumnos-list {
