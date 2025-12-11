@@ -308,39 +308,38 @@ generarSesionesAutomaticas : async (req, res) => {
     const fechaFin = new Date(seccion.fecha_fin);
 
     let sesionesCreadas = 0;
+    let contadorClase = 1;
 
-    while (fechaInicio <= fechaFin) {
-      const diaSemana = fechaInicio.getDay(); // 0-6
-
-      horarios.forEach((h) => {
+    // Crear sesiones según días de horarios
+    for (let f = new Date(fechaInicio); f <= fechaFin; f.setDate(f.getDate() + 1)) {
+      const diaSemana = f.getDay(); // 0 = Domingo, 1 = Lunes ...
+      horarios.forEach(h => {
         if (h.dia_semana === diaSemana) {
-          const fechaISO = fechaInicio.toISOString().split("T")[0];
-          const inicia = new Date(`${fechaISO} ${h.hora_inicio}`);
-          const termina = new Date(`${fechaISO} ${h.hora_fin}`);
+          const fechaISO = f.toISOString().split("T")[0];
+          const inicia = new Date(`${fechaISO}T${h.hora_inicio}`);
+          const termina = new Date(`${fechaISO}T${h.hora_fin}`);
 
           pool.query("INSERT INTO sesiones SET ?", {
             seccion_id: seccionId,
-            titulo: `Clase ${sesionesCreadas + 1}`,
+            titulo: `Clase ${contadorClase}`,
             inicia_en: inicia,
             termina_en: termina,
             tipo_sesion: "PRESENCIAL",
             aula: h.lugar
           });
-
           sesionesCreadas++;
+          contadorClase++;
         }
       });
-
-      fechaInicio.setDate(fechaInicio.getDate() + 1);
     }
 
     res.json({ ok: true, msg: "Sesiones generadas", cantidad: sesionesCreadas });
-
 
   } catch (err) {
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
+
 
 
 

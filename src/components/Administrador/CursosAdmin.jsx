@@ -413,14 +413,16 @@ export default function CursosAdmin() {
                   </div>
 
                   <div>
-                    <label>Horas totales</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={seccionSeleccionada.horas_totales || ""}
-                      onChange={(e) => actualizarSeccionField({ horas_totales: Number(e.target.value) })}
-                    />
+                    <label>Resumen horas</label>
+                    <div className="horas-resumen">
+                      {horarios.length === 0 ? "—" : horarios.reduce((sum, h) => {
+                        const inicio = toMinutes(h.hora_inicio);
+                        const fin = toMinutes(h.hora_fin);
+                        return sum + (fin - inicio);
+                      }, 0) / 60} horas
+                    </div>
                   </div>
+
                 </div>
 
                 <div className="seccion-headers">
@@ -474,6 +476,11 @@ export default function CursosAdmin() {
                             </li>
                           ))}
                         </ul>
+
+                        <p>Total clases posibles: {plantillaBloques.length > 0 ? Math.ceil(
+                          ((new Date(seccionSeleccionada.fecha_fin) - new Date(seccionSeleccionada.fecha_inicio)) / (1000*60*60*24) + 1) 
+                          * plantillaBloques.length / 7
+                        ) : 0}</p>
 
                         <div className="acciones-plantilla">
                           <button className="btn primary" onClick={generarSesionesDesdePlantilla}>Generar sesiones</button>
