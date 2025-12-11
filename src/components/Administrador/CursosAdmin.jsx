@@ -464,19 +464,19 @@ export default function CursosAdmin() {
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                         <FullCalendar
-                          ref={plantillaCalRef}
+                          timeZone="local"
                           plugins={[timeGridPlugin, interactionPlugin]}
                           initialView="timeGridWeek"
-                          firstDay={1} /* Lunes */
+                          firstDay={1}
                           allDaySlot={false}
                           selectable={true}
                           select={onSelectPlantilla}
-                          slotMinTime="07:00:00"
-                          slotMaxTime="22:00:00"
-                          slotDuration="01:00:00"
+                          slotMinTime="06:00:00"
+                          slotMaxTime="23:00:00"
                           events={plantillaEventos()}
                           headerToolbar={{ left: "", center: "title", right: "" }}
                         />
+
                       </div>
 
                       <aside className="plantilla-right">
@@ -512,38 +512,26 @@ export default function CursosAdmin() {
                   </>
                 ) : (
                   <>
-                  <FullCalendar
-                    plugins={[timeGridPlugin, interactionPlugin]}
-                    initialView="timeGridWeek"
-                    firstDay={1}
-                    editable={true}
-                    selectable={true}
+                    <FullCalendar
+                      timeZone="local"
+                      plugins={[timeGridPlugin, interactionPlugin]}
+                      initialView="timeGridWeek"
+                      firstDay={1}
+                      editable={true}
+                      selectable={true}
 
-                    /** 🔥 Esto es clave para que se pinten las sesiones */
-                    events={sesiones}
-                    eventSources={[
-                      {
-                        events: sesiones,
-                      },
-                    ]}
+                      events={sesiones}
+                      eventSources={[{ events: sesiones }]}
 
-                    /** Eventos */
-                    dateClick={onDateClickCrearSesion}
-                    eventClick={(info) => abrirModalEdicion(info.event)}
-                    eventDrop={onEventDropOrResize}
-                    eventResize={onEventDropOrResize}
+                      dateClick={onDateClickCrearSesion}
+                      eventClick={(info) => abrirModalEdicion(info.event)}
+                      eventDrop={onEventDropOrResize}
+                      eventResize={onEventDropOrResize}
 
-                    /** Toolbar */
-                    headerToolbar={{
-                      left: "prev,next today",
-                      center: "title",
-                      right: "timeGridWeek,dayGridMonth",
-                    }}
+                      slotMinTime="06:00:00"
+                      slotMaxTime="23:00:00"
+                    />
 
-                    /** Límites del horario */
-                    slotMinTime="07:00:00"
-                    slotMaxTime="22:00:00"
-                  />
 
                     <div className="horarios-listado">
                       <h4>Horarios guardados</h4>
