@@ -415,12 +415,16 @@ export default function CursosAdmin() {
                   <div>
                     <label>Resumen horas</label>
                     <div className="horas-resumen">
-                      {horarios.length === 0 ? "—" : horarios.reduce((sum, h) => {
-                        const inicio = toMinutes(h.hora_inicio);
-                        const fin = toMinutes(h.hora_fin);
-                        return sum + (fin - inicio);
-                      }, 0) / 60} horas
+                      {sesiones.length === 0
+                        ? "—"
+                        : sesiones.reduce((total, s) => {
+                            const inicio = new Date(s.start);
+                            const fin = new Date(s.end);
+                            return total + (fin - inicio) / (1000 * 60 * 60); // horas
+                          }, 0).toFixed(2) + " horas"
+                      }
                     </div>
+
                   </div>
 
                 </div>
