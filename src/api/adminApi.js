@@ -38,7 +38,7 @@ const adminApi = {
   crearSesion: (data) => axiosClient.post(`/admin/sesiones`, data),
   actualizarSesion: (id, data) => axiosClient.put(`/admin/sesiones/${id}`, data),
   eliminarSesion: (id) => axiosClient.delete(`/admin/sesiones/${id}`),
-
+  generarSesionesAutomaticas: (seccionId) => axios.post(`admin/secciones/${seccionId}/generar-sesiones`),
   generarSesiones: (id) => axiosClient.post(`/admin/secciones/${id}/generar-sesiones`),
 
   // === HORARIOS ===
