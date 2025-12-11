@@ -522,7 +522,7 @@ export default function CursosAdmin() {
                       selectable={true}
 
                       events={sesiones}
-                      eventSources={[{ events: sesiones }]}
+                      
 
                       dateClick={onDateClickCrearSesion}
                       eventClick={(info) => abrirModalEdicion(info.event)}
