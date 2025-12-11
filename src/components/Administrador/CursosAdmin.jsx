@@ -245,46 +245,50 @@ export default function CursosAdmin() {
   // -------------------
   // Generar horarios+sesiones (respeta fecha_inicio de la sección)
   // -------------------
-  const generarSesionesDesdePlantilla = async () => {
-    if (!seccionSeleccionada) return alert("Selecciona una sección primero");
-    if (plantillaBloques.length === 0) return alert("No hay bloques seleccionados");
+ const generarSesionesDesdePlantilla = async () => {
+  if (!seccionSeleccionada) return alert("Selecciona una sección primero");
+  if (plantillaBloques.length === 0) return alert("No hay bloques seleccionados");
 
-    try {
-      console.log("Generando horarios (plantilla) ->", plantillaBloques);
-      // 1) crear horarios en backend (el backend guardará dia_semana 0..6 y horas)
-      for (const b of plantillaBloques) {
-        const payload = {
-          seccion_id: seccionSeleccionada.id,
-          dia_semana: b.dia_semana,
-          hora_inicio: b.hora_inicio,
-          hora_fin: b.hora_fin,
-          lugar: seccionSeleccionada.aula || null,
-        };
-        console.log("POST /horarios payload:", payload);
-        const r = await adminApi.crearHorario(payload);
-        console.log("crearHorario response:", r);
-      }
+  try {
+    console.log("Generando horarios (plantilla) ->", plantillaBloques);
 
-      // 2) recargar horarios
-      await cargarHorarios(seccionSeleccionada.id);
-
-      // 3) llamar a generar-sesiones (backend crea entre fecha_inicio y fecha_fin)
-      console.log("POST /secciones/:id/generar-sesiones ->", seccionSeleccionada.id);
-      const gen = await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
-      console.log("generarSesionesAutomaticas response:", gen);
-
-      await cargarSesiones(seccionSeleccionada.id);
-      // 🔥 Forzar repintado del calendario normal
-      setSesiones((prev) => [...prev]);
-
-
-      setModePlantilla(false);
-      alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
-    } catch (err) {
-      console.error("Error generando sesiones desde plantilla", err);
-      alert("Ocurrió un error al generar sesiones. Revisa consola.");
+    // 1) Crear horarios
+    for (const b of plantillaBloques) {
+      const payload = {
+        seccion_id: seccionSeleccionada.id,
+        dia_semana: b.dia_semana,
+        hora_inicio: b.hora_inicio,
+        hora_fin: b.hora_fin,
+        lugar: seccionSeleccionada.aula || null,
+      };
+      console.log("POST /horarios payload:", payload);
+      await adminApi.crearHorario(payload);
     }
-  };
+
+    // 2) Recargar horarios
+    await cargarHorarios(seccionSeleccionada.id);
+
+    // 3) Generar sesiones (backend)
+    console.log("POST /secciones/:id/generar-sesiones ->", seccionSeleccionada.id);
+    const gen = await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
+    console.log("generarSesionesAutomaticas response:", gen);
+
+    // ⭐⭐ PASO CRÍTICO ⭐⭐
+    // → cambiar a vista normal para que se pinte el calendario real
+    setModePlantilla(false);
+
+    // Esperar un tick para que el calendario se monte
+    setTimeout(async () => {
+      await cargarSesiones(seccionSeleccionada.id);
+    }, 100);
+
+    alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
+  } catch (err) {
+    console.error("Error generando sesiones desde plantilla", err);
+    alert("Ocurrió un error al generar sesiones. Revisa consola.");
+  }
+};
+
 
   // -------------------
   // Crear sesión manual (calendario de sesiones)
