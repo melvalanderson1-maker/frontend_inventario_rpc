@@ -82,6 +82,8 @@ export default function CursosAdmin() {
         end: s.termina_en,
       }));
       setSesiones(eventos);
+      setSesiones((prev) => [...prev]);  // 🔥 fuerza rerender del calendario
+
     } catch (err) {
       console.error("Error listar sesiones", err);
       setSesiones([]);
@@ -229,11 +231,14 @@ export default function CursosAdmin() {
       const endStr = `${date.format("YYYY-MM-DD")}T${b.hora_fin.slice(0,8)}`;
       return {
         id: b.id,
-        title: "Bloque",
+        title: "",
         start: startStr,
         end: endStr,
-        rendering: "background",
+        display: "background", 
+        backgroundColor: "rgba(70, 150, 255, 0.35)", // se ve bonito y claro
+        borderColor: "transparent",
       };
+
     });
   };
 
@@ -269,6 +274,9 @@ export default function CursosAdmin() {
       console.log("generarSesionesAutomaticas response:", gen);
 
       await cargarSesiones(seccionSeleccionada.id);
+      // 🔥 Forzar repintado del calendario normal
+      setSesiones((prev) => [...prev]);
+
 
       setModePlantilla(false);
       alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
@@ -500,21 +508,39 @@ export default function CursosAdmin() {
                   </>
                 ) : (
                   <>
-                    <FullCalendar
-                      plugins={[timeGridPlugin, interactionPlugin]}
-                      initialView="timeGridWeek"
-                      firstDay={1}
-                      editable={true}
-                      selectable={true}
-                      events={sesiones}
-                      dateClick={onDateClickCrearSesion}
-                      eventClick={(info) => abrirModalEdicion(info.event)}
-                      eventDrop={onEventDropOrResize}
-                      eventResize={onEventDropOrResize}
-                      headerToolbar={{ left: "prev,next today", center: "title", right: "timeGridWeek,dayGridMonth" }}
-                      slotMinTime="07:00:00"
-                      slotMaxTime="22:00:00"
-                    />
+                  <FullCalendar
+                    plugins={[timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    firstDay={1}
+                    editable={true}
+                    selectable={true}
+
+                    /** 🔥 Esto es clave para que se pinten las sesiones */
+                    events={sesiones}
+                    eventSources={[
+                      {
+                        events: sesiones,
+                      },
+                    ]}
+
+                    /** Eventos */
+                    dateClick={onDateClickCrearSesion}
+                    eventClick={(info) => abrirModalEdicion(info.event)}
+                    eventDrop={onEventDropOrResize}
+                    eventResize={onEventDropOrResize}
+
+                    /** Toolbar */
+                    headerToolbar={{
+                      left: "prev,next today",
+                      center: "title",
+                      right: "timeGridWeek,dayGridMonth",
+                    }}
+
+                    /** Límites del horario */
+                    slotMinTime="07:00:00"
+                    slotMaxTime="22:00:00"
+                  />
+
                     <div className="horarios-listado">
                       <h4>Horarios guardados</h4>
                       {horarios.length === 0 ? <p>No hay horarios.</p> : (
