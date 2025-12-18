@@ -263,19 +263,45 @@ crearHorario : async (req, res) => {
   try {
     const { seccion_id, dia_semana, hora_inicio, hora_fin, lugar } = req.body;
 
-    await pool.query("INSERT INTO horarios SET ?", {
-      seccion_id,
-      dia_semana,
-      hora_inicio,
-      hora_fin,
-      lugar
+    // 1️⃣ Verificar si el horario ya existe
+    const [existe] = await pool.query(
+      `SELECT id 
+       FROM horarios 
+       WHERE seccion_id = ? 
+         AND dia_semana = ? 
+         AND hora_inicio = ? 
+         AND hora_fin = ?`,
+      [seccion_id, dia_semana, hora_inicio, hora_fin]
+    );
+
+    // 2️⃣ Solo insertar si NO existe
+    if (existe.length === 0) {
+      await pool.query("INSERT INTO horarios SET ?", {
+        seccion_id,
+        dia_semana,
+        hora_inicio,
+        hora_fin,
+        lugar
+      });
+
+      return res.json({
+        ok: true,
+        msg: "Horario creado correctamente"
+      });
+    }
+
+    // 3️⃣ Si ya existe, NO duplicar
+    return res.json({
+      ok: true,
+      msg: "Horario ya existía, no se duplicó"
     });
 
-    res.json({ ok: true, msg: "Horario creado correctamente" });
   } catch (err) {
+    console.error("Error crearHorario:", err);
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
+
 
 
 eliminarHorario: async (req, res) => {

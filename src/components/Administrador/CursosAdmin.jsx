@@ -354,6 +354,17 @@ export default function CursosAdmin() {
     }
   };
 
+  const cargarPlantillaDesdeHorarios = () => {
+  const bloques = horarios.map((h) => ({
+    id: `h-${h.id}`,
+    dia_semana: h.dia_semana,
+    hora_inicio: h.hora_inicio,
+    hora_fin: h.hora_fin,
+  }));
+  setPlantillaBloques(bloques);
+};
+
+
   // -------------------
   // Render
   // -------------------
@@ -449,9 +460,16 @@ export default function CursosAdmin() {
                   </div>
 
                   <div className="btns-mode">
-                    <button className={`btn ${modePlantilla ? "active" : ""}`} onClick={() => { if (sesiones.length > 0 && !confirm("Esta sección ya tiene sesiones creadas. Cambiar a plantilla puede duplicar. ¿Continuar?")) return; setModePlantilla(true); }}>
+                    <button
+                      className={`btn ${modePlantilla ? "active" : ""}`}
+                      onClick={() => {
+                        setModePlantilla(true);
+                        cargarPlantillaDesdeHorarios(); // 🔥 CLAVE
+                      }}
+                    >
                       Plantilla semanal
                     </button>
+
                     <button className={`btn ${!modePlantilla ? "active" : ""}`} onClick={() => setModePlantilla(false)}>Calendario de sesiones</button>
                   </div>
                 </div>
@@ -518,20 +536,18 @@ export default function CursosAdmin() {
                       plugins={[timeGridPlugin, interactionPlugin]}
                       initialView="timeGridWeek"
                       firstDay={1}
-                      editable={true}
+                      editable={false}   // 🔥 IMPORTANTE
                       selectable={true}
 
                       events={sesiones}
-                      
 
                       dateClick={onDateClickCrearSesion}
                       eventClick={(info) => abrirModalEdicion(info.event)}
-                      eventDrop={onEventDropOrResize}
-                      eventResize={onEventDropOrResize}
 
                       slotMinTime="06:00:00"
                       slotMaxTime="23:00:00"
                     />
+
 
 
                     <div className="horarios-listado">
