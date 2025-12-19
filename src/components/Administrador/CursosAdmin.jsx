@@ -4,6 +4,8 @@ import adminApi from "../../api/adminApi";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import esLocale from "@fullcalendar/core/locales/es";
+
 import dayjs from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -247,41 +249,41 @@ export default function CursosAdmin() {
   // Generar horarios+sesiones (respeta fecha_inicio de la sección)
   // -------------------
  const generarSesionesDesdePlantilla = async () => {
-  if (!seccionSeleccionada) return alert("Selecciona una sección primero");
-  if (plantillaBloques.length === 0) return alert("No hay bloques seleccionados");
+  if (!seccionSeleccionada) {
+    alert("Selecciona una sección primero");
+    return;
+  }
+
+  if (plantillaBloques.length === 0) {
+    alert("No hay bloques seleccionados");
+    return;
+  }
 
   try {
     console.log("Generando horarios (plantilla) ->", plantillaBloques);
 
-    // 1) Crear horarios
+    // 1️⃣ Crear horarios en backend
     for (const b of plantillaBloques) {
-      const payload = {
+      await adminApi.crearHorario({
         seccion_id: seccionSeleccionada.id,
         dia_semana: b.dia_semana,
         hora_inicio: b.hora_inicio,
         hora_fin: b.hora_fin,
         lugar: seccionSeleccionada.aula || null,
-      };
-      console.log("POST /horarios payload:", payload);
-      await adminApi.crearHorario(payload);
+      });
     }
 
-    // 2) Recargar horarios
+    // 2️⃣ Generar sesiones automáticamente (backend)
+    const gen = await adminApi.generarSesionesAutomaticas(
+      seccionSeleccionada.id
+    );
+
+    // 3️⃣ Refrescar frontend (SIN recargar página)
     await cargarHorarios(seccionSeleccionada.id);
+    await cargarSesiones(seccionSeleccionada.id);
 
-    // 3) Generar sesiones (backend)
-    console.log("POST /secciones/:id/generar-sesiones ->", seccionSeleccionada.id);
-    const gen = await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
-    console.log("generarSesionesAutomaticas response:", gen);
-
-    // ⭐⭐ PASO CRÍTICO ⭐⭐
-    // → cambiar a vista normal para que se pinte el calendario real
+    // 4️⃣ Volver al calendario normal
     setModePlantilla(false);
-
-    // Esperar un tick para que el calendario se monte
-    setTimeout(async () => {
-      await cargarSesiones(seccionSeleccionada.id);
-    }, 100);
 
     alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
   } catch (err) {
@@ -289,6 +291,7 @@ export default function CursosAdmin() {
     alert("Ocurrió un error al generar sesiones. Revisa consola.");
   }
 };
+
 
 
   // -------------------
@@ -364,6 +367,13 @@ export default function CursosAdmin() {
   setPlantillaBloques(bloques);
 };
 
+  useEffect(() => {
+    if (modePlantilla && horarios.length > 0) {
+      cargarPlantillaDesdeHorarios();
+    }
+  }, [modePlantilla, horarios]);
+
+
 
   // -------------------
   // Render
@@ -399,7 +409,11 @@ export default function CursosAdmin() {
                 >
                   <strong>Sección {s.codigo || s.id}</strong>
                   <p>Modalidad: {s.modalidad}</p>
-                  <p>Inicio: {s.fecha_inicio} • Fin: {s.fecha_fin}</p>
+                  <p>
+                    Inicio: {dayjs(s.fecha_inicio).format("DD-MM-YYYY")} • 
+                    Fin: {dayjs(s.fecha_fin).format("DD-MM-YYYY")}
+                  </p>
+
                 </div>
               ))}
             </div>
@@ -455,7 +469,11 @@ export default function CursosAdmin() {
 
                 <div className="seccion-headers">
                   <div className="left-info">
-                    <p><strong>Periodo:</strong> {seccionSeleccionada.fecha_inicio} → {seccionSeleccionada.fecha_fin}</p>
+                    <p>
+                      <strong>Periodo:</strong>{" "}
+                      {dayjs(seccionSeleccionada.fecha_inicio).format("DD-MM-YYYY")} →
+                      {dayjs(seccionSeleccionada.fecha_fin).format("DD-MM-YYYY")}
+                    </p>
                     <p><strong>Horas previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>
                   </div>
 
@@ -483,6 +501,7 @@ export default function CursosAdmin() {
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                         <FullCalendar
+                          locale={esLocale}
                           timeZone="local"
                           plugins={[timeGridPlugin, interactionPlugin]}
                           initialView="timeGridWeek"
@@ -532,6 +551,7 @@ export default function CursosAdmin() {
                 ) : (
                   <>
                     <FullCalendar
+                      locale={esLocale}
                       timeZone="local"
                       plugins={[timeGridPlugin, interactionPlugin]}
                       initialView="timeGridWeek"
@@ -557,13 +577,40 @@ export default function CursosAdmin() {
                           {horarios.map((h) => (
                             <li key={h.id}>
                               <strong>{["Dom","Lun","Mar","Mie","Jue","Vie","Sab"][h.dia_semana]}</strong> {h.hora_inicio.slice(0,5)} - {h.hora_fin.slice(0,5)}
-                              <button className="small" onClick={async () => {
-                                if (!confirm("Eliminar horario?")) return;
-                                try {
-                                  await adminApi.eliminarHorario(h.id);
-                                  await cargarHorarios(seccionSeleccionada.id);
-                                } catch (err) { console.error(err); alert("Error eliminando horario"); }
-                              }}>Eliminar</button>
+                              <button
+                                className="small"
+                                onClick={async () => {
+                                  if (!confirm("¿Eliminar horario? Esto también quitará los bloques del calendario.")) return;
+
+                                  try {
+                                    await adminApi.eliminarHorario(h.id);
+
+                                    // 1️⃣ quitar del estado horarios
+                                    setHorarios((prev) => prev.filter((x) => x.id !== h.id));
+
+                                    // 2️⃣ quitar del calendario plantilla
+                                    setPlantillaBloques((prev) =>
+                                      prev.filter(
+                                        (b) =>
+                                          !(
+                                            b.dia_semana === h.dia_semana &&
+                                            b.hora_inicio === h.hora_inicio &&
+                                            b.hora_fin === h.hora_fin
+                                          )
+                                      )
+                                    );
+
+                                    // 3️⃣ recargar sesiones (por si backend las recalcula)
+                                    await cargarSesiones(seccionSeleccionada.id);
+                                  } catch (err) {
+                                    console.error(err);
+                                    alert("Error eliminando horario");
+                                  }
+                                }}
+                              >
+                              Eliminar
+                              </button>
+
                             </li>
                           ))}
                         </ul>
