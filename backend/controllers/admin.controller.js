@@ -306,9 +306,41 @@ crearHorario : async (req, res) => {
 
 eliminarHorario: async (req, res) => {
   try {
-    await pool.query("DELETE FROM horarios WHERE id=?", [req.params.id]);
-    res.json({ ok: true, msg: "Horario eliminado" });
+    const horarioId = req.params.id;
+
+    // 1️⃣ Obtener datos del horario
+    const [[horario]] = await pool.query(
+      "SELECT * FROM horarios WHERE id=?",
+      [horarioId]
+    );
+
+    if (!horario) {
+      return res.status(404).json({ ok: false, msg: "Horario no encontrado" });
+    }
+
+    // 2️⃣ Eliminar sesiones que coincidan con ese horario
+    await pool.query(
+      `
+      DELETE s FROM sesiones s
+      WHERE s.seccion_id = ?
+        AND DAYOFWEEK(s.inicia_en) - 1 = ?
+        AND TIME(s.inicia_en) = ?
+        AND TIME(s.termina_en) = ?
+      `,
+      [
+        horario.seccion_id,
+        horario.dia_semana,
+        horario.hora_inicio,
+        horario.hora_fin,
+      ]
+    );
+
+    // 3️⃣ Eliminar el horario
+    await pool.query("DELETE FROM horarios WHERE id=?", [horarioId]);
+
+    res.json({ ok: true, msg: "Horario y sesiones eliminadas" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
@@ -316,6 +348,13 @@ eliminarHorario: async (req, res) => {
 generarSesionesAutomaticas : async (req, res) => {
   try {
     const seccionId = req.params.id;
+
+    // 🔥 BORRAR SESIONES EXISTENTES DE LA SECCIÓN
+    await pool.query(
+      "DELETE FROM sesiones WHERE seccion_id=?",
+      [seccionId]
+    );
+
 
     // 1. Obtener sección (incluye docente_id 👍)
     const [[seccion]] = await pool.query(

@@ -600,16 +600,19 @@ export default function CursosAdmin() {
                                       )
                                     );
 
-                                    // 3️⃣ recargar sesiones (por si backend las recalcula)
+                                    // ⬇️⬇️⬇️ AQUÍ ES DONDE VA ⬇️⬇️⬇️
+                                    await cargarHorarios(seccionSeleccionada.id);
                                     await cargarSesiones(seccionSeleccionada.id);
+
                                   } catch (err) {
                                     console.error(err);
                                     alert("Error eliminando horario");
                                   }
                                 }}
                               >
-                              Eliminar
+                                Eliminar
                               </button>
+
 
                             </li>
                           ))}
