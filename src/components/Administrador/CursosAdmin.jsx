@@ -190,6 +190,38 @@ export default function CursosAdmin() {
     }
   };
 
+
+  const refrescarTodo = async () => {
+  if (!seccionSeleccionada) return;
+
+  try {
+    setLoading(true);
+
+    // limpiar cache para forzar fetch real
+    cacheRef.current.sesiones = {};
+    cacheRef.current.horarios = {};
+    cacheRef.current.plantillaBloques = {};
+
+    await cargarCursos();
+    await cargarSecciones();
+    await cargarDocentes();
+
+    await cargarHorarios(seccionSeleccionada.id);
+    await cargarSesiones(seccionSeleccionada.id);
+
+    // fuerza repaint del calendario
+    setCalendarKey(k => k + 1);
+    setPlantillaCalendarKey(k => k + 1);
+
+    console.log("🔄 Refresco completo realizado");
+  } catch (err) {
+    console.error("Error al refrescar", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   // -------------------
   // Helpers para plantilla
   // -------------------
@@ -339,11 +371,8 @@ const generarSesionesDesdePlantilla = async () => {
 
     // 2️⃣ Backend genera sesiones
     await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
-
-    // 3️⃣ RECARGAR ESTADOS (CLAVE)
-    await cargarHorarios(seccionSeleccionada.id);
-    await cargarSesiones(seccionSeleccionada.id);
-
+    // 3️⃣ RECARGA TOTAL (COMO F5 PERO FETCH)
+    await refrescarTodo();
 
 
 
@@ -454,18 +483,38 @@ const generarSesionesDesdePlantilla = async () => {
   // -------------------
   return (
     <div className="admin-wrapper modern">
-      <div className="panel-cursos">
+    <div className="panel-cursos">
+      <div className="panel-cursos-header">
         <h2>Cursos</h2>
-        {loading && <p>Cargando...</p>}
-        <div className="curso-grid">
-          {cursos.map((c) => (
-            <div key={c.id} className="curso-card" onClick={() => abrirCurso(c)}>
+
+      <button
+        className={`btn refresh ${loading ? "spinning" : ""}`}
+        onClick={refrescarTodo}
+        disabled={loading}
+      >
+        🔄
+      </button>
+
+      </div>
+
+      {loading && <p>Cargando...</p>}
+
+      <div className="curso-grid">
+        {[...cursos]
+          .sort((a, b) => b.id - a.id)
+          .map((c) => (
+            <div
+              key={c.id}
+              className="curso-card"
+              onClick={() => abrirCurso(c)}
+            >
               <h3>{c.titulo}</h3>
               <p className="desc">{c.descripcion}</p>
             </div>
           ))}
-        </div>
       </div>
+    </div>
+
 
       <div className={`panel-detalle ${cursoSeleccionado ? "open" : ""}`}>
         {!cursoSeleccionado && <div className="placeholder"><p>Selecciona un curso</p></div>}
