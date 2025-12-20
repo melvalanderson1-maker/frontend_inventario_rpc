@@ -183,20 +183,26 @@ export default function CursosAdmin() {
     setPlantillaBloques((prev) => {
       const byDay = prev.filter((b) => b.dia_semana === dia_semana);
       const others = prev.filter((b) => b.dia_semana !== dia_semana);
+
       const merged = mergeIntervals([...byDay, { hora_inicio, hora_fin }]);
-      const newBlocksDay = merged.map((m) => ({
-        id: `${dia_semana}-${m.hora_inicio}-${m.hora_fin}`,
-        dia_semana,
-        hora_inicio: m.hora_inicio,
-        hora_fin: m.hora_fin,
-      }));
-      return [...others, ...newBlocksDay].sort((a, b) => a.dia_semana - b.dia_semana || a.hora_inicio.localeCompare(b.hora_inicio));
+
+      return [
+        ...others,
+        ...merged.map((m) => ({
+          id: `${dia_semana}-${m.hora_inicio}-${m.hora_fin}`,
+          dia_semana,
+          hora_inicio: m.hora_inicio,
+          hora_fin: m.hora_fin,
+        })),
+      ];
     });
   };
 
+
   const quitarBloquePlantilla = (id) => {
-    setPlantillaBloques((b) => b.filter((x) => x.id !== id));
+    setPlantillaBloques((prev) => prev.filter((b) => b.id !== id));
   };
+
 
   // -------------------
   // Selección en calendario plantilla (FullCalendar select)
@@ -217,12 +223,13 @@ export default function CursosAdmin() {
     }
   };
 
+  const recalcularEventosPlantilla = () => {
+  if (!modePlantilla || !seccionSeleccionada) {
+    setPlantillaEventosState([]);
+    return;
+  }
 
-
-  useEffect(() => {
-  if (!modePlantilla) return;
-
-  const baseDate = seccionSeleccionada?.fecha_inicio
+  const baseDate = seccionSeleccionada.fecha_inicio
     ? dayjs(seccionSeleccionada.fecha_inicio)
     : dayjs();
 
@@ -237,12 +244,20 @@ export default function CursosAdmin() {
       start: `${date.format("YYYY-MM-DD")}T${b.hora_inicio}`,
       end: `${date.format("YYYY-MM-DD")}T${b.hora_fin}`,
       display: "auto",
-
       backgroundColor: "rgba(70, 150, 255, 0.35)",
+      editable: false,
     };
   });
 
-  setPlantillaEventosState(eventos);
+  // 🔥 CLAVE: nueva referencia
+  setPlantillaEventosState([...eventos]);
+};
+
+
+
+
+useEffect(() => {
+  recalcularEventosPlantilla();
 }, [plantillaBloques, modePlantilla, seccionSeleccionada]);
 
 
@@ -346,14 +361,16 @@ const generarSesionesDesdePlantilla = async () => {
   };
 
   const cargarPlantillaDesdeHorarios = () => {
-  const bloques = horarios.map((h) => ({
-    id: `h-${h.id}`,
-    dia_semana: h.dia_semana,
-    hora_inicio: h.hora_inicio,
-    hora_fin: h.hora_fin,
-  }));
-  setPlantillaBloques(bloques);
-};
+    const bloques = horarios.map((h) => ({
+      id: `h-${h.id}`,
+      dia_semana: h.dia_semana,
+      hora_inicio: h.hora_inicio,
+      hora_fin: h.hora_fin,
+    }));
+
+    setPlantillaBloques(bloques); // 🔥 esto ya dispara repaint
+  };
+
 
   useEffect(() => {
     if (modePlantilla && horarios.length > 0) {
