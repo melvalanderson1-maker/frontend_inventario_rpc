@@ -39,6 +39,13 @@ export default function CursosAdmin() {
 
   const plantillaCalRef = useRef(null);
 
+
+  // 🔒 CACHE EN MEMORIA (NO SE REINICIA)
+  const cacheRef = useRef({
+    sesiones: {},          // { [seccionId]: [] }
+    horarios: {},          // { [seccionId]: [] }
+    plantillaBloques: {},  // { [seccionId]: [] }
+  });
   // -------------------
   // Cargar datos
   // -------------------
@@ -97,6 +104,8 @@ export default function CursosAdmin() {
 
 
       setSesiones(eventos);
+      cacheRef.current.sesiones[seccionId] = eventos;
+
 
 
     } catch (err) {
@@ -109,6 +118,8 @@ export default function CursosAdmin() {
     try {
       const res = await adminApi.listarHorarios(seccionId);
       setHorarios(res.data.horarios || []);
+      cacheRef.current.horarios[seccionId] = res.data.horarios || [];
+
     } catch (err) {
       console.error("Error listar horarios", err);
       setHorarios([]);
@@ -116,13 +127,34 @@ export default function CursosAdmin() {
   };
 
   useEffect(() => {
-    if (seccionSeleccionada) {
-      cargarSesiones(seccionSeleccionada.id);
-      cargarHorarios(seccionSeleccionada.id);
-      setPlantillaBloques([]); // limpiar plantilla al abrir
-      setModePlantilla(false);
+    if (!seccionSeleccionada) return;
+
+    const id = seccionSeleccionada.id;
+
+    // 🔹 SESIONES
+    if (cacheRef.current.sesiones[id]) {
+      setSesiones(cacheRef.current.sesiones[id]);
+    } else {
+      cargarSesiones(id);
     }
+
+    // 🔹 HORARIOS
+    if (cacheRef.current.horarios[id]) {
+      setHorarios(cacheRef.current.horarios[id]);
+    } else {
+      cargarHorarios(id);
+    }
+
+    // 🔹 PLANTILLA
+    if (cacheRef.current.plantillaBloques[id]) {
+      setPlantillaBloques(cacheRef.current.plantillaBloques[id]);
+    } else {
+      setPlantillaBloques([]);
+    }
+
+    setModePlantilla(false);
   }, [seccionSeleccionada]);
+
 
   // 🔥 FUERZA REMOUNT DEL CALENDARIO DE PLANTILLA
   useEffect(() => {
@@ -279,6 +311,13 @@ useEffect(() => {
   recalcularEventosPlantilla();
 }, [plantillaBloques, modePlantilla, seccionSeleccionada]);
 
+// 🔒 GUARDAR PLANTILLA EN CACHE POR SECCIÓN
+useEffect(() => {
+  if (seccionSeleccionada) {
+    cacheRef.current.plantillaBloques[seccionSeleccionada.id] =
+      plantillaBloques;
+  }
+}, [plantillaBloques, seccionSeleccionada]);
 
   // -------------------
   // Generar horarios+sesiones (respeta fecha_inicio de la sección)
@@ -304,6 +343,9 @@ const generarSesionesDesdePlantilla = async () => {
     // 3️⃣ RECARGAR ESTADOS (CLAVE)
     await cargarHorarios(seccionSeleccionada.id);
     await cargarSesiones(seccionSeleccionada.id);
+
+
+
 
 
 
