@@ -409,60 +409,58 @@ eliminarHorario: async (req, res) => {
 },
 
 
-generarSesionesAutomaticas : async (req, res) => {
+generarSesionesAutomaticas: async (req, res) => {
   try {
     const seccionId = req.params.id;
 
-    // 🔥 BORRAR SESIONES EXISTENTES DE LA SECCIÓN
     await pool.query(
       "DELETE FROM sesiones WHERE seccion_id=?",
       [seccionId]
     );
 
-
-    // 1. Obtener sección (incluye docente_id 👍)
     const [[seccion]] = await pool.query(
       "SELECT * FROM secciones WHERE id=?", [seccionId]
     );
 
-    if (!seccion)
+    if (!seccion) {
       return res.json({ ok: false, msg: "Sección no encontrada" });
+    }
 
-    const docenteId = seccion.docente_id; // ← YA LO TIENES AQUÍ
+    const docenteId = seccion.docente_id;
 
-    // 2. Obtener horarios
     const [horarios] = await pool.query(
       "SELECT * FROM horarios WHERE seccion_id=?", [seccionId]
     );
 
-    if (horarios.length === 0)
+    if (horarios.length === 0) {
       return res.json({ ok: false, msg: "No hay horarios configurados" });
+    }
 
     const fechaInicio = new Date(seccion.fecha_inicio + "T00:00:00");
     const fechaFin = new Date(seccion.fecha_fin + "T00:00:00");
 
-    let sesionesCreadas = 0;
     let contadorClase = 1;
     let horasTotales = 0;
 
-    // Crear sesiones según los días configurados
     for (let f = new Date(fechaInicio); f <= fechaFin; f.setDate(f.getDate() + 1)) {
 
-      const diaSemana = f.getDay(); // 0=Dom, 1=Lun, 2=Mar ...
+      const year = f.getFullYear();
+      const month = String(f.getMonth() + 1).padStart(2, "0");
+      const day = String(f.getDate()).padStart(2, "0");
+      const fechaLocal = `${year}-${month}-${day}`;
+
+      const diaSemana = f.getDay(); // 0-6
 
       for (const h of horarios) {
-
         if (h.dia_semana === diaSemana) {
 
-          const fechaISO = f.toISOString().split("T")[0];
-          const inicia = new Date(`${fechaISO}T${h.hora_inicio}`);
-          const termina = new Date(`${fechaISO}T${h.hora_fin}`);
+          const inicia = `${fechaLocal}T${h.hora_inicio}`;
+          const termina = `${fechaLocal}T${h.hora_fin}`;
 
-          // CALCULAR HORAS DE ESTA SESIÓN
-          const horasSesion = (termina - inicia) / (1000 * 60 * 60);
+          const horasSesion =
+            (new Date(termina) - new Date(inicia)) / (1000 * 60 * 60);
           horasTotales += horasSesion;
 
-          // INSERTAR SESIÓN
           await pool.query("INSERT INTO sesiones SET ?", {
             seccion_id: seccionId,
             titulo: `Clase ${contadorClase}`,
@@ -470,34 +468,26 @@ generarSesionesAutomaticas : async (req, res) => {
             termina_en: termina,
             tipo_sesion: "PRESENCIAL",
             aula: h.lugar,
-            descripcion: `Clase dictada por docente ID ${docenteId}`
+            descripcion: `Clase dictada por docente ID ${docenteId}`,
           });
 
-          sesionesCreadas++;
           contadorClase++;
         }
       }
     }
 
-    // 🔥 GUARDAR DURACION_TOTAL EN SECCIONES
     await pool.query(
       "UPDATE secciones SET duracion_horas=? WHERE id=?",
       [Math.round(horasTotales), seccionId]
     );
 
-    res.json({
-      ok: true,
-      msg: "Sesiones generadas correctamente",
-      cantidad: sesionesCreadas,
-      duracion_horas: horasTotales,
-      docente_id: docenteId
-    });
+    res.json({ ok: true, msg: "Sesiones generadas correctamente" });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
-
 
 
 

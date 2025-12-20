@@ -84,8 +84,8 @@ export default function CursosAdmin() {
       const eventos = (res.data.sesiones || []).map((s) => ({
         id: s.id,
         title: s.titulo,
-        start: s.inicia_en.replace("Z", ""), 
-        end: s.termina_en.replace("Z", ""),
+        start: s.inicia_en,
+        end: s.termina_en,
       }));
 
       setSesiones(eventos);
