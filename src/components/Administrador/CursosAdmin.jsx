@@ -29,6 +29,8 @@ export default function CursosAdmin() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modePlantilla, setModePlantilla] = useState(false);
+  const [plantillaEventosState, setPlantillaEventosState] = useState([]);
+
   const plantillaCalRef = useRef(null);
 
   // -------------------
@@ -215,36 +217,34 @@ export default function CursosAdmin() {
     }
   };
 
-  // -------------------
-  // Mostrar bloques de plantilla en el calendario (paint)
-  // -------------------
-  const plantillaEventos = () => {
-    // queremos pintar en la semana de referencia: usamos la semana que contiene la fecha de inicio de la sección o la semana actual
-    const baseDate = seccionSeleccionada?.fecha_inicio ? dayjs(seccionSeleccionada.fecha_inicio) : dayjs();
-    const monday = baseDate.isoWeekday(1); // Monday
-    // Para cada bloque, computes a date in that week with correct time
-    return plantillaBloques.map((b) => {
-      const weekdayIndex = b.dia_semana; // 0..6
-      // dayjs weekday: 0 = Sunday, isoWeekday(1) = Monday
-      // compute offset from monday: monday.add(offset)
-      // convert sunday(0) to offset 6? easier: map JS day index to ISO weekday: Sunday(0)->7
-      const isoDay = b.dia_semana === 0 ? 7 : b.dia_semana; // 1..7
-      const date = monday.isoWeekday(isoDay);
-      const startStr = `${date.format("YYYY-MM-DD")}T${b.hora_inicio.slice(0,8)}`;
-      const endStr = `${date.format("YYYY-MM-DD")}T${b.hora_fin.slice(0,8)}`;
-      return {
-        id: b.id,
-        title: "",
-        start: startStr,
-        end: endStr,
-        display: "auto",
 
-        backgroundColor: "rgba(70, 150, 255, 0.35)", // se ve bonito y claro
-        borderColor: "transparent",
-      };
 
-    });
-  };
+  useEffect(() => {
+  if (!modePlantilla) return;
+
+  const baseDate = seccionSeleccionada?.fecha_inicio
+    ? dayjs(seccionSeleccionada.fecha_inicio)
+    : dayjs();
+
+  const monday = baseDate.isoWeekday(1);
+
+  const eventos = plantillaBloques.map((b) => {
+    const isoDay = b.dia_semana === 0 ? 7 : b.dia_semana;
+    const date = monday.isoWeekday(isoDay);
+
+    return {
+      id: b.id,
+      start: `${date.format("YYYY-MM-DD")}T${b.hora_inicio}`,
+      end: `${date.format("YYYY-MM-DD")}T${b.hora_fin}`,
+      display: "auto",
+
+      backgroundColor: "rgba(70, 150, 255, 0.35)",
+    };
+  });
+
+  setPlantillaEventosState(eventos);
+}, [plantillaBloques, modePlantilla, seccionSeleccionada]);
+
 
   // -------------------
   // Generar horarios+sesiones (respeta fecha_inicio de la sección)
@@ -502,7 +502,6 @@ export default function CursosAdmin() {
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                       <FullCalendar
-                        key={`plantilla-${plantillaBloques.length}`}   // 🔥 CLAVE
                         locale={esLocale}
                         timeZone="local"
                         plugins={[timeGridPlugin, interactionPlugin]}
@@ -513,9 +512,9 @@ export default function CursosAdmin() {
                         select={onSelectPlantilla}
                         slotMinTime="06:00:00"
                         slotMaxTime="23:00:00"
-                        events={plantillaEventos()}
-                        eventOverlap={true}          // 🔥 IMPORTANTE
-                        selectOverlap={true}         // 🔥 IMPORTANTE
+                        events={plantillaEventosState}   // 🔥 AHORA SÍ
+                        eventOverlap={true}
+                        selectOverlap={true}
                         headerToolbar={{ left: "", center: "title", right: "" }}
                       />
 
