@@ -659,10 +659,13 @@ const generarSesionesDesdePlantilla = async () => {
                     ref={calendarRef}
                     key={calendarKey}
                     locale={esLocale}
-                    timeZone="local"
+                    timeZone="UTC"
                     plugins={[timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     firstDay={1}
+                    slotMinTime="06:00:00"
+                    slotMaxTime="23:00:00"
+                    allDaySlot={false}
                     events={sesiones}
                   />
 
