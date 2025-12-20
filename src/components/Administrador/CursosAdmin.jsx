@@ -32,6 +32,9 @@ export default function CursosAdmin() {
   const [plantillaEventosState, setPlantillaEventosState] = useState([]);
   const [plantillaCalendarKey, setPlantillaCalendarKey] = useState(0);
 
+  const [calendarKey, setCalendarKey] = useState(0);
+
+
 
   const plantillaCalRef = useRef(null);
 
@@ -211,53 +214,53 @@ export default function CursosAdmin() {
   // -------------------
   // convertimos selectInfo.start,end a hora y dia.
   const onSelectPlantilla = (selectInfo) => {
-    const start = selectInfo.start;
-    const end = selectInfo.end;
+    const { start, end } = selectInfo;
 
-    const diaSemana = start.getDay(); // 0-6
+    const diaSemana = start.getDay(); // 0–6
     const horaInicio = `${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
     const horaFin = `${pad(end.getHours())}:${pad(end.getMinutes())}:00`;
 
     addBloquePlantilla(diaSemana, horaInicio, horaFin);
 
-    // 🔥 FORZAR REPAINT
+    // 🔥 repaint del calendario plantilla
     setPlantillaCalendarKey((k) => k + 1);
 
     selectInfo.view.calendar.unselect();
   };
 
 
-  const recalcularEventosPlantilla = () => {
+
+const recalcularEventosPlantilla = () => {
   if (!modePlantilla || !seccionSeleccionada) {
     setPlantillaEventosState([]);
     return;
   }
 
-  const baseDate = seccionSeleccionada.fecha_inicio
-    ? dayjs(seccionSeleccionada.fecha_inicio).utc(true)
+  const baseDate = dayjs(
+    seccionSeleccionada.fecha_inicio,
+    "YYYY-MM-DD"
+  );
 
-    : dayjs();
-
-
-  const monday = baseDate.isoWeekday(1);
+  const monday = baseDate.clone().isoWeekday(1);
 
   const eventos = plantillaBloques.map((b) => {
     const isoDay = b.dia_semana === 0 ? 7 : b.dia_semana;
-    const date = monday.isoWeekday(isoDay);
+    const date = monday.clone().isoWeekday(isoDay);
 
     return {
       id: b.id,
       start: `${date.format("YYYY-MM-DD")}T${b.hora_inicio}`,
       end: `${date.format("YYYY-MM-DD")}T${b.hora_fin}`,
+      editable: false,
       display: "auto",
       backgroundColor: "rgba(70, 150, 255, 0.35)",
-      editable: false,
     };
   });
 
-  // 🔥 CLAVE: nueva referencia
+  // 🔥 nueva referencia = repaint garantizado
   setPlantillaEventosState([...eventos]);
 };
+
 
 
 
@@ -292,7 +295,10 @@ const generarSesionesDesdePlantilla = async () => {
     await cargarHorarios(seccionSeleccionada.id);
     await cargarSesiones(seccionSeleccionada.id);
 
-    // 4️⃣ Cambiar modo (calendario normal)
+    // 🔥 FORZAR REDIBUJO DEL CALENDARIO
+    setCalendarKey(k => k + 1);
+
+    // 🔄 volver al calendario normal
     setModePlantilla(false);
 
   } catch (err) {
@@ -482,9 +488,10 @@ const generarSesionesDesdePlantilla = async () => {
                 <div className="seccion-headers">
                   <div className="left-info">
                     <p>
-                      <strong>Periodo:</strong>{" "}
-                    {dayjs(seccionSeleccionada.fecha_inicio).utc(true).format("DD-MM-YYYY")} →
-                    {dayjs(seccionSeleccionada.fecha_fin).utc(true).format("DD-MM-YYYY")}
+                    <strong>Periodo:</strong>{" "}
+                    {dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD").format("DD-MM-YYYY")} →
+                    {dayjs(seccionSeleccionada.fecha_fin, "YYYY-MM-DD").format("DD-MM-YYYY")}
+
 
                     </p>
                     <p><strong>Horas previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>
@@ -514,23 +521,44 @@ const generarSesionesDesdePlantilla = async () => {
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                       <FullCalendar
-                        key={plantillaCalendarKey}   // 🔥 CLAVE
+                        key={plantillaCalendarKey}
+                        ref={plantillaCalRef}
+
                         locale={esLocale}
                         timeZone="local"
+
                         plugins={[timeGridPlugin, interactionPlugin]}
                         initialView="timeGridWeek"
-                        initialDate={seccionSeleccionada.fecha_inicio}
+
+                        // ✅ FECHA BASE CORRECTA (SIN UTC, SIN RESTAR DÍA)
+                        initialDate={dayjs(
+                          seccionSeleccionada.fecha_inicio,
+                          "YYYY-MM-DD"
+                        ).format("YYYY-MM-DD")}
+
                         firstDay={1}
                         allDaySlot={false}
+
                         selectable={true}
+                        selectMirror={true}
                         select={onSelectPlantilla}
+
                         slotMinTime="06:00:00"
                         slotMaxTime="23:00:00"
+
                         events={plantillaEventosState}
+
+                        // ✅ PERMITIR SOLAPES (plantilla)
                         eventOverlap={true}
                         selectOverlap={true}
-                        headerToolbar={{ left: "", center: "title", right: "" }}
+
+                        headerToolbar={{
+                          left: "",
+                          center: "title",
+                          right: "",
+                        }}
                       />
+
 
 
                       </div>
@@ -568,23 +596,23 @@ const generarSesionesDesdePlantilla = async () => {
                   </>
                 ) : (
                   <>
-                    <FullCalendar
-                      locale={esLocale}
-                      timeZone="local"
-                      plugins={[timeGridPlugin, interactionPlugin]}
-                      initialView="timeGridWeek"
-                      firstDay={1}
-                      editable={false}   // 🔥 IMPORTANTE
-                      selectable={true}
+                  <FullCalendar
+                    key={calendarKey}
+                    locale={esLocale}
+                    timeZone="local"
 
-                      events={sesiones}
+                    plugins={[timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    firstDay={1}
 
-                      dateClick={onDateClickCrearSesion}
-                      eventClick={(info) => abrirModalEdicion(info.event)}
+                    events={sesiones}
 
-                      slotMinTime="06:00:00"
-                      slotMaxTime="23:00:00"
-                    />
+                    selectable={true}
+                    dateClick={onDateClickCrearSesion}
+                    eventClick={(info) => abrirModalEdicion(info.event)}
+                  />
+
+
 
 
 
