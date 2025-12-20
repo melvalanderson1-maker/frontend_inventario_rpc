@@ -248,10 +248,8 @@ const recalcularEventosPlantilla = () => {
     return;
   }
 
-  const baseDate = dayjs(
-    seccionSeleccionada.fecha_inicio,
-    "YYYY-MM-DD"
-  );
+  const baseDate = dayjs(seccionSeleccionada.fecha_inicio);
+
 
   const monday = baseDate.clone().isoWeekday(1);
 

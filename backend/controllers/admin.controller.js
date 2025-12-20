@@ -436,23 +436,30 @@ generarSesionesAutomaticas: async (req, res) => {
     if (horarios.length === 0) {
       return res.json({ ok: false, msg: "No hay horarios configurados" });
     }
-    const fechaInicio = new Date(seccion.fecha_inicio + "T00:00:00");
-    const fechaFin = new Date(seccion.fecha_fin + "T00:00:00");
+    const fechaInicio = seccion.fecha_inicio; // "2025-03-18"
+    const fechaFin = seccion.fecha_fin;
+
 
 
     let contadorClase = 1;
     let horasTotales = 0;
 
-    for (let f = new Date(fechaInicio); f <= fechaFin; f.setDate(f.getDate() + 1)) {
+    const sumarDias = (fecha, dias) => {
+      const [y, m, d] = fecha.split("-").map(Number);
+      const dt = new Date(y, m - 1, d + dias, 12); // ⬅️ MEDIODÍA (CLAVE)
+      return dt.toISOString().slice(0, 10);
+    };
 
-      const fechaLocal = f.toISOString().slice(0, 10);
-      const diaSemana = f.getDay(); // 0-6
+    let fechaActual = fechaInicio;
+
+    while (fechaActual <= fechaFin) {
+      const diaSemana = new Date(fechaActual + "T12:00:00").getDay(); // 0-6
 
       for (const h of horarios) {
         if (h.dia_semana === diaSemana) {
 
-          const inicia = `${fechaLocal}T${h.hora_inicio}`;
-          const termina = `${fechaLocal}T${h.hora_fin}`;
+          const inicia = `${fechaActual}T${h.hora_inicio}`;
+          const termina = `${fechaActual}T${h.hora_fin}`;
 
           const horasSesion =
             (new Date(termina) - new Date(inicia)) / (1000 * 60 * 60);
@@ -472,6 +479,8 @@ generarSesionesAutomaticas: async (req, res) => {
           contadorClase++;
         }
       }
+
+      fechaActual = sumarDias(fechaActual, 1);
     }
 
 
