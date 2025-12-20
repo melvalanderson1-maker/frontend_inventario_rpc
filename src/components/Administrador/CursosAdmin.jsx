@@ -237,7 +237,8 @@ export default function CursosAdmin() {
         title: "",
         start: startStr,
         end: endStr,
-        display: "background", 
+        display: "auto",
+
         backgroundColor: "rgba(70, 150, 255, 0.35)", // se ve bonito y claro
         borderColor: "transparent",
       };
@@ -500,20 +501,24 @@ export default function CursosAdmin() {
 
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
-                        <FullCalendar
-                          locale={esLocale}
-                          timeZone="local"
-                          plugins={[timeGridPlugin, interactionPlugin]}
-                          initialView="timeGridWeek"
-                          firstDay={1}
-                          allDaySlot={false}
-                          selectable={true}
-                          select={onSelectPlantilla}
-                          slotMinTime="06:00:00"
-                          slotMaxTime="23:00:00"
-                          events={plantillaEventos()}
-                          headerToolbar={{ left: "", center: "title", right: "" }}
-                        />
+                      <FullCalendar
+                        key={`plantilla-${plantillaBloques.length}`}   // 🔥 CLAVE
+                        locale={esLocale}
+                        timeZone="local"
+                        plugins={[timeGridPlugin, interactionPlugin]}
+                        initialView="timeGridWeek"
+                        firstDay={1}
+                        allDaySlot={false}
+                        selectable={true}
+                        select={onSelectPlantilla}
+                        slotMinTime="06:00:00"
+                        slotMaxTime="23:00:00"
+                        events={plantillaEventos()}
+                        eventOverlap={true}          // 🔥 IMPORTANTE
+                        selectOverlap={true}         // 🔥 IMPORTANTE
+                        headerToolbar={{ left: "", center: "title", right: "" }}
+                      />
+
 
                       </div>
 

@@ -218,20 +218,59 @@ listarAlumnosSeccion: async (req, res) => {
     }
   },
 
-  actualizarSesion : async (req, res) => {
-    try {
-      const data = req.body;
+actualizarSesion: async (req, res) => {
+  try {
+    const sesionId = req.params.id;
+    const data = req.body;
 
-      await pool.query("UPDATE sesiones SET ? WHERE id=?", [
-        data,
-        req.params.id,
-      ]);
+    // 1️⃣ Obtener la sesión antes de actualizar
+    const [[sesion]] = await pool.query(
+      "SELECT seccion_id FROM sesiones WHERE id=?",
+      [sesionId]
+    );
 
-      res.json({ ok: true, msg: "Sesión actualizada" });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
+    if (!sesion) {
+      return res.status(404).json({ ok: false, msg: "Sesión no encontrada" });
     }
-  },
+
+    const seccionId = sesion.seccion_id;
+
+    // 2️⃣ Actualizar la sesión (fecha, hora, título, etc.)
+    await pool.query(
+      "UPDATE sesiones SET ? WHERE id=?",
+      [data, sesionId]
+    );
+
+    // 🔄 3️⃣ RENÚMERAR TODAS LAS SESIONES DE LA SECCIÓN
+    const [sesiones] = await pool.query(
+      `
+      SELECT id
+      FROM sesiones
+      WHERE seccion_id=?
+      ORDER BY inicia_en ASC
+      `,
+      [seccionId]
+    );
+
+    let contador = 1;
+    for (const s of sesiones) {
+      await pool.query(
+        "UPDATE sesiones SET titulo=? WHERE id=?",
+        [`Clase ${contador}`, s.id]
+      );
+      contador++;
+    }
+
+    res.json({
+      ok: true,
+      msg: "Sesión actualizada y clases renumeradas correctamente"
+    });
+
+  } catch (err) {
+    console.error("Error actualizarSesion:", err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
 
   eliminarSesion : async (req, res) => {
     try {
@@ -338,12 +377,37 @@ eliminarHorario: async (req, res) => {
     // 3️⃣ Eliminar el horario
     await pool.query("DELETE FROM horarios WHERE id=?", [horarioId]);
 
-    res.json({ ok: true, msg: "Horario y sesiones eliminadas" });
+    // 🔄 4️⃣ REORDENAR TITULOS DE SESIONES (🔥 LO QUE FALTABA)
+    const [sesiones] = await pool.query(
+      `
+      SELECT id 
+      FROM sesiones 
+      WHERE seccion_id=? 
+      ORDER BY inicia_en ASC
+      `,
+      [horario.seccion_id]
+    );
+
+    let i = 1;
+    for (const s of sesiones) {
+      await pool.query(
+        "UPDATE sesiones SET titulo=? WHERE id=?",
+        [`Clase ${i}`, s.id]
+      );
+      i++;
+    }
+
+    res.json({
+      ok: true,
+      msg: "Horario eliminado y sesiones renumeradas correctamente"
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
+
 
 generarSesionesAutomaticas : async (req, res) => {
   try {
