@@ -249,21 +249,11 @@ export default function CursosAdmin() {
   // -------------------
   // Generar horarios+sesiones (respeta fecha_inicio de la sección)
   // -------------------
- const generarSesionesDesdePlantilla = async () => {
-  if (!seccionSeleccionada) {
-    alert("Selecciona una sección primero");
-    return;
-  }
-
-  if (plantillaBloques.length === 0) {
-    alert("No hay bloques seleccionados");
-    return;
-  }
+const generarSesionesDesdePlantilla = async () => {
+  if (!seccionSeleccionada || plantillaBloques.length === 0) return;
 
   try {
-    console.log("Generando horarios (plantilla) ->", plantillaBloques);
-
-    // 1️⃣ Crear horarios en backend
+    // 1️⃣ Crear horarios
     for (const b of plantillaBloques) {
       await adminApi.crearHorario({
         seccion_id: seccionSeleccionada.id,
@@ -274,24 +264,21 @@ export default function CursosAdmin() {
       });
     }
 
-    // 2️⃣ Generar sesiones automáticamente (backend)
-    const gen = await adminApi.generarSesionesAutomaticas(
-      seccionSeleccionada.id
-    );
+    // 2️⃣ Backend genera sesiones
+    await adminApi.generarSesionesAutomaticas(seccionSeleccionada.id);
 
-    // 3️⃣ Refrescar frontend (SIN recargar página)
+    // 3️⃣ RECARGAR ESTADOS (CLAVE)
     await cargarHorarios(seccionSeleccionada.id);
     await cargarSesiones(seccionSeleccionada.id);
 
-    // 4️⃣ Volver al calendario normal
+    // 4️⃣ Cambiar modo (calendario normal)
     setModePlantilla(false);
 
-    alert(`Sesiones generadas: ${gen.data.cantidad || "?"}`);
   } catch (err) {
-    console.error("Error generando sesiones desde plantilla", err);
-    alert("Ocurrió un error al generar sesiones. Revisa consola.");
+    console.error(err);
   }
 };
+
 
 
 
@@ -584,15 +571,21 @@ export default function CursosAdmin() {
                               <button
                                 className="small"
                                 onClick={async () => {
-                                  if (!confirm("¿Eliminar horario? Esto también quitará los bloques del calendario.")) return;
+                                  if (
+                                    !window.confirm(
+                                      "¿Eliminar horario? Esto también eliminará las sesiones asociadas."
+                                    )
+                                  )
+                                    return;
 
                                   try {
+                                    // 1️⃣ eliminar en backend (horario + sesiones)
                                     await adminApi.eliminarHorario(h.id);
 
-                                    // 1️⃣ quitar del estado horarios
+                                    // 2️⃣ actualizar estado local de horarios
                                     setHorarios((prev) => prev.filter((x) => x.id !== h.id));
 
-                                    // 2️⃣ quitar del calendario plantilla
+                                    // 3️⃣ limpiar bloques de la plantilla
                                     setPlantillaBloques((prev) =>
                                       prev.filter(
                                         (b) =>
@@ -604,18 +597,22 @@ export default function CursosAdmin() {
                                       )
                                     );
 
-                                    // ⬇️⬇️⬇️ AQUÍ ES DONDE VA ⬇️⬇️⬇️
+                                    // 4️⃣ refrescar datos reales desde backend
                                     await cargarHorarios(seccionSeleccionada.id);
                                     await cargarSesiones(seccionSeleccionada.id);
 
-                                  } catch (err) {
-                                    console.error(err);
-                                    alert("Error eliminando horario");
+                                    // 5️⃣ volver al calendario normal
+                                    setModePlantilla(false);
+
+                                  } catch (error) {
+                                    console.error("Error eliminando horario:", error);
+                                    alert("No se pudo eliminar el horario. Revisa la consola.");
                                   }
                                 }}
                               >
                                 Eliminar
                               </button>
+
 
 
                             </li>
