@@ -87,9 +87,12 @@ export default function CursosAdmin() {
       const eventos = (res.data.sesiones || []).map((s) => ({
         id: s.id,
         title: s.titulo,
-        start: s.inicia_en,
-        end: s.termina_en,
+
+        // 🔥 NORMALIZACIÓN CLAVE
+        start: dayjs(s.inicia_en).format("YYYY-MM-DDTHH:mm:ss"),
+        end: dayjs(s.termina_en).format("YYYY-MM-DDTHH:mm:ss"),
       }));
+
 
       setSesiones(eventos);
 
@@ -116,6 +119,13 @@ export default function CursosAdmin() {
       cargarHorarios(seccionSeleccionada.id);
       setPlantillaBloques([]); // limpiar plantilla al abrir
       setModePlantilla(false);
+    }
+  }, [seccionSeleccionada]);
+
+  // 🔥 FUERZA REMOUNT DEL CALENDARIO DE PLANTILLA
+  useEffect(() => {
+    if (seccionSeleccionada) {
+      setPlantillaCalendarKey(k => k + 1);
     }
   }, [seccionSeleccionada]);
 
@@ -295,12 +305,11 @@ const generarSesionesDesdePlantilla = async () => {
     await cargarHorarios(seccionSeleccionada.id);
     await cargarSesiones(seccionSeleccionada.id);
 
-    // 🔥 FORZAR REDIBUJO DEL CALENDARIO
-    setCalendarKey(k => k + 1);
+
 
     // 🔄 volver al calendario normal
     setModePlantilla(false);
-
+    setCalendarKey(k => k + 1); // 🔥 ESTE ES EL GOL
   } catch (err) {
     console.error(err);
   }
@@ -454,7 +463,8 @@ const generarSesionesDesdePlantilla = async () => {
                     <label>Fecha inicio</label>
                     <input
                       type="date"
-                      value={dayjs(seccionSeleccionada.fecha_inicio).format("YYYY-MM-DD")}
+                      value={dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD").format("YYYY-MM-DD")}
+
                       onChange={(e) => actualizarSeccionField({ fecha_inicio: e.target.value })}
                     />
                   </div>
@@ -463,9 +473,10 @@ const generarSesionesDesdePlantilla = async () => {
                     <label>Fecha fin</label>
                     <input
                       type="date"
-                      value={dayjs(seccionSeleccionada.fecha_fin).format("YYYY-MM-DD")}
+                      value={dayjs(seccionSeleccionada.fecha_fin, "YYYY-MM-DD").format("YYYY-MM-DD")}
                       onChange={(e) => actualizarSeccionField({ fecha_fin: e.target.value })}
                     />
+
                   </div>
 
                   <div>
