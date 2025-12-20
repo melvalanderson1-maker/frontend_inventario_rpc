@@ -420,9 +420,10 @@ const generarSesionesDesdePlantilla = async () => {
                   <strong>Sección {s.codigo || s.id}</strong>
                   <p>Modalidad: {s.modalidad}</p>
                   <p>
-                    Inicio: {dayjs(s.fecha_inicio).format("DD-MM-YYYY")} • 
-                    Fin: {dayjs(s.fecha_fin).format("DD-MM-YYYY")}
+                    Inicio: {dayjs(s.fecha_inicio, "YYYY-MM-DD").format("DD-MM-YYYY")} • 
+                    Fin: {dayjs(s.fecha_fin, "YYYY-MM-DD").format("DD-MM-YYYY")}
                   </p>
+
 
                 </div>
               ))}
@@ -481,8 +482,9 @@ const generarSesionesDesdePlantilla = async () => {
                   <div className="left-info">
                     <p>
                       <strong>Periodo:</strong>{" "}
-                      {dayjs(seccionSeleccionada.fecha_inicio).format("DD-MM-YYYY")} →
-                      {dayjs(seccionSeleccionada.fecha_fin).format("DD-MM-YYYY")}
+                    {dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD").format("DD-MM-YYYY")} →
+                    {dayjs(seccionSeleccionada.fecha_fin, "YYYY-MM-DD").format("DD-MM-YYYY")}
+
                     </p>
                     <p><strong>Horas previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>
                   </div>
