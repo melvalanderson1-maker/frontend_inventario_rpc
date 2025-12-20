@@ -577,8 +577,20 @@ generarSesionesAutomaticas: async (req, res) => {
   // ─────────────────────────────────────────────
   listarSecciones: async (req, res) => {
     const [rows] = await pool.query("SELECT * FROM secciones");
-    res.json({ ok: true, secciones: rows });
+
+    const secciones = rows.map(s => ({
+      ...s,
+      fecha_inicio: s.fecha_inicio
+        ? `${s.fecha_inicio.getFullYear()}-${String(s.fecha_inicio.getMonth()+1).padStart(2,"0")}-${String(s.fecha_inicio.getDate()).padStart(2,"0")}`
+        : null,
+      fecha_fin: s.fecha_fin
+        ? `${s.fecha_fin.getFullYear()}-${String(s.fecha_fin.getMonth()+1).padStart(2,"0")}-${String(s.fecha_fin.getDate()).padStart(2,"0")}`
+        : null,
+    }));
+
+    res.json({ ok: true, secciones });
   },
+
 
   crearSeccion: async (req, res) => {
     await pool.query("INSERT INTO secciones SET ?", [req.body]);
