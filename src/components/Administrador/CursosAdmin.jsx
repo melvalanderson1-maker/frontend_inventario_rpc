@@ -234,7 +234,8 @@ export default function CursosAdmin() {
   }
 
   const baseDate = seccionSeleccionada.fecha_inicio
-    ? dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD")
+    ? dayjs(seccionSeleccionada.fecha_inicio).utc(true)
+
     : dayjs();
 
 
@@ -447,7 +448,7 @@ const generarSesionesDesdePlantilla = async () => {
                     <label>Fecha inicio</label>
                     <input
                       type="date"
-                      value={seccionSeleccionada.fecha_inicio || ""}
+                      value={dayjs(seccionSeleccionada.fecha_inicio).format("YYYY-MM-DD")}
                       onChange={(e) => actualizarSeccionField({ fecha_inicio: e.target.value })}
                     />
                   </div>
@@ -456,7 +457,7 @@ const generarSesionesDesdePlantilla = async () => {
                     <label>Fecha fin</label>
                     <input
                       type="date"
-                      value={seccionSeleccionada.fecha_fin || ""}
+                      value={dayjs(seccionSeleccionada.fecha_fin).format("YYYY-MM-DD")}
                       onChange={(e) => actualizarSeccionField({ fecha_fin: e.target.value })}
                     />
                   </div>
@@ -482,8 +483,8 @@ const generarSesionesDesdePlantilla = async () => {
                   <div className="left-info">
                     <p>
                       <strong>Periodo:</strong>{" "}
-                    {dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD").format("DD-MM-YYYY")} →
-                    {dayjs(seccionSeleccionada.fecha_fin, "YYYY-MM-DD").format("DD-MM-YYYY")}
+                    {dayjs(seccionSeleccionada.fecha_inicio).utc(true).format("DD-MM-YYYY")} →
+                    {dayjs(seccionSeleccionada.fecha_fin).utc(true).format("DD-MM-YYYY")}
 
                     </p>
                     <p><strong>Horas previstas:</strong> {seccionSeleccionada.horas_totales || "—"}</p>

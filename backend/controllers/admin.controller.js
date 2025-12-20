@@ -436,8 +436,9 @@ generarSesionesAutomaticas: async (req, res) => {
       return res.json({ ok: false, msg: "No hay horarios configurados" });
     }
 
-    const fechaInicio = new Date(seccion.fecha_inicio + "T00:00:00");
-    const fechaFin = new Date(seccion.fecha_fin + "T00:00:00");
+    const fechaInicio = new Date(seccion.fecha_inicio + "T12:00:00");
+    const fechaFin = new Date(seccion.fecha_fin + "T12:00:00");
+
 
     let contadorClase = 1;
     let horasTotales = 0;
