@@ -454,14 +454,29 @@ generarSesionesAutomaticas: async (req, res) => {
     // 🔹 helpers PRIMERO
     const toYMD = (date) => {
       if (typeof date === "string") return date;
-      return date.toISOString().slice(0, 10);
+
+      // ⚠️ usar getters LOCALES, NO UTC
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+
+      return `${y}-${m}-${d}`;
     };
 
-    const sumarDias = (fecha, dias) => {
-      const [y, m, d] = fecha.split("-").map(Number);
-      const dt = new Date(y, m - 1, d + dias, 12); // MEDIODÍA
-      return dt.toISOString().slice(0, 10);
-    };
+
+  const sumarDias = (fecha, dias) => {
+    const [y, m, d] = fecha.split("-").map(Number);
+
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + dias);
+
+    const yy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getDate()).padStart(2, "0");
+
+    return `${yy}-${mm}-${dd}`;
+  };
+
 
     // 🔹 luego sí usar helpers
     const fechaInicio = toYMD(seccion.fecha_inicio);
@@ -473,36 +488,32 @@ generarSesionesAutomaticas: async (req, res) => {
     let fechaActual = fechaInicio;
 
 
-    while (fechaActual <= fechaFin) {
-      const diaSemana = new Date(fechaActual + "T12:00:00").getDay(); // 0-6
+      while (fechaActual <= fechaFin) {
+        const diaSemana = new Date(
+          `${fechaActual}T12:00:00`
+        ).getDay();
 
-      for (const h of horarios) {
-        if (h.dia_semana === diaSemana) {
+        for (const h of horarios) {
+          if (h.dia_semana === diaSemana) {
+            const inicia = `${fechaActual}T${h.hora_inicio}`;
+            const termina = `${fechaActual}T${h.hora_fin}`;
 
-          const inicia = `${fechaActual}T${h.hora_inicio}`;
-          const termina = `${fechaActual}T${h.hora_fin}`;
+            await pool.query("INSERT INTO sesiones SET ?", {
+              seccion_id: seccionId,
+              titulo: `Clase ${contadorClase}`,
+              inicia_en: inicia,
+              termina_en: termina,
+              tipo_sesion: "PRESENCIAL",
+              aula: h.lugar,
+            });
 
-          const horasSesion =
-            (new Date(termina) - new Date(inicia)) / (1000 * 60 * 60);
-
-          horasTotales += horasSesion;
-
-          await pool.query("INSERT INTO sesiones SET ?", {
-            seccion_id: seccionId,
-            titulo: `Clase ${contadorClase}`,
-            inicia_en: inicia,
-            termina_en: termina,
-            tipo_sesion: "PRESENCIAL",
-            aula: h.lugar,
-            descripcion: `Clase dictada por docente ID ${docenteId}`,
-          });
-
-          contadorClase++;
+            contadorClase++;
+          }
         }
+
+        fechaActual = sumarDias(fechaActual, 1);
       }
 
-      fechaActual = sumarDias(fechaActual, 1);
-    }
 
 
     await pool.query(
