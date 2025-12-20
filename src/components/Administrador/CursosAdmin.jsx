@@ -30,6 +30,8 @@ export default function CursosAdmin() {
   const [loading, setLoading] = useState(true);
   const [modePlantilla, setModePlantilla] = useState(false);
   const [plantillaEventosState, setPlantillaEventosState] = useState([]);
+  const [plantillaCalendarKey, setPlantillaCalendarKey] = useState(0);
+
 
   const plantillaCalRef = useRef(null);
 
@@ -209,19 +211,21 @@ export default function CursosAdmin() {
   // -------------------
   // convertimos selectInfo.start,end a hora y dia.
   const onSelectPlantilla = (selectInfo) => {
-    // FullCalendar selection gives real dates; solo usamos día de la semana + horas
     const start = selectInfo.start;
     const end = selectInfo.end;
-    const diaSemana = start.getDay(); // 0 Domingo .. 6 Sabado
+
+    const diaSemana = start.getDay(); // 0-6
     const horaInicio = `${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
     const horaFin = `${pad(end.getHours())}:${pad(end.getMinutes())}:00`;
 
     addBloquePlantilla(diaSemana, horaInicio, horaFin);
-    // prevent selection highlight linger
-    if (selectInfo.view) {
-      selectInfo.view.calendar.unselect();
-    }
+
+    // 🔥 FORZAR REPAINT
+    setPlantillaCalendarKey((k) => k + 1);
+
+    selectInfo.view.calendar.unselect();
   };
+
 
   const recalcularEventosPlantilla = () => {
   if (!modePlantilla || !seccionSeleccionada) {
@@ -506,6 +510,7 @@ const generarSesionesDesdePlantilla = async () => {
                     <div className="plantilla-wrapper">
                       <div className="plantilla-left">
                       <FullCalendar
+                        key={plantillaCalendarKey}   // 🔥 CLAVE
                         locale={esLocale}
                         timeZone="local"
                         plugins={[timeGridPlugin, interactionPlugin]}
@@ -516,7 +521,7 @@ const generarSesionesDesdePlantilla = async () => {
                         select={onSelectPlantilla}
                         slotMinTime="06:00:00"
                         slotMaxTime="23:00:00"
-                        events={plantillaEventosState}   // 🔥 AHORA SÍ
+                        events={plantillaEventosState}
                         eventOverlap={true}
                         selectOverlap={true}
                         headerToolbar={{ left: "", center: "title", right: "" }}
