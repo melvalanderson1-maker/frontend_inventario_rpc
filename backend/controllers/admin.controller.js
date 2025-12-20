@@ -427,6 +427,21 @@ generarSesionesAutomaticas: async (req, res) => {
       return res.json({ ok: false, msg: "Sección no encontrada" });
     }
 
+    console.log(
+      "DEBUG fecha_inicio:",
+      seccion.fecha_inicio,
+      "tipo:",
+      typeof seccion.fecha_inicio
+    );
+
+    console.log(
+      "DEBUG fecha_fin:",
+      seccion.fecha_fin,
+      "tipo:",
+      typeof seccion.fecha_fin
+    );
+
+
     const docenteId = seccion.docente_id;
 
     const [horarios] = await pool.query(
@@ -436,21 +451,27 @@ generarSesionesAutomaticas: async (req, res) => {
     if (horarios.length === 0) {
       return res.json({ ok: false, msg: "No hay horarios configurados" });
     }
-    const fechaInicio = seccion.fecha_inicio; // "2025-03-18"
-    const fechaFin = seccion.fecha_fin;
+    // 🔹 helpers PRIMERO
+    const toYMD = (date) => {
+      if (typeof date === "string") return date;
+      return date.toISOString().slice(0, 10);
+    };
 
+    const sumarDias = (fecha, dias) => {
+      const [y, m, d] = fecha.split("-").map(Number);
+      const dt = new Date(y, m - 1, d + dias, 12); // MEDIODÍA
+      return dt.toISOString().slice(0, 10);
+    };
 
+    // 🔹 luego sí usar helpers
+    const fechaInicio = toYMD(seccion.fecha_inicio);
+    const fechaFin = toYMD(seccion.fecha_fin);
 
     let contadorClase = 1;
     let horasTotales = 0;
 
-    const sumarDias = (fecha, dias) => {
-      const [y, m, d] = fecha.split("-").map(Number);
-      const dt = new Date(y, m - 1, d + dias, 12); // ⬅️ MEDIODÍA (CLAVE)
-      return dt.toISOString().slice(0, 10);
-    };
-
     let fechaActual = fechaInicio;
+
 
     while (fechaActual <= fechaFin) {
       const diaSemana = new Date(fechaActual + "T12:00:00").getDay(); // 0-6
