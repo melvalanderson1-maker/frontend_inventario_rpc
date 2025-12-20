@@ -234,8 +234,9 @@ export default function CursosAdmin() {
   }
 
   const baseDate = seccionSeleccionada.fecha_inicio
-    ? dayjs(seccionSeleccionada.fecha_inicio)
+    ? dayjs(seccionSeleccionada.fecha_inicio, "YYYY-MM-DD")
     : dayjs();
+
 
   const monday = baseDate.isoWeekday(1);
 
@@ -515,6 +516,7 @@ const generarSesionesDesdePlantilla = async () => {
                         timeZone="local"
                         plugins={[timeGridPlugin, interactionPlugin]}
                         initialView="timeGridWeek"
+                        initialDate={seccionSeleccionada.fecha_inicio}
                         firstDay={1}
                         allDaySlot={false}
                         selectable={true}
