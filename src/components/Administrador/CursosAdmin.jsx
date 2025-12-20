@@ -33,6 +33,7 @@ export default function CursosAdmin() {
   const [plantillaCalendarKey, setPlantillaCalendarKey] = useState(0);
 
   const [calendarKey, setCalendarKey] = useState(0);
+  const calendarRef = useRef(null);
 
 
 
@@ -89,8 +90,9 @@ export default function CursosAdmin() {
         title: s.titulo,
 
         // 🔥 NORMALIZACIÓN CLAVE
-        start: dayjs(s.inicia_en).format("YYYY-MM-DDTHH:mm:ss"),
-        end: dayjs(s.termina_en).format("YYYY-MM-DDTHH:mm:ss"),
+        start: s.inicia_en,
+        end: s.termina_en,
+
       }));
 
 
@@ -310,6 +312,12 @@ const generarSesionesDesdePlantilla = async () => {
     // 🔄 volver al calendario normal
     setModePlantilla(false);
     setCalendarKey(k => k + 1); // 🔥 ESTE ES EL GOL
+
+    setTimeout(() => {
+      calendarRef.current?.getApi().gotoDate(
+        seccionSeleccionada.fecha_inicio
+      );
+    }, 0);
   } catch (err) {
     console.error(err);
   }
@@ -608,19 +616,14 @@ const generarSesionesDesdePlantilla = async () => {
                 ) : (
                   <>
                   <FullCalendar
+                    ref={calendarRef}
                     key={calendarKey}
                     locale={esLocale}
                     timeZone="local"
-
                     plugins={[timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     firstDay={1}
-
                     events={sesiones}
-
-                    selectable={true}
-                    dateClick={onDateClickCrearSesion}
-                    eventClick={(info) => abrirModalEdicion(info.event)}
                   />
 
 

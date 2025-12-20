@@ -238,8 +238,9 @@ actualizarSesion: async (req, res) => {
     // 2️⃣ Actualizar la sesión (fecha, hora, título, etc.)
     await pool.query(
       "UPDATE sesiones SET ? WHERE id=?",
-      [data, sesionId]
+      [data, req.params.id]
     );
+
 
     // 🔄 3️⃣ RENÚMERAR TODAS LAS SESIONES DE LA SECCIÓN
     const [sesiones] = await pool.query(
@@ -435,9 +436,8 @@ generarSesionesAutomaticas: async (req, res) => {
     if (horarios.length === 0) {
       return res.json({ ok: false, msg: "No hay horarios configurados" });
     }
-
-    const fechaInicio = new Date(seccion.fecha_inicio + "T12:00:00");
-    const fechaFin = new Date(seccion.fecha_fin + "T12:00:00");
+    const fechaInicio = new Date(seccion.fecha_inicio + "T00:00:00");
+    const fechaFin = new Date(seccion.fecha_fin + "T00:00:00");
 
 
     let contadorClase = 1;
@@ -445,11 +445,7 @@ generarSesionesAutomaticas: async (req, res) => {
 
     for (let f = new Date(fechaInicio); f <= fechaFin; f.setDate(f.getDate() + 1)) {
 
-      const year = f.getFullYear();
-      const month = String(f.getMonth() + 1).padStart(2, "0");
-      const day = String(f.getDate()).padStart(2, "0");
-      const fechaLocal = `${year}-${month}-${day}`;
-
+      const fechaLocal = f.toISOString().slice(0, 10);
       const diaSemana = f.getDay(); // 0-6
 
       for (const h of horarios) {
@@ -460,6 +456,7 @@ generarSesionesAutomaticas: async (req, res) => {
 
           const horasSesion =
             (new Date(termina) - new Date(inicia)) / (1000 * 60 * 60);
+
           horasTotales += horasSesion;
 
           await pool.query("INSERT INTO sesiones SET ?", {
@@ -476,6 +473,7 @@ generarSesionesAutomaticas: async (req, res) => {
         }
       }
     }
+
 
     await pool.query(
       "UPDATE secciones SET duracion_horas=? WHERE id=?",
