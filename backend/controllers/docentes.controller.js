@@ -51,6 +51,22 @@ module.exports = {
     }
   },
 
+
+  // LISTAR DOCENTES
+listarDocentes: async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT id, nombre, apellido_paterno, apellido_materno
+      FROM usuarios
+      WHERE rol = 'DOCENTE'
+    `);
+
+    res.json({ ok: true, docentes: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
   // ─────────────────────────────────────────────
   // SESIONES DE UNA SECCIÓN (CALENDARIO)
   // ─────────────────────────────────────────────

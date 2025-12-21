@@ -1,21 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const docentesController = require("../controllers/docentes.controller");
+const authMiddleware = require("../middlewares/authMiddleware");
 
-// Listar docentes
-router.get("/", docentesController.listarDocentes);
+// ❌ (opcional) elimina si no lo usas
+// router.get("/", docentesController.listarDocentes);
 
-// Secciones del docente
-router.get("/mis-secciones", authMiddleware, docentesController.listarSeccionesDocente);
+// ✅ SECCIONES DEL DOCENTE (JWT)
+router.get(
+  "/mis-secciones",
+  authMiddleware,
+  docentesController.listarSeccionesDocente
+);
 
+// Sesiones de una sección
+router.get(
+  "/secciones/:id/sesiones",
+  docentesController.listarSesionesSeccion
+);
 
-// Sesiones de una sección (para FullCalendar)
-router.get("/secciones/:id/sesiones", docentesController.listarSesionesSeccion);
+router.get(
+  "/sesiones/:id/alumnos",
+  docentesController.listarAlumnosSesion
+);
 
-// Alumnos de la sesión
-router.get("/sesiones/:id/alumnos", docentesController.listarAlumnosSesion);
-
-// Registrar asistencia
-router.post("/sesiones/:id/asistencia", docentesController.registrarAsistencia);
+router.post(
+  "/sesiones/:id/asistencia",
+  docentesController.registrarAsistencia
+);
 
 module.exports = router;

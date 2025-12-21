@@ -19,13 +19,12 @@ export default function MisSecciones({ usuario }) {
   // Cargar secciones del docente
   // ─────────────────────────────────────────────
   useEffect(() => {
-    if (!usuario?.id) return;
-
     docentesApi
-      .listarSeccionesDocente(usuario.id)
+      .listarSeccionesDocente()
       .then(res => setSecciones(res.data.secciones || []))
       .catch(err => console.error(err));
-  }, [usuario]);
+  }, []);
+
 
   // ─────────────────────────────────────────────
   // Cargar sesiones de sección
