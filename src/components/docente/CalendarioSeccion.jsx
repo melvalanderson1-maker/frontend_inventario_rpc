@@ -1,4 +1,3 @@
-// src/pages/misSecciones/CalendarioSeccion.jsx
 import React, { useEffect, useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -14,52 +13,39 @@ export default function CalendarioSeccion({ seccionId }) {
   const [loading, setLoading] = useState(false);
   const calendarRef = useRef(null);
 
-const cargarSesiones = async () => {
-  try {
-    const res = await docentesApi.listarSesionesSeccion(seccionId);
-    const eventos = (res.data.sesiones || []).map((s) => {
-      if (!s.inicia_en || !s.termina_en) return null;
+  // Cargar sesiones + horarios
+  const cargarSesiones = async () => {
+    try {
+      const res = await docentesApi.listarSesionesSeccion(seccionId);
+      setSesiones(res.data.sesiones || []);
+    } catch (err) {
+      console.error("Error cargando sesiones", err);
+      setSesiones([]);
+    }
+  };
 
-      return {
-        id: s.sesion_id,
-        title: s.titulo,
-        start: s.inicia_en,
-        end: s.termina_en,
-        color: "#4a90e2",
-      };
-    }).filter(Boolean);
-
-    setSesiones(eventos);
-  } catch (err) {
-    console.error("Error cargando sesiones", err);
-    setSesiones([]);
-  }
-};
-
-
- const cargarAlumnos = async (sesionId) => {
-  try {
-    setLoading(true);
-    const res = await adminApi.listarAlumnosSesion(sesionId); 
-    setAlumnos(res.data.alumnos || []);
-    setShowAlumnosModal(true);
-  } catch (err) {
-    console.error("Error cargando alumnos", err);
-    setAlumnos([]);
-    alert("No se pudo cargar la lista de alumnos");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  // Cargar alumnos de la sesión
+  const cargarAlumnos = async (sesionId) => {
+    try {
+      setLoading(true);
+      const res = await docentesApi.listarAlumnosSesion(sesionId); 
+      setAlumnos(res.data.alumnos || []);
+      setShowAlumnosModal(true);
+    } catch (err) {
+      console.error("Error cargando alumnos", err);
+      setAlumnos([]);
+      alert("No se pudo cargar la lista de alumnos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (seccionId) cargarSesiones();
   }, [seccionId]);
 
   const handleEventClick = (info) => {
-    // Al dar click en la sesión, cargamos alumnos
-    cargarAlumnos(info.event.id);
+    cargarAlumnos(info.event.extendedProps.sesion_id);
   };
 
   return (
@@ -74,12 +60,25 @@ const cargarSesiones = async () => {
         slotMinTime="06:00:00"
         slotMaxTime="23:00:00"
         allDaySlot={false}
-        events={sesiones}
+        events={sesiones.map(s => ({
+          id: s.sesion_id,
+          title: s.title,
+          start: s.start,
+          end: s.end,
+          color: s.color,
+          extendedProps: {
+            aula: s.aula,
+            tipo_sesion: s.tipo_sesion,
+            lugar: s.lugar,
+            enlace_meet: s.enlace_meet,
+            sesion_id: s.sesion_id
+          }
+        }))}
         eventClick={handleEventClick}
         height="auto"
       />
 
-      {/* Modal simple de alumnos */}
+      {/* Modal de alumnos */}
       {showAlumnosModal && (
         <div className="modal-alumnos">
           <div className="modal-content">

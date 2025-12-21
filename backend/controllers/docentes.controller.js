@@ -103,18 +103,17 @@ listarSesionesSeccion: async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT 
-         s.id AS sesion_id, 
-         s.titulo, 
-         s.tipo_sesion, 
-         s.aula, 
+         s.id AS sesion_id,
+         s.titulo,
+         s.tipo_sesion,
+         s.aula,
          s.enlace_meet,
-         h.dia_semana, 
-         h.hora_inicio, 
-         h.hora_fin, 
-         h.lugar,
-         -- combinamos fecha de la sección + hora para FullCalendar
-         CONCAT(sec.fecha_inicio, 'T', h.hora_inicio) AS inicia_en,
-         CONCAT(sec.fecha_inicio, 'T', h.hora_fin) AS termina_en
+         sec.fecha_inicio,
+         sec.fecha_fin,
+         h.dia_semana,
+         h.hora_inicio,
+         h.hora_fin,
+         h.lugar
        FROM sesiones s
        JOIN secciones sec ON s.seccion_id = sec.id
        LEFT JOIN horarios h ON h.seccion_id = sec.id
@@ -123,7 +122,40 @@ listarSesionesSeccion: async (req, res) => {
       [seccionId]
     );
 
-    res.json({ ok: true, sesiones: rows });
+    // Convertimos cada horario en un evento de FullCalendar
+    const eventos = [];
+    rows.forEach((r) => {
+      if (!r.hora_inicio || !r.hora_fin) return;
+
+      // Creamos un evento para cada día de la semana
+      // Asumiendo que dia_semana: 1=lunes, 7=domingo
+      const fechaInicio = new Date(r.fecha_inicio);
+      // Ajustamos al día de la semana correcto
+      const dayDiff = r.dia_semana - (fechaInicio.getDay() === 0 ? 7 : fechaInicio.getDay());
+      fechaInicio.setDate(fechaInicio.getDate() + dayDiff);
+
+      const start = new Date(fechaInicio);
+      const [hStart, mStart, sStart] = r.hora_inicio.split(":").map(Number);
+      start.setHours(hStart, mStart, sStart || 0);
+
+      const end = new Date(fechaInicio);
+      const [hEnd, mEnd, sEnd] = r.hora_fin.split(":").map(Number);
+      end.setHours(hEnd, mEnd, sEnd || 0);
+
+      eventos.push({
+        sesion_id: r.sesion_id,
+        title: r.titulo,
+        start: start.toISOString(),
+        end: end.toISOString(),
+        color: "#4a90e2",
+        aula: r.aula,
+        tipo_sesion: r.tipo_sesion,
+        lugar: r.lugar,
+        enlace_meet: r.enlace_meet,
+      });
+    });
+
+    res.json({ ok: true, sesiones: eventos });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, msg: err.message });
