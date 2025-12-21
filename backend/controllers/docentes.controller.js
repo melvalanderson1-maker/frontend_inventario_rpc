@@ -100,15 +100,29 @@ listarSesionesDocente: async (req, res) => {
 listarSesionesSeccion: async (req, res) => {
   try {
     const seccionId = req.params.id;
+
     const [rows] = await pool.query(
-      `SELECT se.id AS sesion_id, se.titulo, se.tipo_sesion, se.aula, se.enlace_meet,
-              h.dia_semana, h.hora_inicio, h.hora_fin, h.lugar
-       FROM sesiones se
-       LEFT JOIN horarios h ON h.seccion_id = se.seccion_id
-       WHERE se.seccion_id = ?
+      `SELECT 
+         s.id AS sesion_id, 
+         s.titulo, 
+         s.tipo_sesion, 
+         s.aula, 
+         s.enlace_meet,
+         h.dia_semana, 
+         h.hora_inicio, 
+         h.hora_fin, 
+         h.lugar,
+         -- combinamos fecha de la sección + hora para FullCalendar
+         CONCAT(sec.fecha_inicio, 'T', h.hora_inicio) AS inicia_en,
+         CONCAT(sec.fecha_inicio, 'T', h.hora_fin) AS termina_en
+       FROM sesiones s
+       JOIN secciones sec ON s.seccion_id = sec.id
+       LEFT JOIN horarios h ON h.seccion_id = sec.id
+       WHERE s.seccion_id = ?
        ORDER BY h.dia_semana, h.hora_inicio ASC`,
       [seccionId]
     );
+
     res.json({ ok: true, sesiones: rows });
   } catch (err) {
     console.error(err);

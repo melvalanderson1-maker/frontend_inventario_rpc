@@ -4,7 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
-import adminApi from "../../api/adminApi";
+import docentesApi from "../../api/docentesApi"; 
 import "./CalendarioSeccion.css";
 
 export default function CalendarioSeccion({ seccionId }) {
@@ -16,14 +16,14 @@ export default function CalendarioSeccion({ seccionId }) {
 
 const cargarSesiones = async () => {
   try {
-    const res = await adminApi.listarSesionesSeccion(seccionId);
+    const res = await docentesApi.listarSesionesSeccion(seccionId);
     const eventos = (res.data.sesiones || []).map((s) => {
       if (!s.inicia_en || !s.termina_en) return null;
 
       return {
         id: s.sesion_id,
         title: s.titulo,
-        start: s.inicia_en,  // usamos directamente la fecha completa
+        start: s.inicia_en,
         end: s.termina_en,
         color: "#4a90e2",
       };
