@@ -92,15 +92,7 @@ export default function AppRouter() {
             }
           />
 
-          {/* DOCENTE → MIS CURSOS */}
-          <Route
-            path="/docente/cursos"
-            element={
-              <PrivateRoute roles={["DOCENTE"]}>
-                <MisCursos />
-              </PrivateRoute>
-            }
-          />
+
 
           <Route
             path="/docente/missecciones"
