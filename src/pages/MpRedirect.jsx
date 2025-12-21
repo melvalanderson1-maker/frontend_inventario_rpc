@@ -9,9 +9,16 @@ export default function MpRedirect() {
   useEffect(() => {
     const preferenceId =
       params.get("preference_id") || params.get("preference-id");
+    const status = params.get("status"); // 👈 CLAVE
 
     if (!preferenceId) {
       navigate("/");
+      return;
+    }
+
+    // 🔴 SI MP DICE FAILURE O REJECTED
+    if (status === "failure") {
+      navigate(`/checkout-error?pref=${preferenceId}`);
       return;
     }
 
@@ -27,14 +34,15 @@ export default function MpRedirect() {
 
         if (estado === "APPROVED") {
           navigate("/login");
-        } else if (estado === "PENDING" && intentos < 6) {
+        } else if (estado === "PENDING" && intentos < 8) {
           intentos++;
-          setTimeout(verificar, 2000); // espera webhook
+          setTimeout(verificar, 2000);
         } else {
-          navigate(-1);
+          // 🔴 RECHAZADO
+          navigate(`/checkout-error?pref=${preferenceId}`);
         }
       } catch (err) {
-        navigate(-1);
+        navigate(`/checkout-error?pref=${preferenceId}`);
       }
     };
 
