@@ -35,27 +35,23 @@ module.exports = {
     }
   },
 
-  listarSesionesDocente: async (req, res) => {
-    try {
-      const docenteId = req.params.id;
-      const [rows] = await pool.query(
-        `SELECT se.id AS sesion_id, se.seccion_id, se.titulo, se.tipo_sesion, se.aula, se.enlace_meet,
-                h.dia_semana, h.hora_inicio, h.hora_fin, h.lugar,
-                s.codigo AS seccion_codigo, c.titulo AS curso_titulo
-         FROM sesiones se
-         JOIN secciones s ON se.seccion_id = s.id
-         JOIN cursos c ON s.curso_id = c.id
-         LEFT JOIN horarios h ON h.seccion_id = se.seccion_id
-         WHERE s.docente_id = ?
-         ORDER BY h.dia_semana, h.hora_inicio ASC`,
-        [docenteId]
-      );
-      res.json({ ok: true, sesiones: rows });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
+listarSesionesDocente: async (req, res) => {
+  try {
+    const docenteId = req.params.id;
+    const [rows] = await pool.query(
+      `SELECT s.id AS sesion_id, s.seccion_id, s.titulo, s.inicia_en, s.termina_en
+       FROM sesiones s
+       JOIN secciones sec ON s.seccion_id = sec.id
+       WHERE sec.docente_id = ?`,
+      [docenteId]
+    );
+    res.json({ ok: true, sesiones: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
 
   listarAlumnosSesion: async (req, res) => {
     try {

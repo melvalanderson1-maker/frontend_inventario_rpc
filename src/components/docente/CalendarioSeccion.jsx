@@ -18,28 +18,13 @@ const cargarSesiones = async () => {
   try {
     const res = await adminApi.listarSesionesSeccion(seccionId);
     const eventos = (res.data.sesiones || []).map((s) => {
-      if (!s.dia_semana || !s.hora_inicio || !s.hora_fin) return null;
-
-      // FullCalendar espera fecha completa
-      // Calculamos la fecha de inicio de esta semana para el día de la semana
-      const today = new Date();
-      const dayOfWeek = parseInt(s.dia_semana); // 1=Lunes, 7=Domingo
-      const diff = dayOfWeek - (today.getDay() === 0 ? 7 : today.getDay()); // domingo=0
-      const startDate = new Date(today);
-      startDate.setDate(today.getDate() + diff);
-      const [hStart, mStart] = s.hora_inicio.split(":").map(Number);
-      startDate.setHours(hStart, mStart, 0);
-
-      const endDate = new Date(today);
-      endDate.setDate(today.getDate() + diff);
-      const [hEnd, mEnd] = s.hora_fin.split(":").map(Number);
-      endDate.setHours(hEnd, mEnd, 0);
+      if (!s.inicia_en || !s.termina_en) return null;
 
       return {
         id: s.sesion_id,
         title: s.titulo,
-        start: startDate,
-        end: endDate,
+        start: s.inicia_en,  // usamos directamente la fecha completa
+        end: s.termina_en,
         color: "#4a90e2",
       };
     }).filter(Boolean);
