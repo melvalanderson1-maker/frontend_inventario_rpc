@@ -1,13 +1,87 @@
-.mis-secciones { padding: 1.5rem; }
-.mis-secciones header h2 { color: #214d9f; }
-.muted { color:#6b7582; }
+.mis-secciones {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
 
-.secciones-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-top:1rem; }
-.seccion-card { background:#fff; padding:1rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 6px 12px rgba(0,0,0,0.05); }
-.seccion-title { font-weight:700; color:#1d3557; }
-.seccion-sub { color:#6b7582; font-size:0.9rem; margin-top:0.25rem; }
-.seccion-count { margin-top:0.5rem; color:#333; }
-.seccion-actions { display:flex; gap:0.6rem; align-items:center; }
-.btn { background:#1a73e8; color:#fff; padding:0.5rem 0.8rem; border-radius:8px; text-decoration:none; }
-.btn.outline { background:#fff; color:#1a73e8; border:1px solid #1a73e8; }
-@media(max-width:600px){ .secciones-grid { grid-template-columns:1fr; } .seccion-card { flex-direction:column; align-items:flex-start; gap:0.6rem; } }
+header h2 {
+  margin-bottom: 5px;
+}
+
+.cursos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.curso-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.curso-header {
+  padding: 10px 15px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  background-color: #f7f7f7;
+}
+
+.secciones-list {
+  padding: 10px 15px;
+}
+
+.seccion-card {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.seccion-actions button, .seccion-actions .btn {
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
+.alumnos-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.alumnos-table th, .alumnos-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.btn {
+  background-color: #6200ea;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn.outline {
+  background: none;
+  border: 1px solid #6200ea;
+  color: #6200ea;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .seccion-card {
+    flex-direction: column;
+  }
+}
