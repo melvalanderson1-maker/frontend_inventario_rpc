@@ -11,11 +11,11 @@ router.get("/:id/secciones", docentesController.listarSeccionesDocente);
 // Sesiones del docente
 router.get("/:id/sesiones", docentesController.listarSesionesDocente);
 
-// Alumnos de una sección
-router.get("/secciones/:id/alumnos", docentesController.listarAlumnosSeccion);
+// Alumnos de una sesión
+router.get("/sesiones/:id/alumnos", docentesController.listarAlumnosSesion);
 
 // Registrar asistencia
-router.post("/secciones/:id/asistencia", docentesController.registrarAsistencia);
+router.post("/sesiones/:id/asistencia", docentesController.registrarAsistencia);
 
 // Registrar notas
 router.post("/secciones/:id/notas", docentesController.registrarNotas);
