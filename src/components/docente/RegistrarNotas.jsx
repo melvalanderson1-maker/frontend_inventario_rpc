@@ -1,36 +1,42 @@
-// src/pages/docente/RegistrarNotas.jsx
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import docentesApi from "../../api/docentesApi";
-import "./RegistrarNotas.css";
-import { useSearchParams } from "react-router-dom";
 
 import DashboardHeader from "../../components/layout/DashboardHeader";
 import DashboardFooter from "../../components/layout/DashboardFooter";
+import "./RegistrarNotas.css";
 
 export default function RegistrarNotas() {
-  const [searchParams] = useSearchParams();
-  const seccionQuery = searchParams.get("seccion");
-  const [seccionId, setSeccionId] = useState(seccionQuery || "");
+  // ✅ SECCIÓN DESDE LA URL
+  const { seccionId } = useParams();
+
   const [alumnos, setAlumnos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (seccionId) fetchAlumnos(seccionId);
-  }, [seccionId]);
+    if (!seccionId) return;
 
-  const fetchAlumnos = async (id) => {
-    setLoading(true);
-    try {
-      const res = await docentesApi.listarAlumnosSeccion(id);
-      setAlumnos((res.data.alumnos || []).map((a) => ({ ...a, nota: "" })));
-    } catch (err) {
-      console.error(err);
-      alert("Error cargando alumnos");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchAlumnos = async () => {
+      setLoading(true);
+      try {
+        const res = await docentesApi.listarAlumnosSeccion(seccionId);
+        setAlumnos(
+          (res.data.alumnos || []).map((a) => ({
+            ...a,
+            nota: a.nota_final ?? "",
+          }))
+        );
+      } catch (err) {
+        console.error(err);
+        alert("Error cargando alumnos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlumnos();
+  }, [seccionId]);
 
   const updateNota = (idx, value) => {
     const copy = [...alumnos];
@@ -47,8 +53,9 @@ export default function RegistrarNotas() {
           nota: parseFloat(a.nota || 0),
         })),
       };
+
       await docentesApi.registrarNotas(seccionId, payload);
-      alert("Notas guardadas");
+      alert("Notas guardadas correctamente");
     } catch (err) {
       console.error(err);
       alert("Error guardando notas");
@@ -64,61 +71,45 @@ export default function RegistrarNotas() {
       <div className="registrar-notas">
         <header>
           <h2>Registrar Notas</h2>
-          <p className="muted">Ingresa las notas y guarda.</p>
+          <p className="muted">
+            Registro de notas finales de la <strong>sección</strong>.
+          </p>
         </header>
 
         <div className="form-row">
-          <label>Sección ID</label>
-          <input
-            value={seccionId}
-            onChange={(e) => setSeccionId(e.target.value)}
-            placeholder="Sección ID"
-          />
-          <button className="btn" onClick={() => seccionId && fetchAlumnos(seccionId)}>
-            Cargar
-          </button>
+          <label>ID de Sección</label>
+          <input value={seccionId} disabled />
         </div>
 
         {loading ? (
-          <p>Cargando...</p>
+          <p>Cargando alumnos...</p>
         ) : (
           <div className="notas-list">
-            {alumnos.length === 0 ? (
-              <div className="empty">No hay alumnos</div>
-            ) : (
-              alumnos.map((a, i) => (
-                <div key={a.id} className="nota-row">
-                  <div className="alumno-info">
-                    <div className="alumno-name">
-                      {a.nombre} {a.apellido_paterno}
-                    </div>
-                    <div className="alumno-doc">{a.numero_documento}</div>
-                  </div>
-                  <div className="alumno-input">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="100"
-                      value={a.nota}
-                      onChange={(e) => updateNota(i, e.target.value)}
-                    />
-                  </div>
-                </div>
-              ))
-            )}
+            {alumnos.map((a, i) => (
+              <div key={a.id} className="nota-row">
+                <span>
+                  {a.nombre} {a.apellido_paterno}
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  max="20"
+                  step="0.01"
+                  value={a.nota}
+                  onChange={(e) => updateNota(i, e.target.value)}
+                />
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="save-row">
-          <button
-            className="btn primary"
-            onClick={guardarNotas}
-            disabled={saving}
-          >
-            {saving ? "Guardando..." : "Guardar notas"}
-          </button>
-        </div>
+        <button
+          className="btn primary"
+          onClick={guardarNotas}
+          disabled={saving}
+        >
+          {saving ? "Guardando..." : "Guardar notas"}
+        </button>
       </div>
 
       <DashboardFooter />

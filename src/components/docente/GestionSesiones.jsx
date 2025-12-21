@@ -1,20 +1,37 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import "./GestionSesiones.css";
+
 
 export default function GestionSesiones() {
   const { sesionId } = useParams();
+  const [searchParams] = useSearchParams();
+  const seccionId = searchParams.get("seccion");
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="gestion-sesion">
       <h2>Gestión de sesión</h2>
 
-      <button onClick={() => navigate(`/docente/sesiones/${sesionId}/asistencia`)}>
-        Tomar asistencia
-      </button>
+      <p><strong>Sesión ID:</strong> {sesionId}</p>
+      <p><strong>Sección ID:</strong> {seccionId}</p>
 
-      <button onClick={() => navigate(`/docente/sesiones/${sesionId}/notas`)}>
-        Registrar notas
-      </button>
+      <div className="acciones">
+        <button
+          onClick={() =>
+            navigate(`/docente/sesiones/${sesionId}/asistencia`)
+          }
+        >
+          📝 Tomar asistencia
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(`/docente/secciones/${seccionId}/notas`)
+          }
+        >
+          📊 Registrar notas
+        </button>
+      </div>
     </div>
   );
 }

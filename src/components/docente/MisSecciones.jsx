@@ -5,6 +5,8 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
+import { useNavigate } from "react-router-dom";
+
 
 import dayjs from "dayjs";
 import "./MisSecciones.css";
@@ -14,6 +16,8 @@ export default function MisSecciones({ usuario }) {
   const [seccionSeleccionada, setSeccionSeleccionada] = useState(null);
   const [sesiones, setSesiones] = useState([]);
   const calendarRef = useRef(null);
+  const navigate = useNavigate();
+
 
   // ─────────────────────────────────────────────
   // Cargar secciones del docente
@@ -111,8 +115,11 @@ export default function MisSecciones({ usuario }) {
               slotMaxTime="23:00:00"
               events={sesiones}
               eventClick={(info) => {
-                navigate(`/docente/sesiones/${info.event.id}`);
+                navigate(
+                  `/docente/sesiones/${info.event.id}?seccion=${seccionSeleccionada.seccion_id}`
+                );
               }}
+
             />
 
           </>

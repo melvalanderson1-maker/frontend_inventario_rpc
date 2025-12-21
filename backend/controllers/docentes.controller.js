@@ -150,6 +150,53 @@ listarAlumnosSesion: async (req, res) => {
   }
 },
 
+listarAlumnosSeccion: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id,
+        u.nombre,
+        u.apellido_paterno,
+        u.apellido_materno,
+        m.nota_final
+      FROM matriculas m
+      JOIN usuarios u ON u.id = m.usuario_id
+      WHERE m.seccion_id = ?
+        AND m.estado = 'ACTIVO'
+      ORDER BY u.apellido_paterno
+    `, [seccionId]);
+
+    res.json({ ok: true, alumnos: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+registrarNotas: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const { notas } = req.body;
+
+    for (const n of notas) {
+      await pool.query(
+        `
+        UPDATE matriculas
+        SET nota_final=?
+        WHERE seccion_id=? AND usuario_id=?
+        `,
+        [n.nota, seccionId, n.usuario_id]
+      );
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
 
   // ─────────────────────────────────────────────
   // REGISTRAR / ACTUALIZAR ASISTENCIA

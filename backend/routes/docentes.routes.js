@@ -23,11 +23,6 @@ router.get(
 
 router.get(
   "/sesiones/:id/alumnos",
-  docentesController.listarAlumnosSesion
-);
-
-router.get(
-  "/sesiones/:id/alumnos",
   authMiddleware,
   docentesController.listarAlumnosSesion
 );
@@ -36,5 +31,18 @@ router.post(
   "/sesiones/:id/asistencia",
   docentesController.registrarAsistencia
 );
+
+router.get(
+  "/secciones/:id/alumnos",
+  authMiddleware,
+  docentesController.listarAlumnosSeccion
+);
+
+router.post(
+  "/secciones/:id/notas",
+  authMiddleware,
+  docentesController.registrarNotas
+);
+
 
 module.exports = router;
