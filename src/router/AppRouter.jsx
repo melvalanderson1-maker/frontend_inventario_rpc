@@ -35,7 +35,7 @@ import AuditoriaAdmin from "../components/Administrador/AuditoriaAdmin";
 
 
 // rutas/docente (ajusta paths según dónde pongas los archivos)
-import MisCursos from "../components/docente/MisCursos";
+
 import SeccionesCurso from "../components/docente/SeccionesCurso";
 import SesionesSeccion from "../components/docente/SesionesSeccion";
 import RegistrarAsistencia from "../components/docente/RegistrarAsistencia";
