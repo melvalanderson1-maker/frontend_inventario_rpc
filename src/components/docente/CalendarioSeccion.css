@@ -1,0 +1,131 @@
+/* src/pages/misSecciones/CalendarioSeccion.css */
+
+/* Contenedor principal del calendario */
+.calendario-seccion {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* FullCalendar: hacer que ocupe todo el ancho y se vea grande */
+.calendario-seccion .fc {
+  font-family: 'Arial', sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.calendario-seccion .fc-timegrid-event {
+  border-radius: 6px !important;
+  color: #fff !important;
+  font-weight: 600;
+  padding: 2px 4px;
+}
+
+.calendario-seccion .fc-timegrid-event:hover {
+  filter: brightness(1.1);
+  cursor: pointer;
+}
+
+/* Modal de alumnos */
+.modal-alumnos {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-alumnos .modal-content {
+  background-color: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.modal-alumnos h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.modal-alumnos .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-alumnos .close-btn:hover {
+  background-color: #d32f2f;
+}
+
+.modal-alumnos ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.modal-alumnos li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Responsive: FullCalendar y modal */
+@media (max-width: 768px) {
+  .calendario-seccion {
+    padding: 0.5rem;
+  }
+
+  .modal-alumnos .modal-content {
+    max-width: 95%;
+    padding: 1rem;
+  }
+
+  .modal-alumnos h3 {
+    font-size: 1.2rem;
+  }
+
+  .modal-alumnos li {
+    font-size: 0.9rem;
+  }
+}
+
+/* Ajuste de FullCalendar en móviles */
+@media (max-width: 576px) {
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.75rem;
+  }
+
+  .fc .fc-timegrid-event .fc-event-title {
+    font-size: 0.75rem;
+    white-space: normal;
+  }
+}
