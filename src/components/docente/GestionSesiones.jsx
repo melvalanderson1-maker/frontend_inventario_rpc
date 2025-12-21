@@ -1,23 +1,23 @@
-// src/pages/docente/GestionSesiones.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import docentesApi from "../../api/docentesApi";
+import { AuthContext } from "../../context/AuthContext";
 import "./GestionSesiones.css";
-
 import DashboardHeader from "../../components/layout/DashboardHeader";
 import DashboardFooter from "../../components/layout/DashboardFooter";
 
 export default function GestionSesiones() {
+  const { usuario } = useContext(AuthContext);
   const [sesiones, setSesiones] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchSesiones();
-  }, []);
+    if (usuario) fetchSesiones(usuario.id);
+  }, [usuario]);
 
-  const fetchSesiones = async () => {
+  const fetchSesiones = async (docenteId) => {
     setLoading(true);
     try {
-      const res = await docentesApi.listarSesionesDocente("me");
+      const res = await docentesApi.listarSesionesDocente(docenteId);
       setSesiones(res.data.sesiones || []);
     } catch (err) {
       console.error(err);
@@ -30,13 +30,10 @@ export default function GestionSesiones() {
   return (
     <>
       <DashboardHeader />
-
       <div className="gestion-sesiones">
         <header>
           <h2>Gestión de Sesiones</h2>
-          <p className="muted">
-            Aquí puedes ver y administrar tus sesiones programadas.
-          </p>
+          <p className="muted">Aquí puedes ver y administrar tus sesiones programadas.</p>
         </header>
 
         {loading ? (
@@ -55,12 +52,7 @@ export default function GestionSesiones() {
                     </div>
                   </div>
                   <div className="sesion-right">
-                    <a
-                      className="btn small"
-                      href={s.enlace_meet || "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
+                    <a className="btn small" href={s.enlace_meet || "#"} target="_blank" rel="noreferrer">
                       Abrir enlace
                     </a>
                   </div>
@@ -70,7 +62,6 @@ export default function GestionSesiones() {
           </div>
         )}
       </div>
-
       <DashboardFooter />
     </>
   );

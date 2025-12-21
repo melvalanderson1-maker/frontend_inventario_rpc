@@ -1,9 +1,6 @@
-// backend/controllers/docentes.controller.js
 const { initDB } = require("../config/db");
 let pool;
-(async () => {
-  pool = await initDB();
-})();
+(async () => { pool = await initDB(); })();
 
 module.exports = {
   listarDocentes: async (req, res) => {
@@ -41,12 +38,13 @@ module.exports = {
     try {
       const docenteId = req.params.id;
       const [rows] = await pool.query(
-        `SELECT se.id, se.seccion_id, se.titulo, se.inicia_en, se.termina_en, 
-                se.tipo_sesion, se.aula, se.enlace_meet
+        `SELECT se.id, se.seccion_id, se.titulo, se.inicia_en, se.termina_en, se.tipo_sesion, se.aula, se.enlace_meet,
+                s.codigo AS seccion_codigo, c.titulo AS curso_titulo
          FROM sesiones se
          JOIN secciones s ON se.seccion_id = s.id
+         JOIN cursos c ON s.curso_id = c.id
          WHERE s.docente_id = ?
-         ORDER BY se.inicia_en DESC`,
+         ORDER BY se.inicia_en ASC`,
         [docenteId]
       );
       res.json({ ok: true, sesiones: rows });
@@ -59,9 +57,14 @@ module.exports = {
   listarAlumnosSeccion: async (req, res) => {
     try {
       const seccionId = req.params.id;
+      const [[seccion]] = await pool.query(
+        "SELECT * FROM secciones WHERE id=?",
+        [seccionId]
+      );
+      if (!seccion) return res.status(404).json({ ok:false, msg:"Sección no encontrada" });
+
       const [rows] = await pool.query(
-        `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, 
-                u.correo, u.numero_documento
+        `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, u.numero_documento
          FROM matriculas m
          JOIN usuarios u ON m.usuario_id = u.id
          WHERE m.seccion_id = ? AND m.estado='ACTIVO'`,
@@ -80,29 +83,13 @@ module.exports = {
       const { asistencias } = req.body;
       const docenteId = req.user?.id || null;
 
-      if (!Array.isArray(asistencias)) {
-        return res.status(400).json({ ok: false, msg: "Formato inválido" });
-      }
+      if (!Array.isArray(asistencias)) return res.status(400).json({ ok: false, msg: "Formato inválido" });
 
-      // PREVENIR DUPLICADOS POR SECCION
-      await pool.query("DELETE FROM asistencias WHERE seccion_id = ?", [seccionId]);
+      await pool.query("DELETE FROM asistencias WHERE sesion_id = ?", [seccionId]);
 
-      const values = asistencias.map((a) => [
-        seccionId,
-        a.usuario_id,
-        a.estado,
-        docenteId,
-      ]);
-
+      const values = asistencias.map(a => [seccionId, a.usuario_id, a.estado, docenteId]);
       await pool.query(
-        `
-        INSERT INTO asistencias (
-          seccion_id,
-          usuario_id,
-          estado,
-          marcado_por
-        ) VALUES ?
-        `,
+        `INSERT INTO asistencias (sesion_id, usuario_id, estado, marcado_por) VALUES ?`,
         [values]
       );
 
@@ -117,27 +104,18 @@ module.exports = {
     try {
       const seccionId = req.params.id;
       const { notas } = req.body;
+      if (!Array.isArray(notas)) return res.status(400).json({ ok:false, msg:"Formato inválido" });
 
-      if (!Array.isArray(notas)) {
-        return res.status(400).json({ ok: false, msg: "Formato inválido" });
-      }
-
-      const values = notas.map((n) => [
-        seccionId,
-        n.usuario_id,
-        n.actividad_id || null,
-        n.nota,
-      ]);
-
+      const values = notas.map(n => [seccionId, n.usuario_id, n.actividad_id || null, n.nota]);
       await pool.query(
         "INSERT INTO notas (seccion_id, usuario_id, actividad_id, nota) VALUES ?",
         [values]
       );
 
-      res.json({ ok: true, msg: "Notas registradas" });
+      res.json({ ok:true, msg:"Notas registradas correctamente" });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ ok: false, msg: err.message });
+      res.status(500).json({ ok:false, msg:err.message });
     }
-  },
+  }
 };

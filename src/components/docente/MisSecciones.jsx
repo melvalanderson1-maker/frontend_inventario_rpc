@@ -1,10 +1,8 @@
-// src/pages/docente/MisSecciones.jsx
 import React, { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import docentesApi from "../../api/docentesApi";
 import { AuthContext } from "../../context/AuthContext";
 import "./MisSecciones.css";
-import { Link } from "react-router-dom";
-
 import DashboardHeader from "../../components/layout/DashboardHeader";
 import DashboardFooter from "../../components/layout/DashboardFooter";
 
@@ -34,7 +32,6 @@ export default function MisSecciones() {
   return (
     <>
       <DashboardHeader />
-
       <div className="mis-secciones">
         <header>
           <h2>Mis Secciones</h2>
@@ -61,10 +58,9 @@ export default function MisSecciones() {
                   </div>
 
                   <div className="seccion-actions">
-                    <Link to={`/docente/asistencia?seccion=${s.seccion_id}`} className="btn">
+                    <Link to={`/docente/asistencia?sesion=${s.seccion_id}`} className="btn">
                       Asistencia
                     </Link>
-
                     <Link to={`/docente/notas?seccion=${s.seccion_id}`} className="btn outline">
                       Notas
                     </Link>
@@ -75,7 +71,6 @@ export default function MisSecciones() {
           </div>
         )}
       </div>
-
       <DashboardFooter />
     </>
   );

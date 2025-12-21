@@ -11,7 +11,7 @@ router.get("/:id/secciones", docentesController.listarSeccionesDocente);
 // Sesiones del docente
 router.get("/:id/sesiones", docentesController.listarSesionesDocente);
 
-// Alumnos de una SECCIÓN
+// Alumnos de una sección
 router.get("/secciones/:id/alumnos", docentesController.listarAlumnosSeccion);
 
 // Registrar asistencia
