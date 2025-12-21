@@ -8,6 +8,12 @@ export default function GestionSesiones() {
   const seccionId = searchParams.get("seccion");
   const navigate = useNavigate();
 
+    // ✅ AQUÍ VA EXACTAMENTE
+  if (!sesionId || !seccionId) {
+    return <p>Error: sesión o sección no válida</p>;
+  }
+
+
   return (
     <div className="gestion-sesion">
       <h2>Gestión de sesión</h2>

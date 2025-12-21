@@ -106,14 +106,7 @@ export default function AppRouter() {
             }
           />
 
-          <Route
-            path="/docente/gestionsesiones"
-            element={
-              <PrivateRoute roles={["DOCENTE"]}>
-                <GestionSesiones />
-              </PrivateRoute>
-            }
-          />
+
 
           <Route
             path="/docente/misecciones"
@@ -141,6 +134,16 @@ export default function AppRouter() {
             element={
               <PrivateRoute roles={["DOCENTE"]}>
                 <ListaAlumnos />
+              </PrivateRoute>
+            }
+          />
+
+
+          <Route
+            path="/docente/sesiones/:sesionId"
+            element={
+              <PrivateRoute roles={["DOCENTE"]}>
+                <GestionSesiones />
               </PrivateRoute>
             }
           />

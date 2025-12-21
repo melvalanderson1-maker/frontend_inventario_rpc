@@ -29,6 +29,7 @@ router.get(
 
 router.post(
   "/sesiones/:id/asistencia",
+  authMiddleware,
   docentesController.registrarAsistencia
 );
 
