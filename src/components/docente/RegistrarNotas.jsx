@@ -7,35 +7,39 @@ import DashboardFooter from "../../components/layout/DashboardFooter";
 import "./RegistrarNotas.css";
 
 export default function RegistrarNotas() {
-  // ✅ SECCIÓN DESDE LA URL
   const { seccionId } = useParams();
 
+  const [infoSeccion, setInfoSeccion] = useState(null);
   const [alumnos, setAlumnos] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!seccionId) return;
 
-    const fetchAlumnos = async () => {
-      setLoading(true);
+    const cargarTodo = async () => {
       try {
-        const res = await docentesApi.listarAlumnosSeccion(seccionId);
+        const [infoRes, alumnosRes] = await Promise.all([
+          docentesApi.obtenerInfoSeccion(seccionId),
+          docentesApi.listarAlumnosSeccion(seccionId),
+        ]);
+
+        setInfoSeccion(infoRes.data.info);
         setAlumnos(
-          (res.data.alumnos || []).map((a) => ({
+          (alumnosRes.data.alumnos || []).map((a) => ({
             ...a,
             nota: a.nota_final ?? "",
           }))
         );
       } catch (err) {
         console.error(err);
-        alert("Error cargando alumnos");
+        alert("Error cargando información de la sección");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAlumnos();
+    cargarTodo();
   }, [seccionId]);
 
   const updateNota = (idx, value) => {
@@ -47,68 +51,73 @@ export default function RegistrarNotas() {
   const guardarNotas = async () => {
     setSaving(true);
     try {
-      const payload = {
+      await docentesApi.registrarNotas(seccionId, {
         notas: alumnos.map((a) => ({
           usuario_id: a.id,
           nota: parseFloat(a.nota || 0),
         })),
-      };
+      });
 
-      await docentesApi.registrarNotas(seccionId, payload);
-      alert("Notas guardadas correctamente");
+      alert("✅ Notas guardadas correctamente");
     } catch (err) {
       console.error(err);
-      alert("Error guardando notas");
+      alert("❌ Error guardando notas");
     } finally {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <DashboardHeader />
+        <p className="loading">Cargando...</p>
+        <DashboardFooter />
+      </>
+    );
+  }
 
   return (
     <>
       <DashboardHeader />
 
       <div className="registrar-notas">
-        <header>
-          <h2>Registrar Notas</h2>
+        {/* HEADER */}
+        <header className="header-seccion">
+          <h2>{infoSeccion.curso_titulo}</h2>
           <p className="muted">
-            Registro de notas finales de la <strong>sección</strong>.
+            Sección <strong>{infoSeccion.seccion_codigo}</strong>
           </p>
+          <small>
+            {infoSeccion.fecha_inicio} → {infoSeccion.fecha_fin}
+          </small>
         </header>
 
-        <div className="form-row">
-          <label>ID de Sección</label>
-          <input value={seccionId} disabled />
+        {/* LISTA */}
+        <div className="notas-list">
+          {alumnos.map((a, i) => (
+            <div key={a.id} className="nota-row">
+              <span>
+                {a.apellido_paterno} {a.apellido_materno}, {a.nombre}
+              </span>
+              <input
+                type="number"
+                min="0"
+                max="20"
+                step="0.01"
+                value={a.nota}
+                onChange={(e) => updateNota(i, e.target.value)}
+              />
+            </div>
+          ))}
         </div>
-
-        {loading ? (
-          <p>Cargando alumnos...</p>
-        ) : (
-          <div className="notas-list">
-            {alumnos.map((a, i) => (
-              <div key={a.id} className="nota-row">
-                <span>
-                  {a.nombre} {a.apellido_paterno}
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  max="20"
-                  step="0.01"
-                  value={a.nota}
-                  onChange={(e) => updateNota(i, e.target.value)}
-                />
-              </div>
-            ))}
-          </div>
-        )}
 
         <button
           className="btn primary"
           onClick={guardarNotas}
           disabled={saving}
         >
-          {saving ? "Guardando..." : "Guardar notas"}
+          {saving ? "Guardando..." : "💾 Guardar notas"}
         </button>
       </div>
 
