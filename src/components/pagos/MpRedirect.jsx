@@ -7,15 +7,15 @@ export default function MpRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // ✅ Mercado Pago SIEMPRE devuelve preference_id
     const preferenceId =
       params.get("preference_id") || params.get("preference-id");
 
     if (!preferenceId) {
-      console.error("❌ No llegó preference_id desde Mercado Pago");
       navigate("/");
       return;
     }
+
+    let intentos = 0;
 
     const verificar = async () => {
       try {
@@ -26,16 +26,14 @@ export default function MpRedirect() {
         const estado = res.data.estado;
 
         if (estado === "APPROVED") {
-          navigate("/login"); // ✅ pago exitoso
-        } else if (estado === "PENDING") {
-          // ⏳ puedes mostrar una vista de espera si quieres
-          navigate("/"); 
+          navigate("/login");
+        } else if (estado === "PENDING" && intentos < 6) {
+          intentos++;
+          setTimeout(verificar, 2000); // espera webhook
         } else {
-          // ❌ rejected, failure, etc
           navigate(-1);
         }
       } catch (err) {
-        console.error("❌ Error verificando pago", err);
         navigate(-1);
       }
     };
@@ -43,5 +41,5 @@ export default function MpRedirect() {
     verificar();
   }, [navigate, params]);
 
-  return <p>Verificando pago...</p>;
+  return <p>Confirmando pago...</p>;
 }

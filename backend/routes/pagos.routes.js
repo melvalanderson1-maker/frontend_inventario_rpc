@@ -177,8 +177,8 @@ router.post("/webhook/mercadopago", async (req, res) => {
     );
 
     const payment = mpRes.data;
-    const preferenceId = payment.external_reference || payment.preference_id;
 
+    const preferenceId = payment.preference_id; // 🔥 CLAVE
     const status = payment.status; // approved | rejected | pending
 
     const db = await initDB();
@@ -194,6 +194,7 @@ router.post("/webhook/mercadopago", async (req, res) => {
     return res.sendStatus(500);
   }
 });
+
 
 
 
