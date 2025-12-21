@@ -23,6 +23,32 @@ async function obtenerCursoYSeccion(db, seccion_id) {
   return rows[0];
 }
 
+
+
+
+// 🔍 VERIFICAR ESTADO DEL PAGO (USADO POR FRONT)
+// ===============================================
+router.get("/verificar/:preferenceId", async (req, res) => {
+  try {
+    const { preferenceId } = req.params;
+    const db = await initDB();
+
+    const [rows] = await db.query(
+      "SELECT estado FROM preferencias WHERE preference_id = ?",
+      [preferenceId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ estado: "NOT_FOUND" });
+    }
+
+    return res.json({ estado: rows[0].estado });
+  } catch (error) {
+    console.error("Error verificando pago:", error);
+    return res.status(500).json({ estado: "ERROR" });
+  }
+});
+
 // ====================================================================
 // POST /pagos/mercadopago
 // ====================================================================
@@ -58,6 +84,8 @@ router.post("/mercadopago", express.json(), async (req, res) => {
           currency_id: "PEN",
         },
       ],
+
+      external_reference: preference.id, // 🔥 CLAVE REAL
 
       payer: {
         email: alumno.correo,
@@ -130,6 +158,44 @@ router.post("/mercadopago", express.json(), async (req, res) => {
     });
   }
 });
+
+
+
+router.post("/webhook/mercadopago", async (req, res) => {
+  try {
+    const paymentId = req.body?.data?.id;
+    if (!paymentId) return res.sendStatus(200);
+
+    const mpRes = await axios.get(
+      `https://api.mercadopago.com/v1/payments/${paymentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+        },
+      }
+    );
+
+    const payment = mpRes.data;
+    const preferenceId = payment.external_reference || payment.preference_id;
+
+    const status = payment.status; // approved | rejected | pending
+
+    const db = await initDB();
+
+    await db.query(
+      `UPDATE preferencias SET estado = ? WHERE preference_id = ?`,
+      [status.toUpperCase(), preferenceId]
+    );
+
+    return res.sendStatus(200);
+  } catch (err) {
+    console.error("Webhook error:", err.message);
+    return res.sendStatus(500);
+  }
+});
+
+
+
 
 // ====================================================================
 // POST /pagos/yape-simulado

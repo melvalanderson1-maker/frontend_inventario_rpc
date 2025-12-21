@@ -1,24 +1,38 @@
-// src/components/pagos/MpRedirect.jsx
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import axiosClient from "../api/axiosClient";
 
 export default function MpRedirect() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const preference_id =
-      params.get("preference_id") ||
-      params.get("preference-id") ||
-      params.get("preferenceId");
+    const externalReference = params.get("external_reference");
 
-    if (!preference_id) {
+    if (!externalReference) {
       navigate("/");
       return;
     }
 
-    navigate(`/pago-exitoso?${params.toString()}`);
+    const verificar = async () => {
+      try {
+        const res = await axiosClient.get(
+          `/pagos/verificar/${externalReference}`
+        );
+
+        if (res.data.estado === "APPROVED") {
+          navigate("/login"); // ✅ pago exitoso
+        } else {
+          navigate(-1); // ❌ vuelve a checkout
+        }
+      } catch (err) {
+        console.error("Error verificando pago", err);
+        navigate(-1);
+      }
+    };
+
+    verificar();
   }, []);
 
-  return <div>Redirigiendo...</div>;
+  return <p>Verificando pago...</p>;
 }

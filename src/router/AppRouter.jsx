@@ -71,7 +71,7 @@ export default function AppRouter() {
         <Route path="/curso/:id" element={<DetalleCursoPublico />} />
         <Route path="/checkout/:cursoId" element={<CheckoutCurso />} />
 
-        <Route path="/mp-redirect" element={<MpRedirect />} />
+        
 
 
         {/* ESTUDIANTE */}

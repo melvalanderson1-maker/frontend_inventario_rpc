@@ -1,39 +1,38 @@
-// src/pages/MpRedirect.jsx
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 
 export default function MpRedirect() {
-  const locate = useLocation();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
-  const [msg, setMsg] = useState("Verificando pago...");
 
   useEffect(() => {
-    const params = new URLSearchParams(locate.search);
-    const preference_id = params.get("preference_id") || params.get("preference_id");
-    const collection_id = params.get("collection_id") || params.get("collection_id");
-    const status = params.get("collection_status") || params.get("status");
+    const externalReference = params.get("external_reference");
 
-    // Si ya vino status approved, confirmamos en servidor
-    (async () => {
+    if (!externalReference) {
+      navigate("/");
+      return;
+    }
+
+    const verificar = async () => {
       try {
-        const res = await axiosClient.post("/pagos/confirm", { preference_id, collection_id });
-        if (res.data && res.data.ok) {
-          setMsg("Pago confirmado. Redirigiendo al login...");
-          setTimeout(() => navigate("/login"), 1500);
+        const res = await axiosClient.get(
+          `/pagos/verificar/${externalReference}`
+        );
+
+        if (res.data.estado === "APPROVED") {
+          navigate("/login"); // ✅ pago exitoso
         } else {
-          setMsg("Pago pendiente o no confirmado. Revisa tu método de pago.");
+          navigate(-1); // ❌ vuelve a checkout
         }
       } catch (err) {
-        console.error("Error confirmando:", err);
-        setMsg("Error verificando pago. Revisa la consola.");
+        console.error("Error verificando pago", err);
+        navigate(-1);
       }
-    })();
-  }, [locate.search, navigate]);
+    };
 
-  return (
-    <div className="container">
-      <h2>{msg}</h2>
-    </div>
-  );
+    verificar();
+  }, []);
+
+  return <p>Verificando pago...</p>;
 }
