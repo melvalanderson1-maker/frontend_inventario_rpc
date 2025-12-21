@@ -16,8 +16,14 @@ export default function RegistrarAsistencia() {
   const [alumnos, setAlumnos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
+  const [guardando, setGuardando] = useState(false);
 
+  // ─────────────────────────────────────────────
+  // CARGAR INFO + ALUMNOS
+  // ─────────────────────────────────────────────
   useEffect(() => {
+    if (!sesionId) return;
+
     const cargarTodo = async () => {
       try {
         const [infoRes, alumnosRes] = await Promise.all([
@@ -27,13 +33,14 @@ export default function RegistrarAsistencia() {
 
         setInfo(infoRes.data.info);
         setAlumnos(
-          alumnosRes.data.alumnos.map(a => ({
+          (alumnosRes.data.alumnos || []).map(a => ({
             ...a,
             estado: a.estado || "PRESENTE",
           }))
         );
       } catch (err) {
-        alert("Error cargando información");
+        console.error(err);
+        alert("❌ Error cargando información de la sesión");
       } finally {
         setLoading(false);
       }
@@ -42,16 +49,65 @@ export default function RegistrarAsistencia() {
     cargarTodo();
   }, [sesionId]);
 
+  // ─────────────────────────────────────────────
+  // FILTRO BUSCADOR
+  // ─────────────────────────────────────────────
   const filtrados = alumnos.filter(a =>
     `${a.nombre} ${a.apellido_paterno} ${a.apellido_materno}`
       .toLowerCase()
       .includes(busqueda.toLowerCase())
   );
 
+  // ─────────────────────────────────────────────
+  // CONTADORES
+  // ─────────────────────────────────────────────
   const contar = estado =>
     alumnos.filter(a => a.estado === estado).length;
 
-  if (loading) return <p>Cargando...</p>;
+  // ─────────────────────────────────────────────
+  // CAMBIAR ESTADO
+  // ─────────────────────────────────────────────
+  const cambiarEstado = (index, estado) => {
+    const copy = [...alumnos];
+    copy[index].estado = estado;
+    setAlumnos(copy);
+  };
+
+  // ─────────────────────────────────────────────
+  // GUARDAR ASISTENCIA
+  // ─────────────────────────────────────────────
+  const guardar = async () => {
+    try {
+      setGuardando(true);
+
+      await docentesApi.registrarAsistencia(sesionId, {
+        asistencias: alumnos.map(a => ({
+          usuario_id: a.id,
+          estado: a.estado,
+        })),
+      });
+
+      alert("✅ Asistencia registrada correctamente");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error al registrar asistencia");
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  // ─────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────
+  if (loading) {
+    return (
+      <>
+        <DashboardHeader />
+        <p className="loading">Cargando...</p>
+        <DashboardFooter />
+      </>
+    );
+  }
 
   return (
     <>
@@ -66,7 +122,7 @@ export default function RegistrarAsistencia() {
             {info.sesion_titulo}
           </p>
           <small>
-            {dayjs(info.inicia_en).format("DD/MM/YYYY HH:mm")} -
+            {dayjs(info.inicia_en).format("DD/MM/YYYY HH:mm")} –{" "}
             {dayjs(info.termina_en).format("HH:mm")}
           </small>
         </div>
@@ -86,21 +142,20 @@ export default function RegistrarAsistencia() {
           onChange={e => setBusqueda(e.target.value)}
         />
 
-        {/* LISTA */}
+        {/* LISTA DE ALUMNOS */}
         <div className="alumnos-list">
           {filtrados.map((a, i) => (
             <div className="alumno-card" key={a.id}>
-              <span>{a.apellido_paterno} {a.apellido_materno}, {a.nombre}</span>
+              <span className="alumno-nombre">
+                {a.apellido_paterno} {a.apellido_materno}, {a.nombre}
+              </span>
+
               <div className="estado-selector">
                 {ESTADOS.map(e => (
                   <button
                     key={e}
                     className={a.estado === e ? "active" : ""}
-                    onClick={() => {
-                      const copy = [...alumnos];
-                      copy[i].estado = e;
-                      setAlumnos(copy);
-                    }}
+                    onClick={() => cambiarEstado(i, e)}
                   >
                     {e}
                   </button>
@@ -108,6 +163,17 @@ export default function RegistrarAsistencia() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* BOTÓN GUARDAR */}
+        <div className="acciones-footer">
+          <button
+            className="btn-guardar"
+            onClick={guardar}
+            disabled={guardando}
+          >
+            {guardando ? "Guardando..." : "💾 Registrar asistencia"}
+          </button>
         </div>
       </div>
 
