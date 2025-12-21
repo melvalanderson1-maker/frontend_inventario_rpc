@@ -46,10 +46,10 @@ export default function GestionSesiones() {
           Sección <strong>{info.seccion_codigo}</strong>
         </p>
         <h3>{info.sesion_titulo}</h3>
-        <p className="fecha">
+        {/*<p className="fecha">
           {dayjs(info.inicia_en).format("DD/MM/YYYY HH:mm")} –{" "}
           {dayjs(info.termina_en).format("HH:mm")}
-        </p>
+        </p>*/}
       </div>
 
       {/* INFO CARDS */}

@@ -121,10 +121,10 @@ export default function RegistrarAsistencia() {
             Sección <strong>{info.seccion_codigo}</strong> —{" "}
             {info.sesion_titulo}
           </p>
-            <small>
+            {/*<small>
             {dayjs(info.inicia_en, "YYYY-MM-DDTHH:mm:ss").format("DD/MM/YYYY HH:mm")} –{" "}
             {dayjs(info.termina_en, "YYYY-MM-DDTHH:mm:ss").format("HH:mm")}
-            </small>
+            </small>*/}
 
         </div>
 
