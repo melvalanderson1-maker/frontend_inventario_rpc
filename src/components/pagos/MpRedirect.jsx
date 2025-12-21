@@ -7,9 +7,12 @@ export default function MpRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const externalReference = params.get("external_reference");
+    // ✅ Mercado Pago SIEMPRE devuelve preference_id
+    const preferenceId =
+      params.get("preference_id") || params.get("preference-id");
 
-    if (!externalReference) {
+    if (!preferenceId) {
+      console.error("❌ No llegó preference_id desde Mercado Pago");
       navigate("/");
       return;
     }
@@ -17,22 +20,28 @@ export default function MpRedirect() {
     const verificar = async () => {
       try {
         const res = await axiosClient.get(
-          `/pagos/verificar/${externalReference}`
+          `/pagos/verificar/${preferenceId}`
         );
 
-        if (res.data.estado === "APPROVED") {
+        const estado = res.data.estado;
+
+        if (estado === "APPROVED") {
           navigate("/login"); // ✅ pago exitoso
+        } else if (estado === "PENDING") {
+          // ⏳ puedes mostrar una vista de espera si quieres
+          navigate("/"); 
         } else {
-          navigate(-1); // ❌ vuelve a checkout
+          // ❌ rejected, failure, etc
+          navigate(-1);
         }
       } catch (err) {
-        console.error("Error verificando pago", err);
+        console.error("❌ Error verificando pago", err);
         navigate(-1);
       }
     };
 
     verificar();
-  }, []);
+  }, [navigate, params]);
 
   return <p>Verificando pago...</p>;
 }

@@ -85,7 +85,8 @@ router.post("/mercadopago", express.json(), async (req, res) => {
         },
       ],
 
-      external_reference: preference.id, // 🔥 CLAVE REAL
+        // ✅ USAR ALGO TUYO
+      external_reference: String(seccion_id),
 
       payer: {
         email: alumno.correo,
