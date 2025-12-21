@@ -8,6 +8,47 @@ let pool;
 
 module.exports = {
 
+
+// ─────────────────────────────────────────────
+// DOCENTE: SUS SECCIONES + CURSOS
+// ─────────────────────────────────────────────
+listarSeccionesDocente: async (req, res) => {
+  try {
+    const docenteId = req.user.id;
+
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        s.id AS seccion_id,
+        s.codigo AS seccion_codigo,
+        s.fecha_inicio,
+        s.fecha_fin,
+        c.titulo AS curso_titulo
+      FROM secciones s
+      JOIN cursos c ON s.curso_id = c.id
+      WHERE s.docente_id = ?
+      ORDER BY s.fecha_inicio DESC
+      `,
+      [docenteId]
+    );
+
+    const secciones = rows.map(r => ({
+      ...r,
+      fecha_inicio: r.fecha_inicio
+        ? r.fecha_inicio.toISOString().slice(0, 10)
+        : null,
+      fecha_fin: r.fecha_fin
+        ? r.fecha_fin.toISOString().slice(0, 10)
+        : null,
+    }));
+
+    res.json({ ok: true, secciones });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
   // ─────────────────────────────────────────────
   // DOCENTE: SUS SECCIONES + CURSOS
   // ─────────────────────────────────────────────
