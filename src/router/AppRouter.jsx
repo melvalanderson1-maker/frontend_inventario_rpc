@@ -36,11 +36,14 @@ import AuditoriaAdmin from "../components/Administrador/AuditoriaAdmin";
 
 // rutas/docente (ajusta paths según dónde pongas los archivos)
 
-import SeccionesCurso from "../components/docente/SeccionesCurso";
-import SesionesSeccion from "../components/docente/SesionesSeccion";
+// DOCENTE PAGES
+import MisSecciones from "../components/docente/MisSecciones";
+import GestionSesiones from "../components/docente/GestionSesiones";
 import RegistrarAsistencia from "../components/docente/RegistrarAsistencia";
+import RegistrarNotas from "../components/docente/RegistrarNotas"; // ← corregido
 import CalendarioSeccion from "../components/docente/CalendarioSeccion";
 import ListaAlumnos from "../components/docente/ListaAlumnos";
+
 
 
 
@@ -103,6 +106,25 @@ export default function AppRouter() {
             }
           />
 
+          <Route
+            path="/docente/gestionsesiones"
+            element={
+              <PrivateRoute roles={["DOCENTE"]}>
+                <GestionSesiones />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/docente/misecciones"
+            element={
+              <PrivateRoute roles={["DOCENTE"]}>
+                <MisSecciones />
+              </PrivateRoute>
+            }
+          />
+
+
           {/* DOCENTE → CALENDARIO DE UNA SECCIÓN */}
           <Route
             path="/docente/secciones/:seccionId/calendario"
@@ -125,25 +147,7 @@ export default function AppRouter() {
 
 
 
-          {/* DOCENTE → SECCIONES DE UN CURSO */}
-          <Route
-            path="/docente/cursos/:cursoId/secciones"
-            element={
-              <PrivateRoute roles={["DOCENTE"]}>
-                <SeccionesCurso />
-              </PrivateRoute>
-            }
-          />
 
-          {/* DOCENTE → SESIONES DE UNA SECCIÓN */}
-          <Route
-            path="/docente/secciones/:seccionId/sesiones"
-            element={
-              <PrivateRoute roles={["DOCENTE"]}>
-                <SesionesSeccion />
-              </PrivateRoute>
-            }
-          />
 
           {/* DOCENTE → ASISTENCIA */}
           <Route
