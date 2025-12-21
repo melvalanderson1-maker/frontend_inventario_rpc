@@ -26,6 +26,12 @@ router.get(
   docentesController.listarAlumnosSesion
 );
 
+router.get(
+  "/sesiones/:id/alumnos",
+  authMiddleware,
+  docentesController.listarAlumnosSesion
+);
+
 router.post(
   "/sesiones/:id/asistencia",
   docentesController.registrarAsistencia

@@ -119,30 +119,37 @@ listarDocentes: async (req, res) => {
   // ─────────────────────────────────────────────
   // ALUMNOS DE UNA SESIÓN
   // ─────────────────────────────────────────────
-  listarAlumnosSesion: async (req, res) => {
-    try {
-      const sesionId = req.params.id;
+listarAlumnosSesion: async (req, res) => {
+  try {
+    const sesionId = req.params.id;
 
-      const [rows] = await pool.query(
-        `
-        SELECT 
-          u.id,
-          u.nombre,
-          u.apellido_paterno,
-          u.apellido_materno,
-          a.estado
-        FROM asistencias a
-        JOIN usuarios u ON a.usuario_id = u.id
-        WHERE a.sesion_id = ?
-        `,
-        [sesionId]
-      );
+    const [[sesion]] = await pool.query(
+      `SELECT seccion_id FROM sesiones WHERE id=?`,
+      [sesionId]
+    );
 
-      res.json({ ok: true, alumnos: rows });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id,
+        u.nombre,
+        u.apellido_paterno,
+        u.apellido_materno,
+        COALESCE(a.estado, 'PRESENTE') AS estado
+      FROM matriculas m
+      JOIN usuarios u ON u.id = m.usuario_id
+      LEFT JOIN asistencias a 
+        ON a.usuario_id = u.id AND a.sesion_id = ?
+      WHERE m.seccion_id = ?
+        AND m.estado = 'ACTIVO'
+      ORDER BY u.apellido_paterno
+    `, [sesionId, sesion.seccion_id]);
+
+    res.json({ ok: true, alumnos: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
 
   // ─────────────────────────────────────────────
   // REGISTRAR / ACTUALIZAR ASISTENCIA

@@ -110,7 +110,11 @@ export default function MisSecciones({ usuario }) {
               slotMinTime="06:00:00"
               slotMaxTime="23:00:00"
               events={sesiones}
+              eventClick={(info) => {
+                navigate(`/docente/sesiones/${info.event.id}`);
+              }}
             />
+
           </>
         )}
       </main>
