@@ -39,6 +39,13 @@ router.get(
   docentesController.listarAlumnosSeccion
 );
 
+router.get(
+  "/sesiones/:id/info",
+  authMiddleware,
+  docentesController.obtenerInfoSesion
+);
+
+
 router.post(
   "/secciones/:id/notas",
   authMiddleware,

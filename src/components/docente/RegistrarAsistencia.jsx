@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import docentesApi from "../../api/docentesApi";
+import dayjs from "dayjs";
 
 import DashboardHeader from "../../components/layout/DashboardHeader";
 import DashboardFooter from "../../components/layout/DashboardFooter";
@@ -11,112 +12,103 @@ const ESTADOS = ["PRESENTE", "TARDANZA", "AUSENTE", "JUSTIFICADO", "REMOTO"];
 export default function RegistrarAsistencia() {
   const { sesionId } = useParams();
 
+  const [info, setInfo] = useState(null);
   const [alumnos, setAlumnos] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
-  const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!sesionId) {
-      setError("Sesión inválida");
-      setLoading(false);
-      return;
-    }
-
-    const fetchAlumnos = async () => {
+    const cargarTodo = async () => {
       try {
-        const res = await docentesApi.listarAlumnosSesion(sesionId);
+        const [infoRes, alumnosRes] = await Promise.all([
+          docentesApi.obtenerInfoSesion(sesionId),
+          docentesApi.listarAlumnosSesion(sesionId),
+        ]);
 
+        setInfo(infoRes.data.info);
         setAlumnos(
-          (res.data.alumnos || []).map(a => ({
+          alumnosRes.data.alumnos.map(a => ({
             ...a,
             estado: a.estado || "PRESENTE",
           }))
         );
       } catch (err) {
-        console.error(err);
-        setError(
-          err.response?.data?.msg ||
-          "No se pudo cargar la lista de alumnos"
-        );
+        alert("Error cargando información");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAlumnos();
+    cargarTodo();
   }, [sesionId]);
 
-  const cambiarEstado = (idx, estado) => {
-    const copy = [...alumnos];
-    copy[idx].estado = estado;
-    setAlumnos(copy);
-  };
+  const filtrados = alumnos.filter(a =>
+    `${a.nombre} ${a.apellido_paterno} ${a.apellido_materno}`
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
+  );
 
-  const guardar = async () => {
-    setGuardando(true);
-    try {
-      await docentesApi.registrarAsistencia(sesionId, {
-        asistencias: alumnos.map(a => ({
-          usuario_id: a.id,
-          estado: a.estado,
-        })),
-      });
-      alert("✅ Asistencia registrada correctamente");
-    } catch (err) {
-      alert("❌ Error guardando asistencia");
-    } finally {
-      setGuardando(false);
-    }
-  };
+  const contar = estado =>
+    alumnos.filter(a => a.estado === estado).length;
+
+  if (loading) return <p>Cargando...</p>;
 
   return (
     <>
       <DashboardHeader />
 
       <div className="asistencia-container">
-        <h2>Registrar Asistencia</h2>
+        {/* HEADER */}
+        <div className="info-header">
+          <h2>{info.curso_titulo}</h2>
+          <p>
+            Sección <strong>{info.seccion_codigo}</strong> —{" "}
+            {info.sesion_titulo}
+          </p>
+          <small>
+            {dayjs(info.inicia_en).format("DD/MM/YYYY HH:mm")} -
+            {dayjs(info.termina_en).format("HH:mm")}
+          </small>
+        </div>
 
-        {loading && <p>Cargando alumnos...</p>}
-        {error && <p className="error">{error}</p>}
+        {/* STATS */}
+        <div className="stats-grid">
+          <div className="stat-card">👥 {info.total_alumnos} Matriculados</div>
+          <div className="stat-card">✅ {contar("PRESENTE")} Presentes</div>
+          <div className="stat-card">❌ {contar("AUSENTE")} Ausentes</div>
+        </div>
 
-        {!loading && !error && alumnos.length === 0 && (
-          <p className="muted">No hay alumnos matriculados en esta sección</p>
-        )}
+        {/* BUSCADOR */}
+        <input
+          className="buscador"
+          placeholder="Buscar por nombre o DNI..."
+          value={busqueda}
+          onChange={e => setBusqueda(e.target.value)}
+        />
 
-        {!loading && !error && alumnos.length > 0 && (
-          <>
-            <div className="alumnos-list">
-              {alumnos.map((a, i) => (
-                <div className="alumno-card" key={a.id}>
-                  <span className="alumno-nombre">
-                    {a.apellido_paterno} {a.apellido_materno}, {a.nombre}
-                  </span>
-
-                  <div className="estado-selector">
-                    {ESTADOS.map(e => (
-                      <button
-                        key={e}
-                        className={a.estado === e ? "active" : ""}
-                        onClick={() => cambiarEstado(i, e)}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+        {/* LISTA */}
+        <div className="alumnos-list">
+          {filtrados.map((a, i) => (
+            <div className="alumno-card" key={a.id}>
+              <span>{a.apellido_paterno} {a.apellido_materno}, {a.nombre}</span>
+              <div className="estado-selector">
+                {ESTADOS.map(e => (
+                  <button
+                    key={e}
+                    className={a.estado === e ? "active" : ""}
+                    onClick={() => {
+                      const copy = [...alumnos];
+                      copy[i].estado = e;
+                      setAlumnos(copy);
+                    }}
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
             </div>
-
-            <button
-              className="btn primary"
-              onClick={guardar}
-              disabled={guardando}
-            >
-              {guardando ? "Guardando..." : "Guardar asistencia"}
-            </button>
-          </>
-        )}
+          ))}
+        </div>
       </div>
 
       <DashboardFooter />

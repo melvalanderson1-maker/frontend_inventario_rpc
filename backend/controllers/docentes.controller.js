@@ -197,6 +197,53 @@ listarAlumnosSeccion: async (req, res) => {
   }
 },
 
+
+obtenerInfoSesion: async (req, res) => {
+  try {
+    const sesionId = req.params.id;
+    const docenteId = req.user.id;
+
+    const [[info]] = await pool.query(
+      `
+      SELECT 
+        c.titulo AS curso_titulo,
+        sec.codigo AS seccion_codigo,
+        s.titulo AS sesion_titulo,
+        s.inicia_en,
+        s.termina_en,
+        (
+          SELECT COUNT(*) 
+          FROM matriculas m 
+          WHERE m.seccion_id = sec.id 
+            AND m.estado = 'ACTIVO'
+        ) AS total_alumnos
+      FROM sesiones s
+      JOIN secciones sec ON sec.id = s.seccion_id
+      JOIN cursos c ON c.id = sec.curso_id
+      WHERE s.id = ?
+        AND sec.docente_id = ?
+      `,
+      [sesionId, docenteId]
+    );
+
+    if (!info) {
+      return res.status(404).json({ ok: false, msg: "Sesión no válida" });
+    }
+
+    res.json({
+      ok: true,
+      info: {
+        ...info,
+        inicia_en: info.inicia_en?.toISOString(),
+        termina_en: info.termina_en?.toISOString(),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
 registrarNotas: async (req, res) => {
   try {
     const seccionId = req.params.id;
