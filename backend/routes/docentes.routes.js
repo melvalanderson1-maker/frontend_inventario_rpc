@@ -6,7 +6,8 @@ const docentesController = require("../controllers/docentes.controller");
 router.get("/", docentesController.listarDocentes);
 
 // Secciones del docente
-router.get("/:id/secciones", docentesController.listarSeccionesDocente);
+router.get("/mis-secciones", authMiddleware, docentesController.listarSeccionesDocente);
+
 
 // Sesiones de una sección (para FullCalendar)
 router.get("/secciones/:id/sesiones", docentesController.listarSesionesSeccion);

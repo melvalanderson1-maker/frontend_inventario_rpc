@@ -1,117 +1,145 @@
+// backend/controllers/docentes.controller.js
 const { initDB } = require("../config/db");
 let pool;
-(async () => { pool = await initDB(); })();
+
+(async () => {
+  pool = await initDB();
+})();
 
 module.exports = {
-  listarDocentes: async (req, res) => {
-    try {
-      const [rows] = await pool.query(
-        "SELECT id, nombre, apellido_paterno, apellido_materno, correo, telefono FROM usuarios WHERE rol='DOCENTE'"
-      );
-      res.json({ ok: true, docentes: rows });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
 
+  // ─────────────────────────────────────────────
+  // DOCENTE: SUS SECCIONES + CURSOS
+  // ─────────────────────────────────────────────
   listarSeccionesDocente: async (req, res) => {
     try {
-      const docenteId = req.params.id;
+      const docenteId = req.user.id; // o req.user.id si usas auth real
+
       const [rows] = await pool.query(
-        `SELECT s.id AS seccion_id, s.codigo AS seccion_codigo, s.periodo, s.modalidad, s.capacidad,
-                c.id AS curso_id, c.titulo AS curso_titulo, c.codigo AS curso_codigo,
-                (SELECT COUNT(*) FROM matriculas m WHERE m.seccion_id = s.id AND m.estado='ACTIVO') AS alumnos_count
-         FROM secciones s
-         JOIN cursos c ON s.curso_id = c.id
-         WHERE s.docente_id = ?`,
+        `
+        SELECT 
+          s.id AS seccion_id,
+          s.codigo AS seccion_codigo,
+          s.fecha_inicio,
+          s.fecha_fin,
+          s.modalidad,
+          s.curso_id,
+          c.titulo AS curso_titulo,
+          c.descripcion AS curso_descripcion
+        FROM secciones s
+        JOIN cursos c ON s.curso_id = c.id
+        WHERE s.docente_id = ?
+        ORDER BY s.fecha_inicio DESC
+        `,
         [docenteId]
       );
-      res.json({ ok: true, secciones: rows });
+
+      const secciones = rows.map(r => ({
+        ...r,
+        fecha_inicio: r.fecha_inicio
+          ? r.fecha_inicio.toISOString().slice(0, 10)
+          : null,
+        fecha_fin: r.fecha_fin
+          ? r.fecha_fin.toISOString().slice(0, 10)
+          : null,
+      }));
+
+      res.json({ ok: true, secciones });
     } catch (err) {
       console.error(err);
       res.status(500).json({ ok: false, msg: err.message });
     }
   },
 
+  // ─────────────────────────────────────────────
+  // SESIONES DE UNA SECCIÓN (CALENDARIO)
+  // ─────────────────────────────────────────────
   listarSesionesSeccion: async (req, res) => {
     try {
       const seccionId = req.params.id;
 
-      // Usamos la consulta que me diste
       const [rows] = await pool.query(
-        `SELECT 
-          c.id AS curso_id,
-          c.titulo AS curso,
-          sec.id AS seccion_id,
-          sec.codigo AS seccion,
-          s.id AS sesion_id,
-          s.titulo AS title,
-          s.inicia_en AS start,
-          s.termina_en AS end
-        FROM sesiones s
-        JOIN secciones sec ON s.seccion_id = sec.id
-        JOIN cursos c ON sec.curso_id = c.id
-        WHERE sec.id = ?
-        ORDER BY c.titulo, sec.codigo, s.inicia_en`,
+        `
+        SELECT *
+        FROM sesiones
+        WHERE seccion_id = ?
+        ORDER BY inicia_en ASC
+        `,
         [seccionId]
       );
 
-      // Mapeamos a eventos para FullCalendar
-      const eventos = rows.map((r) => ({
-        sesion_id: r.sesion_id,
-        title: r.title,
-        start: r.start,
-        end: r.end,
-        color: "#4a90e2",
-      }));
-
-      res.json({ ok: true, sesiones: eventos });
+      res.json({ ok: true, sesiones: rows });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ ok: false, msg: err.message });
     }
   },
 
+  // ─────────────────────────────────────────────
+  // ALUMNOS DE UNA SESIÓN
+  // ─────────────────────────────────────────────
   listarAlumnosSesion: async (req, res) => {
     try {
       const sesionId = req.params.id;
-      const [[sesion]] = await pool.query(
-        "SELECT seccion_id FROM sesiones WHERE id = ?",
-        [sesionId]
-      );
-      if (!sesion) return res.status(404).json({ ok: false, msg: "Sesión no encontrada" });
 
       const [rows] = await pool.query(
-        `SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, u.numero_documento
-         FROM matriculas m
-         JOIN usuarios u ON m.usuario_id = u.id
-         WHERE m.seccion_id = ? AND m.estado='ACTIVO'`,
-        [sesion.seccion_id]
+        `
+        SELECT 
+          u.id,
+          u.nombre,
+          u.apellido_paterno,
+          u.apellido_materno,
+          a.estado
+        FROM asistencias a
+        JOIN usuarios u ON a.usuario_id = u.id
+        WHERE a.sesion_id = ?
+        `,
+        [sesionId]
       );
+
       res.json({ ok: true, alumnos: rows });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ ok: false, msg: err.message });
     }
   },
 
+  // ─────────────────────────────────────────────
+  // REGISTRAR / ACTUALIZAR ASISTENCIA
+  // ─────────────────────────────────────────────
   registrarAsistencia: async (req, res) => {
     try {
       const sesionId = req.params.id;
       const { asistencias } = req.body;
       const docenteId = req.user?.id || null;
 
-      if (!Array.isArray(asistencias))
-        return res.status(400).json({ ok: false, msg: "Formato inválido" });
+      for (const a of asistencias) {
+        const [existe] = await pool.query(
+          `
+          SELECT id FROM asistencias
+          WHERE sesion_id=? AND usuario_id=?
+          `,
+          [sesionId, a.usuario_id]
+        );
 
-      await pool.query("DELETE FROM asistencias WHERE sesion_id = ?", [sesionId]);
-
-      const values = asistencias.map((a) => [sesionId, a.usuario_id, a.estado, docenteId]);
-      await pool.query(
-        `INSERT INTO asistencias (sesion_id, usuario_id, estado, marcado_por) VALUES ?`,
-        [values]
-      );
+        if (existe.length === 0) {
+          await pool.query(
+            `
+            INSERT INTO asistencias
+            (sesion_id, usuario_id, estado, marcado_por)
+            VALUES (?, ?, ?, ?)
+            `,
+            [sesionId, a.usuario_id, a.estado, docenteId]
+          );
+        } else {
+          await pool.query(
+            `
+            UPDATE asistencias
+            SET estado=?, marcado_por=?
+            WHERE sesion_id=? AND usuario_id=?
+            `,
+            [a.estado, docenteId, sesionId, a.usuario_id]
+          );
+        }
+      }
 
       res.json({ ok: true, msg: "Asistencia registrada correctamente" });
     } catch (err) {
@@ -119,4 +147,5 @@ module.exports = {
       res.status(500).json({ ok: false, msg: err.message });
     }
   },
+
 };
