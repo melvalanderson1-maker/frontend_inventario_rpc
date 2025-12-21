@@ -122,13 +122,30 @@ listarDocentes: async (req, res) => {
 listarAlumnosSesion: async (req, res) => {
   try {
     const sesionId = req.params.id;
+    const docenteId = req.user.id;
 
+    // 1️⃣ Validar sesión + sección + docente
     const [[sesion]] = await pool.query(
-      `SELECT seccion_id FROM sesiones WHERE id=?`,
-      [sesionId]
+      `
+      SELECT s.seccion_id
+      FROM sesiones s
+      JOIN secciones sec ON sec.id = s.seccion_id
+      WHERE s.id = ?
+        AND sec.docente_id = ?
+      `,
+      [sesionId, docenteId]
     );
 
-    const [rows] = await pool.query(`
+    if (!sesion) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Sesión no encontrada o no pertenece al docente",
+      });
+    }
+
+    // 2️⃣ Listar alumnos matriculados de ESA sección
+    const [rows] = await pool.query(
+      `
       SELECT 
         u.id,
         u.nombre,
@@ -138,17 +155,23 @@ listarAlumnosSesion: async (req, res) => {
       FROM matriculas m
       JOIN usuarios u ON u.id = m.usuario_id
       LEFT JOIN asistencias a 
-        ON a.usuario_id = u.id AND a.sesion_id = ?
+        ON a.usuario_id = u.id 
+        AND a.sesion_id = ?
       WHERE m.seccion_id = ?
         AND m.estado = 'ACTIVO'
       ORDER BY u.apellido_paterno
-    `, [sesionId, sesion.seccion_id]);
+      `,
+      [sesionId, sesion.seccion_id]
+    );
 
     res.json({ ok: true, alumnos: rows });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ ok: false, msg: err.message });
   }
 },
+
 
 listarAlumnosSeccion: async (req, res) => {
   try {

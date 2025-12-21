@@ -9,31 +9,36 @@ import "./RegistrarAsistencia.css";
 const ESTADOS = ["PRESENTE", "TARDANZA", "AUSENTE", "JUSTIFICADO", "REMOTO"];
 
 export default function RegistrarAsistencia() {
-  // ✅ SESIÓN VIENE POR LA URL
   const { sesionId } = useParams();
 
   const [alumnos, setAlumnos] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState(null);
 
-  // 🔹 Cargar alumnos de la sesión
   useEffect(() => {
-    if (!sesionId) return;
+    if (!sesionId) {
+      setError("Sesión inválida");
+      setLoading(false);
+      return;
+    }
 
     const fetchAlumnos = async () => {
-      setLoading(true);
       try {
         const res = await docentesApi.listarAlumnosSesion(sesionId);
 
         setAlumnos(
-          (res.data.alumnos || []).map((a) => ({
+          (res.data.alumnos || []).map(a => ({
             ...a,
-            estado: "PRESENTE",
+            estado: a.estado || "PRESENTE",
           }))
         );
       } catch (err) {
         console.error(err);
-        alert("Error cargando alumnos de la sesión");
+        setError(
+          err.response?.data?.msg ||
+          "No se pudo cargar la lista de alumnos"
+        );
       } finally {
         setLoading(false);
       }
@@ -51,18 +56,15 @@ export default function RegistrarAsistencia() {
   const guardar = async () => {
     setGuardando(true);
     try {
-      const payload = {
-        asistencias: alumnos.map((a) => ({
+      await docentesApi.registrarAsistencia(sesionId, {
+        asistencias: alumnos.map(a => ({
           usuario_id: a.id,
           estado: a.estado,
         })),
-      };
-
-      await docentesApi.registrarAsistencia(sesionId, payload);
-      alert("Asistencia registrada correctamente");
+      });
+      alert("✅ Asistencia registrada correctamente");
     } catch (err) {
-      console.error(err);
-      alert("Error guardando asistencia");
+      alert("❌ Error guardando asistencia");
     } finally {
       setGuardando(false);
     }
@@ -73,53 +75,48 @@ export default function RegistrarAsistencia() {
       <DashboardHeader />
 
       <div className="asistencia-container">
-        <header>
-          <h2>Registrar Asistencia</h2>
-          <p className="muted">
-            Registro de asistencia de los estudiantes matriculados
-            para esta <strong>sesión</strong>.
-          </p>
-        </header>
+        <h2>Registrar Asistencia</h2>
 
-        {/* ID SOLO INFORMATIVO */}
-        <div className="form-row">
-          <label>ID de Sesión</label>
-          <input value={sesionId} disabled />
-        </div>
+        {loading && <p>Cargando alumnos...</p>}
+        {error && <p className="error">{error}</p>}
 
-        {loading ? (
-          <p>Cargando alumnos...</p>
-        ) : (
-          <div className="alumnos-list">
-            {alumnos.map((a, i) => (
-              <div className="alumno-card" key={a.id}>
-                <div className="alumno-info">
-                  {a.nombre} {a.apellido_paterno} {a.apellido_materno}
-                </div>
-
-                <div className="estado-selector">
-                  {ESTADOS.map((e) => (
-                    <button
-                      key={e}
-                      className={a.estado === e ? "active" : ""}
-                      onClick={() => cambiarEstado(i, e)}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        {!loading && !error && alumnos.length === 0 && (
+          <p className="muted">No hay alumnos matriculados en esta sección</p>
         )}
 
-        <button
-          className="btn primary"
-          onClick={guardar}
-          disabled={guardando}
-        >
-          {guardando ? "Guardando..." : "Guardar asistencia"}
-        </button>
+        {!loading && !error && alumnos.length > 0 && (
+          <>
+            <div className="alumnos-list">
+              {alumnos.map((a, i) => (
+                <div className="alumno-card" key={a.id}>
+                  <span className="alumno-nombre">
+                    {a.apellido_paterno} {a.apellido_materno}, {a.nombre}
+                  </span>
+
+                  <div className="estado-selector">
+                    {ESTADOS.map(e => (
+                      <button
+                        key={e}
+                        className={a.estado === e ? "active" : ""}
+                        onClick={() => cambiarEstado(i, e)}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="btn primary"
+              onClick={guardar}
+              disabled={guardando}
+            >
+              {guardando ? "Guardando..." : "Guardar asistencia"}
+            </button>
+          </>
+        )}
       </div>
 
       <DashboardFooter />
