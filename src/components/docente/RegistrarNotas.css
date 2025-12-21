@@ -1,11 +1,152 @@
-.registrar-notas { padding:1.5rem; }
-.form-row { display:flex; gap:0.6rem; align-items:center; margin-top:0.6rem; flex-wrap:wrap; }
-.form-row input { padding:0.5rem 0.6rem; border-radius:6px; border:1px solid #dfe6ee; }
+/* ================================
+   RegistrarNotas.css
+   Diseño profesional y responsive
+   ================================ */
 
-.notas-list { margin-top:1rem; display:flex; flex-direction:column; gap:0.6rem; }
-.nota-row { display:flex; justify-content:space-between; align-items:center; padding:0.9rem; background:#fff; border-radius:8px; }
-.alumno-info { }
-.alumno-input input { width:120px; padding:0.45rem; border-radius:6px; border:1px solid #dfe6ee; }
-.save-row { margin-top:1rem; }
-.btn.primary { background:#8c52ff; color:#fff; padding:0.6rem 1rem; border-radius:8px; border:none; }
-@media(max-width:600px){ .nota-row{ flex-direction:column; align-items:flex-start; gap:0.5rem; } .alumno-input input{ width:100%; } }
+.registrar-notas {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+/* ---------- HEADER ---------- */
+.registrar-notas header {
+  margin-bottom: 24px;
+}
+
+.registrar-notas h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.registrar-notes .muted,
+.registrar-notas .muted {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* ---------- FORM ROW ---------- */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.form-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-row input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 0.95rem;
+}
+
+/* ---------- LISTA DE NOTAS ---------- */
+.notas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.nota-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.nota-row span {
+  font-size: 0.95rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.nota-row input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.nota-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* ---------- BOTÓN ---------- */
+.registrar-notas .btn.primary {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.registrar-notas .btn.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.registrar-notas .btn.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .nota-row {
+    grid-template-columns: 1fr 90px;
+  }
+
+  .registrar-notas h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .nota-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .nota-row input {
+    text-align: left;
+  }
+
+  .registrar-notas {
+    padding: 16px 12px 32px;
+  }
+
+  .registrar-notas .btn.primary {
+    max-width: 100%;
+  }
+}

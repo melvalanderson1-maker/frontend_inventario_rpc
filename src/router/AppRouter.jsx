@@ -138,6 +138,15 @@ export default function AppRouter() {
             }
           />
 
+          <Route
+            path="/docente/secciones/:seccionId/notas"
+            element={
+              <PrivateRoute roles={["DOCENTE"]}>
+                <RegistrarNotas />
+              </PrivateRoute>
+            }
+          />
+
 
           <Route
             path="/docente/sesiones/:sesionId"
@@ -161,6 +170,8 @@ export default function AppRouter() {
               </PrivateRoute>
             }
           />
+          
+
 
 
         {/* SECRETARIA MENU */}
