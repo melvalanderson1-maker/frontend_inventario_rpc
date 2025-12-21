@@ -121,8 +121,16 @@ export default function RegistrarNotas() {
                 max="20"
                 step="0.01"
                 value={a.nota}
+                className={
+                  a.nota === ""
+                    ? ""
+                    : Number(a.nota) < 11
+                    ? "nota-desaprobada"
+                    : "nota-aprobada"
+                }
                 onChange={(e) => updateNota(i, e.target.value)}
               />
+
             </div>
           ))}
         </div>
