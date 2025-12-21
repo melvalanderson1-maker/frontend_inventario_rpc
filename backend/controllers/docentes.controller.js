@@ -100,6 +100,27 @@ module.exports = {
     }
   },
 
+  // Listar sesiones de una sección específica
+listarSesionesSeccion: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const [rows] = await pool.query(
+      `SELECT se.id AS sesion_id, se.titulo, se.tipo_sesion, se.aula, se.enlace_meet,
+              h.dia_semana, h.hora_inicio, h.hora_fin, h.lugar
+       FROM sesiones se
+       LEFT JOIN horarios h ON h.seccion_id = se.seccion_id
+       WHERE se.seccion_id = ?
+       ORDER BY h.dia_semana, h.hora_inicio ASC`,
+      [seccionId]
+    );
+    res.json({ ok: true, sesiones: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
   registrarNotas: async (req, res) => {
     try {
       const seccionId = req.params.id;

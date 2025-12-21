@@ -14,53 +14,59 @@ export default function CalendarioSeccion({ seccionId }) {
   const [loading, setLoading] = useState(false);
   const calendarRef = useRef(null);
 
-  const cargarSesiones = async () => {
-    try {
-        const res = await adminApi.listarSesiones(seccionId);
-        const eventos = (res.data.sesiones || []).map((s) => {
-        // Calculamos la fecha de inicio en la semana actual
-        const today = new Date();
-        const dayOfWeek = s.dia_semana; // 1=Lunes, 7=Domingo
-        const diff = dayOfWeek - today.getDay();
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() + diff);
-        startDate.setHours(parseInt(s.hora_inicio.split(":")[0]), parseInt(s.hora_inicio.split(":")[1]));
+const cargarSesiones = async () => {
+  try {
+    const res = await adminApi.listarSesionesSeccion(seccionId);
+    const eventos = (res.data.sesiones || []).map((s) => {
+      if (!s.dia_semana || !s.hora_inicio || !s.hora_fin) return null;
 
-        const endDate = new Date(today);
-        endDate.setDate(today.getDate() + diff);
-        endDate.setHours(parseInt(s.hora_fin.split(":")[0]), parseInt(s.hora_fin.split(":")[1]));
+      // FullCalendar espera fecha completa
+      // Calculamos la fecha de inicio de esta semana para el día de la semana
+      const today = new Date();
+      const dayOfWeek = parseInt(s.dia_semana); // 1=Lunes, 7=Domingo
+      const diff = dayOfWeek - (today.getDay() === 0 ? 7 : today.getDay()); // domingo=0
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() + diff);
+      const [hStart, mStart] = s.hora_inicio.split(":").map(Number);
+      startDate.setHours(hStart, mStart, 0);
 
-        return {
-            id: s.sesion_id,
-            title: s.titulo,
-            start: startDate,
-            end: endDate,
-            color: "#4a90e2",
-        };
-        });
+      const endDate = new Date(today);
+      endDate.setDate(today.getDate() + diff);
+      const [hEnd, mEnd] = s.hora_fin.split(":").map(Number);
+      endDate.setHours(hEnd, mEnd, 0);
 
-      setSesiones(eventos);
-    } catch (err) {
-      console.error("Error cargando sesiones", err);
-      setSesiones([]);
-    }
-  };
+      return {
+        id: s.sesion_id,
+        title: s.titulo,
+        start: startDate,
+        end: endDate,
+        color: "#4a90e2",
+      };
+    }).filter(Boolean);
 
-    const cargarAlumnos = async (sesionId) => {
-    try {
-        setLoading(true);
-        // Pedimos los alumnos de la seccion asociada a esta sesion
-        const res = await adminApi.listarAlumnosSesion(sesionId); 
-        setAlumnos(res.data.alumnos || []);
-        setShowAlumnosModal(true);
-    } catch (err) {
-        console.error("Error cargando alumnos", err);
-        setAlumnos([]);
-        alert("No se pudo cargar la lista de alumnos");
-    } finally {
-        setLoading(false);
-    }
-    };
+    setSesiones(eventos);
+  } catch (err) {
+    console.error("Error cargando sesiones", err);
+    setSesiones([]);
+  }
+};
+
+
+ const cargarAlumnos = async (sesionId) => {
+  try {
+    setLoading(true);
+    const res = await adminApi.listarAlumnosSesion(sesionId); 
+    setAlumnos(res.data.alumnos || []);
+    setShowAlumnosModal(true);
+  } catch (err) {
+    console.error("Error cargando alumnos", err);
+    setAlumnos([]);
+    alert("No se pudo cargar la lista de alumnos");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     if (seccionId) cargarSesiones();

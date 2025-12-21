@@ -14,6 +14,13 @@ router.get("/:id/sesiones", docentesController.listarSesionesDocente);
 // Alumnos de una sesión
 router.get("/sesiones/:id/alumnos", docentesController.listarAlumnosSesion);
 
+// Sesiones de una sección
+router.get("/secciones/:id/sesiones", docentesController.listarSesionesSeccion);
+
+// Alumnos de la sesión (ya existe)
+router.get("/sesiones/:id/alumnos", docentesController.listarAlumnosSesion);
+
+
 // Registrar asistencia
 router.post("/sesiones/:id/asistencia", docentesController.registrarAsistencia);
 
