@@ -76,7 +76,18 @@ listarSesionesSeccion: async (req, res) => {
       [seccionId, docenteId]
     );
 
-    res.json({ ok: true, sesiones: rows });
+    const sesiones = rows.map(s => ({
+      ...s,
+      inicia_en: s.inicia_en
+        ? s.inicia_en.toISOString().slice(0, 19)
+        : null,
+      termina_en: s.termina_en
+        ? s.termina_en.toISOString().slice(0, 19)
+        : null,
+    }));
+
+    res.json({ ok: true, sesiones });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, msg: err.message });

@@ -36,9 +36,12 @@ export default function MisSecciones({ usuario }) {
       const eventos = (res.data.sesiones || []).map(s => ({
         id: s.id,
         title: s.titulo,
-        start: s.inicia_en,
-        end: s.termina_en,
+        start: dayjs(s.inicia_en).format("YYYY-MM-DDTHH:mm:ss"),
+        end: dayjs(s.termina_en).format("YYYY-MM-DDTHH:mm:ss"),
       }));
+
+      // 🔎 PRUEBA RÁPIDA (AGREGA ESTA LÍNEA EXACTAMENTE AQUÍ)
+      console.log("EVENTOS CALENDAR:", eventos);
 
       setSesiones(eventos);
     } catch (err) {
@@ -46,6 +49,7 @@ export default function MisSecciones({ usuario }) {
       setSesiones([]);
     }
   };
+
 
   useEffect(() => {
   if (!seccionSeleccionada) return;
