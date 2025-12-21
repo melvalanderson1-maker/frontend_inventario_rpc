@@ -47,10 +47,16 @@ export default function MisSecciones({ usuario }) {
     }
   };
 
+  useEffect(() => {
+  if (!seccionSeleccionada) return;
+  cargarSesiones(seccionSeleccionada.seccion_id);
+  }, [seccionSeleccionada]);
+
+
   const abrirSeccion = (s) => {
     setSeccionSeleccionada(s);
-    cargarSesiones(s.seccion_id);
   };
+
 
   return (
     <div className="docente-wrapper">

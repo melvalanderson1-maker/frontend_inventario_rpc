@@ -11,45 +11,37 @@ module.exports = {
   // ─────────────────────────────────────────────
   // DOCENTE: SUS SECCIONES + CURSOS
   // ─────────────────────────────────────────────
-  listarSeccionesDocente: async (req, res) => {
-    try {
-      const docenteId = req.user.id; // o req.user.id si usas auth real
+// ─────────────────────────────────────────────
+// SESIONES DE UNA SECCIÓN (CALENDARIO)
+// ─────────────────────────────────────────────
+listarSesionesSeccion: async (req, res) => {
+  try {
+    const seccionId = req.params.id;
+    const docenteId = req.user.id; // 🔐 seguridad
 
-      const [rows] = await pool.query(
-        `
-        SELECT 
-          s.id AS seccion_id,
-          s.codigo AS seccion_codigo,
-          s.fecha_inicio,
-          s.fecha_fin,
-          s.modalidad,
-          s.curso_id,
-          c.titulo AS curso_titulo,
-          c.descripcion AS curso_descripcion
-        FROM secciones s
-        JOIN cursos c ON s.curso_id = c.id
-        WHERE s.docente_id = ?
-        ORDER BY s.fecha_inicio DESC
-        `,
-        [docenteId]
-      );
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        s.id,
+        s.titulo,
+        s.inicia_en,
+        s.termina_en
+      FROM sesiones s
+      JOIN secciones sec ON s.seccion_id = sec.id
+      WHERE s.seccion_id = ?
+        AND sec.docente_id = ?
+      ORDER BY s.inicia_en ASC
+      `,
+      [seccionId, docenteId]
+    );
 
-      const secciones = rows.map(r => ({
-        ...r,
-        fecha_inicio: r.fecha_inicio
-          ? r.fecha_inicio.toISOString().slice(0, 10)
-          : null,
-        fecha_fin: r.fecha_fin
-          ? r.fecha_fin.toISOString().slice(0, 10)
-          : null,
-      }));
+    res.json({ ok: true, sesiones: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
 
-      res.json({ ok: true, secciones });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
 
 
   // LISTAR DOCENTES
@@ -70,25 +62,7 @@ listarDocentes: async (req, res) => {
   // ─────────────────────────────────────────────
   // SESIONES DE UNA SECCIÓN (CALENDARIO)
   // ─────────────────────────────────────────────
-  listarSesionesSeccion: async (req, res) => {
-    try {
-      const seccionId = req.params.id;
 
-      const [rows] = await pool.query(
-        `
-        SELECT *
-        FROM sesiones
-        WHERE seccion_id = ?
-        ORDER BY inicia_en ASC
-        `,
-        [seccionId]
-      );
-
-      res.json({ ok: true, sesiones: rows });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
 
   // ─────────────────────────────────────────────
   // ALUMNOS DE UNA SESIÓN

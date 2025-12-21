@@ -16,8 +16,10 @@ router.get(
 // Sesiones de una sección
 router.get(
   "/secciones/:id/sesiones",
+  authMiddleware, // 🔐 NECESARIO
   docentesController.listarSesionesSeccion
 );
+
 
 router.get(
   "/sesiones/:id/alumnos",
