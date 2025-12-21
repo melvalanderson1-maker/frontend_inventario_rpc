@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import dayjs from "dayjs";
 import docentesApi from "../../api/docentesApi";
 
 import DashboardHeader from "../../components/layout/DashboardHeader";
@@ -19,12 +20,23 @@ export default function RegistrarNotas() {
 
     const cargarTodo = async () => {
       try {
-        const [infoRes, alumnosRes] = await Promise.all([
-          docentesApi.obtenerInfoSeccion(seccionId),
+        const [seccionesRes, alumnosRes] = await Promise.all([
+          docentesApi.listarSeccionesDocente(),
           docentesApi.listarAlumnosSeccion(seccionId),
         ]);
 
-        setInfoSeccion(infoRes.data.info);
+        // 🔍 Buscar la sección correcta
+        const seccion = (seccionesRes.data.secciones || []).find(
+          (s) => String(s.seccion_id) === String(seccionId)
+        );
+
+        if (!seccion) {
+          alert("Sección no encontrada");
+          return;
+        }
+
+        setInfoSeccion(seccion);
+
         setAlumnos(
           (alumnosRes.data.alumnos || []).map((a) => ({
             ...a,
@@ -33,7 +45,7 @@ export default function RegistrarNotas() {
         );
       } catch (err) {
         console.error(err);
-        alert("Error cargando información de la sección");
+        alert("Error cargando información");
       } finally {
         setLoading(false);
       }
@@ -71,29 +83,32 @@ export default function RegistrarNotas() {
     return (
       <>
         <DashboardHeader />
-        <p className="loading">Cargando...</p>
+        <p className="loading">Cargando información...</p>
         <DashboardFooter />
       </>
     );
   }
+
+  if (!infoSeccion) return null;
 
   return (
     <>
       <DashboardHeader />
 
       <div className="registrar-notas">
-        {/* HEADER */}
+        {/* INFO SECCIÓN */}
         <header className="header-seccion">
           <h2>{infoSeccion.curso_titulo}</h2>
           <p className="muted">
             Sección <strong>{infoSeccion.seccion_codigo}</strong>
           </p>
           <small>
-            {infoSeccion.fecha_inicio} → {infoSeccion.fecha_fin}
+            {dayjs(infoSeccion.fecha_inicio).format("DD/MM/YYYY")} →{" "}
+            {dayjs(infoSeccion.fecha_fin).format("DD/MM/YYYY")}
           </small>
         </header>
 
-        {/* LISTA */}
+        {/* LISTA DE ALUMNOS */}
         <div className="notas-list">
           {alumnos.map((a, i) => (
             <div key={a.id} className="nota-row">
