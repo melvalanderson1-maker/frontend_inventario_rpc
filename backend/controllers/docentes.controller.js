@@ -3,7 +3,6 @@ let pool;
 (async () => { pool = await initDB(); })();
 
 module.exports = {
-
   listarDocentes: async (req, res) => {
     try {
       const [rows] = await pool.query(
@@ -35,28 +34,52 @@ module.exports = {
     }
   },
 
-listarSesionesDocente: async (req, res) => {
-  try {
-    const docenteId = req.params.id;
-    const [rows] = await pool.query(
-      `SELECT s.id AS sesion_id, s.seccion_id, s.titulo, s.inicia_en, s.termina_en
-       FROM sesiones s
-       JOIN secciones sec ON s.seccion_id = sec.id
-       WHERE sec.docente_id = ?`,
-      [docenteId]
-    );
-    res.json({ ok: true, sesiones: rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok: false, msg: err.message });
-  }
-},
+  listarSesionesSeccion: async (req, res) => {
+    try {
+      const seccionId = req.params.id;
 
+      // Usamos la consulta que me diste
+      const [rows] = await pool.query(
+        `SELECT 
+          c.id AS curso_id,
+          c.titulo AS curso,
+          sec.id AS seccion_id,
+          sec.codigo AS seccion,
+          s.id AS sesion_id,
+          s.titulo AS title,
+          s.inicia_en AS start,
+          s.termina_en AS end
+        FROM sesiones s
+        JOIN secciones sec ON s.seccion_id = sec.id
+        JOIN cursos c ON sec.curso_id = c.id
+        WHERE sec.id = ?
+        ORDER BY c.titulo, sec.codigo, s.inicia_en`,
+        [seccionId]
+      );
+
+      // Mapeamos a eventos para FullCalendar
+      const eventos = rows.map((r) => ({
+        sesion_id: r.sesion_id,
+        title: r.title,
+        start: r.start,
+        end: r.end,
+        color: "#4a90e2",
+      }));
+
+      res.json({ ok: true, sesiones: eventos });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, msg: err.message });
+    }
+  },
 
   listarAlumnosSesion: async (req, res) => {
     try {
       const sesionId = req.params.id;
-      const [[sesion]] = await pool.query("SELECT seccion_id FROM sesiones WHERE id = ?", [sesionId]);
+      const [[sesion]] = await pool.query(
+        "SELECT seccion_id FROM sesiones WHERE id = ?",
+        [sesionId]
+      );
       if (!sesion) return res.status(404).json({ ok: false, msg: "Sesión no encontrada" });
 
       const [rows] = await pool.query(
@@ -79,11 +102,12 @@ listarSesionesDocente: async (req, res) => {
       const { asistencias } = req.body;
       const docenteId = req.user?.id || null;
 
-      if (!Array.isArray(asistencias)) return res.status(400).json({ ok: false, msg: "Formato inválido" });
+      if (!Array.isArray(asistencias))
+        return res.status(400).json({ ok: false, msg: "Formato inválido" });
 
       await pool.query("DELETE FROM asistencias WHERE sesion_id = ?", [sesionId]);
 
-      const values = asistencias.map(a => [sesionId, a.usuario_id, a.estado, docenteId]);
+      const values = asistencias.map((a) => [sesionId, a.usuario_id, a.estado, docenteId]);
       await pool.query(
         `INSERT INTO asistencias (sesion_id, usuario_id, estado, marcado_por) VALUES ?`,
         [values]
@@ -95,90 +119,4 @@ listarSesionesDocente: async (req, res) => {
       res.status(500).json({ ok: false, msg: err.message });
     }
   },
-
-  // Listar sesiones de una sección específica
-listarSesionesSeccion: async (req, res) => {
-  try {
-    const seccionId = req.params.id;
-
-    const [rows] = await pool.query(
-      `SELECT 
-         s.id AS sesion_id,
-         s.titulo,
-         s.tipo_sesion,
-         s.aula,
-         s.enlace_meet,
-         sec.fecha_inicio,
-         sec.fecha_fin,
-         h.dia_semana,
-         h.hora_inicio,
-         h.hora_fin,
-         h.lugar
-       FROM sesiones s
-       JOIN secciones sec ON s.seccion_id = sec.id
-       LEFT JOIN horarios h ON h.seccion_id = sec.id
-       WHERE s.seccion_id = ?
-       ORDER BY h.dia_semana, h.hora_inicio ASC`,
-      [seccionId]
-    );
-
-    // Convertimos cada horario en un evento de FullCalendar
-    const eventos = [];
-    rows.forEach((r) => {
-      if (!r.hora_inicio || !r.hora_fin) return;
-
-      // Creamos un evento para cada día de la semana
-      // Asumiendo que dia_semana: 1=lunes, 7=domingo
-      const fechaInicio = new Date(r.fecha_inicio);
-      // Ajustamos al día de la semana correcto
-      const dayDiff = r.dia_semana - (fechaInicio.getDay() === 0 ? 7 : fechaInicio.getDay());
-      fechaInicio.setDate(fechaInicio.getDate() + dayDiff);
-
-      const start = new Date(fechaInicio);
-      const [hStart, mStart, sStart] = r.hora_inicio.split(":").map(Number);
-      start.setHours(hStart, mStart, sStart || 0);
-
-      const end = new Date(fechaInicio);
-      const [hEnd, mEnd, sEnd] = r.hora_fin.split(":").map(Number);
-      end.setHours(hEnd, mEnd, sEnd || 0);
-
-      eventos.push({
-        sesion_id: r.sesion_id,
-        title: r.titulo,
-        start: start.toISOString(),
-        end: end.toISOString(),
-        color: "#4a90e2",
-        aula: r.aula,
-        tipo_sesion: r.tipo_sesion,
-        lugar: r.lugar,
-        enlace_meet: r.enlace_meet,
-      });
-    });
-
-    res.json({ ok: true, sesiones: eventos });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok: false, msg: err.message });
-  }
-},
-
-
-  registrarNotas: async (req, res) => {
-    try {
-      const seccionId = req.params.id;
-      const { notas } = req.body;
-      if (!Array.isArray(notas)) return res.status(400).json({ ok:false, msg:"Formato inválido" });
-
-      const values = notas.map(n => [seccionId, n.usuario_id, n.actividad_id || null, n.nota]);
-      await pool.query(
-        "INSERT INTO notas (seccion_id, usuario_id, actividad_id, nota) VALUES ?",
-        [values]
-      );
-
-      res.json({ ok:true, msg:"Notas registradas correctamente" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ ok:false, msg:err.message });
-    }
-  }
 };
