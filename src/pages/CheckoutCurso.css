@@ -11,6 +11,74 @@
 /* ==============================
    Checkout Curso
 ============================== */
+
+/* Ocultar botón pagar */
+.btn-primary {
+  display: none !important;
+}
+
+
+/* Ocultar botón Yape test */
+.btn-secondary {
+  display: none !important;
+}
+
+
+input:disabled,
+select:disabled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+  border: 1px solid #e5e7eb;
+}
+
+
+
+/* ==============================
+   Card principal del curso (estilo Udemy)
+
+
+============================== */
+
+.checkout .card h3 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #081669;
+  margin-bottom: 16px;
+}
+
+.checkout .card .descripcion {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto 20px auto;
+}
+
+
+.checkout .card {
+  background: linear-gradient(180deg, #ffffff, #f8f9ff);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 32px auto;
+  max-width: 720px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(8, 22, 105, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Línea decorativa superior */
+.checkout .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, #193bd1, #081669);
+}
+
 .checkout h2 {
   font-size: 32px;
   font-weight: 700;
@@ -55,6 +123,16 @@
 
   /* Animación sutil al pasar el mouse */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.checkout .precio::before {
+  content: "Precio del curso";
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
 }
 
 .checkout .precio:hover {

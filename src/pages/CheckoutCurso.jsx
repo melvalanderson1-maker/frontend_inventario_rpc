@@ -151,7 +151,7 @@ export default function CheckoutCurso() {
         <div className="form">
           <h3>1. Datos del alumno</h3>
 
-          <select name="seccion_id" value={form.seccion_id} onChange={handleChange}>
+          <select name="seccion_id" disabled value={form.seccion_id} onChange={handleChange}>
             <option value="">Seleccione una sección</option>
             {secciones.map((s) => (
               <option key={s.id} value={s.id}>
@@ -160,14 +160,25 @@ export default function CheckoutCurso() {
             ))}
           </select>
 
-          <input name="nombre" placeholder="Nombre" value={form.nombre} onChange={handleChange} />
-          <input name="apellido_paterno" placeholder="Apellido paterno" value={form.apellido_paterno} onChange={handleChange} />
-          <input name="apellido_materno" placeholder="Apellido materno" value={form.apellido_materno} onChange={handleChange} />
-          <input name="correo" placeholder="Correo" value={form.correo} onChange={handleChange} />
-          <input name="dni" placeholder="DNI" value={form.dni} onChange={handleChange} />
-          <input name="telefono" placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
+          <input name="nombre" disabled placeholder="Nombre" value={form.nombre} onChange={handleChange} />
+          <input name="apellido_paterno" disabled placeholder="Apellido paterno" value={form.apellido_paterno} onChange={handleChange} />
+          <input name="apellido_materno" disabled placeholder="Apellido materno" value={form.apellido_materno} onChange={handleChange} />
+          <input name="correo" disabled placeholder="Correo" value={form.correo} onChange={handleChange} />
+          <input name="dni" disabled placeholder="DNI" value={form.dni} onChange={handleChange} />
+          <input name="telefono" disabled placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
 
           <h3>2. Confirmar pago</h3>
+
+          <div className="whatsapp-button">
+            <a
+              href="https://wa.me/51971168000?text=Hola,%20deseo%20información%20sobre%20el%20curso"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              💬 Consultar por WhatsApp
+            </a>
+          </div>
+
 
           <button className="btn btn-primary" onClick={handlePagar} disabled={procesando}>
             {procesando ? "Procesando..." : "Pagar"}
