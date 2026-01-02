@@ -176,16 +176,18 @@ const validar = () => {
       });
       return false;
     }
-    // VALIDAR FORMATO DE PERIODO: YYYY-MM
-    const regexPeriodo = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+    const regexPeriodo = /^\d{4}-(00|10|20)$/;
+
 
     if (!regexPeriodo.test(s.periodo.trim())) {
       setMensaje({
         type: "warning",
-        text: `El periodo de la sección ${s.codigo} debe tener el formato YYYY-MM (ej: 2026-10).`,
+        text: `El periodo de la sección ${s.codigo} solo puede ser YYYY-00, YYYY-10 o YYYY-20 (Ej: 2026-10).`,
       });
       return false;
     }
+
 
   }
 
@@ -397,10 +399,11 @@ const crearSeccion = async () => {
     if (!regexPeriodo.test(secPeriodo.trim())) {
       setMensaje({
         type: "warning",
-        text: "El periodo debe tener el formato YYYY-MM (Ej: 2025-10).",
+        text: "El periodo solo puede ser YYYY-00, YYYY-10 o YYYY-20 (Ej: 2025-20).",
       });
       return;
     }
+
 
 
 
@@ -469,6 +472,26 @@ const generarCodigoUnico = (prefijo, existentes) => {
 };
 
 
+const permitirPeriodoValido = (valor) => {
+  // Permite escribir progresivamente (para no bloquear al usuario)
+  if (valor === "") return "";
+
+  // Máximo 7 caracteres: YYYY-XX
+  if (valor.length > 7) return valor.slice(0, 7);
+
+  // Solo números y guion
+  if (!/^[0-9-]*$/.test(valor)) return valor;
+
+  // Formato final permitido
+  const regexFinal = /^\d{4}-(00|10|20)$/;
+
+  // Formato parcial permitido mientras escribe
+  const regexParcial = /^\d{0,4}$|^\d{4}-?$|^\d{4}-(0|1|2)?$|^\d{4}-(00|10|20)?$/;
+
+  if (!regexParcial.test(valor)) return "";
+
+  return valor;
+};
 
 
  return (
@@ -580,10 +603,15 @@ const generarCodigoUnico = (prefijo, existentes) => {
                 />
 
                 <input
-                  placeholder="Periodo"
+                  placeholder="Ej: 2026-00"
+                  maxLength={7}
                   value={s.periodo}
-                  onChange={(e) => updateSeccion(i, "periodo", e.target.value)}
+                  onChange={(e) =>
+                    updateSeccion(i, "periodo", permitirPeriodoValido(e.target.value))
+                  }
                 />
+
+
 
                 <select
                   value={s.docente_id}
@@ -682,8 +710,11 @@ const generarCodigoUnico = (prefijo, existentes) => {
                         <label>Periodo</label>
                         <input
                           value={secPeriodo}
-                          onChange={(e) => setSecPeriodo(e.target.value)}
+                          onChange={(e) =>
+                            setSecPeriodo(permitirPeriodoValido(e.target.value))
+                          }
                         />
+
                       </div>
 
                       <div className="field field-full">
