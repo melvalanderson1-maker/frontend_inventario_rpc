@@ -697,7 +697,8 @@ const permitirPeriodoValido = (valor) => {
 
               {showCrearSeccion && (
                 <div className="modal-backdrop">
-                  <div className="modal modal-seccion">
+                  <div className="modal-seccion">
+
                     <h3 className="modal-title">Nueva sección</h3>
 
                     <div className="grid-seccion">

@@ -462,6 +462,11 @@ body{
   padding-top: 10px;
 }
 
+.modal-seccion {
+  animation: fadeIn 0.25s ease-out;
+}
+
+
 
 .modal-buttons button {
   flex: 1;
