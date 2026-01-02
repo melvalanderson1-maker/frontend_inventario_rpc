@@ -33,6 +33,23 @@ export default function CheckoutCurso() {
     seccion_id: "",
   });
 
+  const [slideActual, setSlideActual] = useState(0);
+
+  const slides = [
+    {
+      img: "/images/acceso1.jpg",
+      texto: "✔ Acceso inmediato a la plataforma"
+    },
+    {
+      img: "/images/certificado1.jpg",
+      texto: "✔ Certificado digital incluido"
+    },
+    {
+      img: "/images/soporte1.jpg",
+      texto: "✔ Soporte académico permanente"
+    }
+  ];
+
   useEffect(() => {
     const cargar = async () => {
       if (!cursoId) return;
@@ -50,6 +67,16 @@ export default function CheckoutCurso() {
     };
     cargar();
   }, [cursoId]);
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideActual((prev) => (prev + 1) % slides.length);
+    }, 4000); // cambia cada 4 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -147,6 +174,40 @@ export default function CheckoutCurso() {
           <p className="descripcion">{curso?.descripcion}</p>
           <p className="precio">S/ {curso?.precio}</p>
         </div>
+
+        <div className="beneficios-carousel">
+
+          <button
+            className="carousel-btn left"
+            onClick={() =>
+              setSlideActual(
+                slideActual === 0 ? slides.length - 1 : slideActual - 1
+              )
+            }
+          >
+            ‹
+          </button>
+
+          <div className="carousel-slide">
+            <img
+              src={slides[slideActual].img}
+              alt="Beneficio del curso"
+            />
+            <p>{slides[slideActual].texto}</p>
+          </div>
+
+          <button
+            className="carousel-btn right"
+            onClick={() =>
+              setSlideActual((slideActual + 1) % slides.length)
+            }
+          >
+            ›
+          </button>
+
+        </div>
+
+
 
         <div className="form">
            {/*<h3>1. Datos del alumno</h3>
