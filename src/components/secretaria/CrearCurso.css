@@ -367,27 +367,17 @@ body{
   inset: 0;
   background: rgba(0,0,0,0.55);
   z-index: 999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
-/* MODAL — arriba a la izquierda, SIN espacio sobrante */
 .modal-seccion {
-  position: absolute;
-  
-  top: 10px;       /* más pegado aún */
-  left: 10px;      /* más pegado */
-  height: min-content;
-  
-  width: max-content;   /* OJO: se ajusta SOLO al contenido */
-  max-width: 600px;
-
-  background: #fff;
-  border-radius: 12px;
-  padding: 18px 20px;  /* Menos padding para que no se vea grande */
-  box-shadow: 0 4px 20px rgba(0,0,0,0.22);
-  animation: fadeIn .25s ease;
-  
-  margin: 0;  /* evita espacios arriba */
+  position: relative;
+  z-index: 1000;
 }
+
+
 
 /* TÍTULO */
 .modal-title {
