@@ -384,11 +384,15 @@ body{
   padding: 20px;
   border-radius: 14px;
 
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+
   width: 100%;
   max-width: 520px;
 
   /* 🔥 CLAVE ABSOLUTA */
-  max-height: calc(100vh - 120px);
+
   overflow-y: auto;
 
   margin: 60px auto;
@@ -462,15 +466,10 @@ body{
   padding-top: 10px;
 }
 
-.modal-seccion {
-  animation: fadeIn 0.25s ease-out;
-}
 
 
 
-.modal-buttons button {
-  flex: 1;
-}
+
 
 
 /* BOTONES */
