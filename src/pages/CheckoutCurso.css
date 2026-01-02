@@ -40,22 +40,6 @@ select:disabled {
 
 ============================== */
 
-.checkout .card h3 {
-  font-size: 26px;
-  font-weight: 800;
-  color: #081669;
-  margin-bottom: 12px;
-}
-
-
-.checkout .card .descripcion {
-  font-size: 16px;
-  color: #555;
-  line-height: 1.7;
-  max-width: 520px;
-  margin: 0;
-}
-
 
 .checkout .card {
   background: linear-gradient(180deg, #ffffff, #f8f9ff);
@@ -64,23 +48,37 @@ select:disabled {
   margin: 32px auto;
   max-width: 900px;
 
-  /* 🔥 CLAVE */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  /* 🔥 USAMOS GRID */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 8px 32px;
 
   box-shadow: 0 20px 40px rgba(8, 22, 105, 0.12);
   position: relative;
   overflow: hidden;
 }
 
-
-/* Columna izquierda: título + descripción */
-.checkout .card h3,
-.checkout .card .descripcion {
-  text-align: left;
+/* Título arriba a la izquierda */
+.checkout .card h3 {
+  grid-column: 1;
+  grid-row: 1;
 }
+
+/* Descripción debajo del título */
+.checkout .card .descripcion {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* Precio centrado a la derecha ocupando ambas filas */
+.checkout .card .precio {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+
 
 
 /* Línea decorativa superior */
