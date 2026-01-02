@@ -44,15 +44,16 @@ select:disabled {
   font-size: 26px;
   font-weight: 800;
   color: #081669;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
+
 
 .checkout .card .descripcion {
   font-size: 16px;
   color: #555;
   line-height: 1.7;
-  max-width: 600px;
-  margin: 0 auto 20px auto;
+  max-width: 520px;
+  margin: 0;
 }
 
 
@@ -61,12 +62,26 @@ select:disabled {
   border-radius: 20px;
   padding: 32px;
   margin: 32px auto;
-  max-width: 720px;
-  text-align: center;
+  max-width: 900px;
+
+  /* 🔥 CLAVE */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+
   box-shadow: 0 20px 40px rgba(8, 22, 105, 0.12);
   position: relative;
   overflow: hidden;
 }
+
+
+/* Columna izquierda: título + descripción */
+.checkout .card h3,
+.checkout .card .descripcion {
+  text-align: left;
+}
+
 
 /* Línea decorativa superior */
 .checkout .card::before {
@@ -103,27 +118,23 @@ select:disabled {
 /* Precio destacado en CheckoutCurso */
 /* Precio destacado en CheckoutCurso */
 .checkout .precio {
-  font-size: 24px;
-  font-weight: 800;
-  margin: 16px auto 32px auto; /* centrado horizontal debajo de la descripción */
+  font-size: 28px;
+  font-weight: 900;
   text-align: center;
 
-  /* Gradiente llamativo */
   background: linear-gradient(90deg, #1036e2, #081669);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  /* Bloque centrado */
-  display: block;
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(8, 22, 105, 0.25);
 
-  /* Estilo de caja */
-  padding: 6px 16px;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(48, 47, 44, 0.35);
-
-  /* Animación sutil al pasar el mouse */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* 🔥 CLAVE */
+  align-self: center;
+  min-width: 160px;
 }
+
 
 
 .checkout .precio::before {
@@ -244,6 +255,22 @@ select:disabled {
 }
 
 @media (max-width: 600px) {
+
+
+  .checkout .card {
+  flex-direction: column;
+  text-align: center;
+  }
+
+  .checkout .card h3,
+  .checkout .card .descripcion {
+    text-align: center;
+  }
+
+  .checkout .precio {
+    margin-top: 16px;
+  }
+
   .checkout h2 {
     font-size: 24px;
   }
