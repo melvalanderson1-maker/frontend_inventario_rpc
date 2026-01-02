@@ -149,7 +149,7 @@ export default function CheckoutCurso() {
         </div>
 
         <div className="form">
-          <h3>1. Datos del alumno</h3>
+           {/*<h3>1. Datos del alumno</h3>
 
           <select name="seccion_id" disabled value={form.seccion_id} onChange={handleChange}>
             <option value="">Seleccione una sección</option>
@@ -167,7 +167,7 @@ export default function CheckoutCurso() {
           <input name="dni" disabled placeholder="DNI" value={form.dni} onChange={handleChange} />
           <input name="telefono" disabled placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
 
-          <h3>2. Confirmar pago</h3>
+          <h3>2. Confirmar pago</h3>*/}
 
           <div className="whatsapp-button">
             <a
