@@ -37,15 +37,15 @@ export default function CheckoutCurso() {
 
   const slides = [
     {
-      img: "/images/image1.png",
+      img: "/images/acceso.png",
       texto: "✔ Acceso inmediato a la plataforma"
     },
     {
-      img: "/images/image1.png",
+      img: "/images/certificado.png",
       texto: "✔ Certificado digital incluido"
     },
     {
-      img: "/images/image1.png",
+      img: "/images/soporte.png",
       texto: "✔ Soporte académico permanente"
     }
   ];
