@@ -9,7 +9,7 @@ export default function PublicHeader() {
       <div className="container">
         <Link to="/" className="brand">
           <img
-            src="/images/logo.jpeg"
+            src="/images/logo.png"
             alt="Logo Universidad Quantum"
             className="logo"
           />
