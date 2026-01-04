@@ -248,7 +248,7 @@ export default function CheckoutCurso() {
 
           <div className="whatsapp-button">
             <a
-              href="https://wa.me/51971168000?text=Hola,%20deseo%20información%20sobre%20el%20curso"
+              href="https://wa.me/51964755083?text=Hola,%20deseo%20información%20sobre%20el%20curso%20por%20favor."
               target="_blank"
               rel="noopener noreferrer"
             >
