@@ -47,6 +47,22 @@ export default function CheckoutCurso() {
     {
       img: "/images/soporte.png",
       texto: "✔ Soporte académico permanente"
+    },
+    {
+      img: "/images/Flyer1.png",
+      texto: "✔ Contenido académico actualizado"
+    },
+    {
+      img: "/images/Flyer2.png",
+      texto: "✔ Metodología práctica y aplicada"
+    },
+    {
+      img: "/images/Flyer3.png",
+      texto: "✔ Docentes especializados"
+    },
+    {
+      img: "/images/Flyer4.png",
+      texto: "✔ Formación orientada al éxito profesional"
     }
   ];
 

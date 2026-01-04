@@ -7,7 +7,15 @@ export default function PublicHeader() {
   return (
     <header className="public-header">
       <div className="container">
-        <div className="brand">Universidad Quantum</div>
+        <Link to="/" className="brand">
+          <img
+            src="/images/logo.jpeg"
+            alt="Logo Universidad Quantum"
+            className="logo"
+          />
+          <span>Universidad Quantum</span>
+        </Link>
+
         <nav className="nav">
           <Link to="/">Inicio</Link>
           <Link to="/#cursos">Cursos</Link>

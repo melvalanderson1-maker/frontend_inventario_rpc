@@ -24,10 +24,21 @@
 
 /* Marca a la izquierda */
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 700;
   font-size: 22px;
   color: #fff;
   justify-self: start;
+  text-decoration: none; /* quita subrayado del Link */
+}
+
+
+.logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
 
 /* Nav a la derecha en escritorio */
@@ -113,6 +124,11 @@
   .nav a, .nav .btn {
     width: 100%;
   }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* Móviles pequeños */
@@ -124,5 +140,10 @@
   .nav a, .nav .btn {
     font-size: 14px;
     padding: 8px 12px;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
   }
 }
