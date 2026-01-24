@@ -2,7 +2,7 @@
    Public Header - Fusión 1x3 Responsive
 ============================== */
 .public-header {
-  background: #2b1462;
+  background: #051f5b;
   color: white;
   padding: 12px 0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -69,7 +69,7 @@
   justify-content: center;
   align-items: center;
   background: #f6c53a;
-  color: #2b1462;
+  color: #050a41;
   padding: 6px 14px;
   border-radius: 6px;
   font-weight: 600;

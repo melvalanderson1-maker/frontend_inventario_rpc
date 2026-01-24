@@ -1,34 +1,35 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
+import ModalMovimientoDetalle from "../modales/ModalMovimientoDetalle";
 import "./MovimientosTablas.css";
 
-export default function TablaHistorial({ productoId, varianteId, filtro = "" }) {
+export default function TablaAprobadosContabilidad({ productoId, varianteId, filtro = "" }) {
   const [rows, setRows] = useState([]);
+  const [modalMovimiento, setModalMovimiento] = useState(null);
+const fetchMovimientos = () => {
+  api
+    .get("/api/contabilidad/movimientos", {
+      params: {
+        productoId: varianteId || productoId,
+        estados: "APROBADO_FINAL,RECHAZADO_CONTABILIDAD",
+      },
+    })
+    .then((res) => setRows(res.data || []))
+    .catch(() => setRows([]));
+};
+
 
   useEffect(() => {
-    if (!productoId && !varianteId) return;
-
-    api
-      .get("/api/logistica/movimientos", {
-        params: {
-          productoId: varianteId || productoId,
-          estados:
-            "PENDIENTE_LOGISTICA,VALIDADO_LOGISTICA,RECHAZADO_LOGISTICA,APROBADO_FINAL,RECHAZADO_CONTABILIDAD",
-        },
-      })
-      .then((res) => setRows(res.data || []))
-      .catch(() => setRows([]));
+    fetchMovimientos();
   }, [productoId, varianteId]);
 
-  const formatPrecio = (precio) => {
-    if (precio === null || precio === undefined) return "-";
-    return `S/ ${Number(precio).toFixed(2)}`;
-  };
-
+  const formatPrecio = (precio) => (precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`);
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
-    return isNaN(d) ? "-" : d.toLocaleString();
+    if (isNaN(d)) return "-";
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
   const getRowClass = (tipo) => {
@@ -43,7 +44,6 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
-
     return rows.filter((r) =>
       [
         r.tipo_movimiento,
@@ -62,6 +62,16 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
     );
   }, [rows, filtro]);
 
+  const handleValidar = (id) => {
+    api.post(`/api/contabilidad/movimientos/${id}/validar`).then(() => fetchMovimientos());
+  };
+
+  const handleRechazar = (id) => {
+    const motivo = prompt("Ingrese el motivo del rechazo:");
+    if (!motivo) return;
+    api.post(`/api/contabilidad/movimientos/${id}/rechazar`, { motivo }).then(() => fetchMovimientos());
+  };
+
   return (
     <div className="table-wrapper">
       <table>
@@ -77,15 +87,13 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
             <th>Lug Almac</th>
             <th>F Validación</th>
             <th>Estado</th>
+            <th></th>
           </tr>
         </thead>
-
         <tbody>
           {rowsFiltrados.length === 0 ? (
             <tr>
-              <td colSpan="10" style={{ textAlign: "center", padding: 16 }}>
-                No se encontraron resultados
-              </td>
+              <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>No se encontraron resultados</td>
             </tr>
           ) : (
             rowsFiltrados.map((r) => (
@@ -99,16 +107,20 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>{r.almacen}</td>
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
-                <td>
-                  <span className={`estado estado-${r.estado}`}>
-                    {r.estado.replaceAll("_", " ")}
-                  </span>
-                </td>
+                <td><span className={`estado estado-${r.estado}`}>{r.estado.replaceAll("_", " ")}</span></td>
+
               </tr>
             ))
           )}
         </tbody>
       </table>
+
+      {modalMovimiento && (
+        <ModalMovimientoDetalle
+          movimientoId={modalMovimiento}
+          onClose={() => setModalMovimiento(null)}
+        />
+      )}
     </div>
   );
 }

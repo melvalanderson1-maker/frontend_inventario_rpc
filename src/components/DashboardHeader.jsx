@@ -93,7 +93,7 @@ function DashboardHeader() {
     <header className="dashboard-header">
       <div className="logo-container">
         <Link to="/dashboard" className="logo-link">
-          <img src="/images/logotipo.png" alt="Logo" className={titleVisible ? 'logo-animate' : ''} />
+          <img src="/images/logo.png" alt="Logo" className={titleVisible ? 'logo-animate' : ''} />
         </Link>
       </div>
 

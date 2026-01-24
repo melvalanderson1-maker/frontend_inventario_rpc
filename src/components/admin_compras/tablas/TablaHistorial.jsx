@@ -10,7 +10,7 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
       params: {
         productoId: varianteId || productoId,
         estados:
-          "PENDIENTE_LOGISTICA,VALIDADO_LOGISTICA,RECHAZADO_LOGISTICA,APROBADO_FINAL",
+          "PENDIENTE_LOGISTICA,VALIDADO_LOGISTICA,RECHAZADO_LOGISTICA,APROBADO_FINAL,RECHAZADO_CONTABILIDAD",
       },
     }).then((res) => setRows(res.data));
   }, [productoId, varianteId]);

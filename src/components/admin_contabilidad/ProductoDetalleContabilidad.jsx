@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import api from "../../api/api"; // ya corregido
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
 // TABLAS CONTABILIDAD
@@ -9,9 +9,8 @@ import TablaStockEmpresa from "./tablas/TablaStockEmpresaContabilidad";
 import TablaAprobadosContabilidad from "./tablas/TablaAprobadosContabilidad";
 import TablaPendientesContabilidad from "./tablas/TablaPendientesContabilidad";
 import TablaRechazadosContabilidad from "./tablas/TablaRechazadosContabilidad";
+import TablaRechazadosContabilidadO from "./tablas/TablaRechazadosContabilidadO";
 import TablaCambiosAlmacenPendientesContabilidad from "./tablas/TablaCambiosAlmacenPendientesContabilidad";
-
-
 
 import "./ProductoDetalleContabilidad.css";
 
@@ -24,7 +23,9 @@ export default function ProductoDetalleContabilidad() {
   const [tab, setTab] = useState("historial");
   const [filtro, setFiltro] = useState("");
 
-  // Obtener producto desde API contabilidad
+  // ===================================================
+  // 📥 Cargar producto
+  // ===================================================
   useEffect(() => {
     api
       .get(`/api/contabilidad/productos/${id}`)
@@ -96,9 +97,10 @@ export default function ProductoDetalleContabilidad() {
           {[
             "historial",
             "stock_empresa",
-            "aprobados",
-            "pendientes",
-            "rechazados",
+            "aprobados por Log",
+            "pendientes de Log",
+            "rechazados Log",
+            "Aprobados y Rechazados Cont",
             "cambios_almacen",
           ].map((t) => (
             <button
@@ -106,7 +108,7 @@ export default function ProductoDetalleContabilidad() {
               className={tab === t ? "active" : ""}
               onClick={() => setTab(t)}
             >
-              {t.replace("_", " ")}
+              {t.replaceAll("_", " ")}
             </button>
           ))}
         </div>
@@ -125,14 +127,17 @@ export default function ProductoDetalleContabilidad() {
           {tab === "stock_empresa" && (
             <TablaStockEmpresa productoId={contexto.id} filtro={filtro} />
           )}
-          {tab === "aprobados" && (
+          {tab === "aprobados por Log" && (
             <TablaAprobadosContabilidad productoId={contexto.id} filtro={filtro} />
           )}
-          {tab === "pendientes" && (
+          {tab === "pendientes de Log" && (
             <TablaPendientesContabilidad productoId={contexto.id} filtro={filtro} />
           )}
-          {tab === "rechazados" && (
+          {tab === "rechazados Log" && (
             <TablaRechazadosContabilidad productoId={contexto.id} filtro={filtro} />
+          )}
+          {tab === "Aprobados y Rechazados Cont" && (
+            <TablaRechazadosContabilidadO productoId={contexto.id} filtro={filtro} />
           )}
           {tab === "cambios_almacen" && (
             <TablaCambiosAlmacenPendientesContabilidad

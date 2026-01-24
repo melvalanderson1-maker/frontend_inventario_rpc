@@ -1,4 +1,4 @@
 /* src/pages/Login.css */
 .login form { max-width:420px; margin:40px auto; display:flex; flex-direction:column; gap:10px; }
 .login input { padding:10px; border-radius:6px; border:1px solid #ddd; }
-.login button { background:#2b1462; color:white; padding:10px; border-radius:6px; border:none; cursor:pointer; }
+.login button { background:#0a398b; color:white; padding:10px; border-radius:6px; border:none; cursor:pointer; }

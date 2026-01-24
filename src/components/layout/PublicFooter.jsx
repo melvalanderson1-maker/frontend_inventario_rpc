@@ -6,8 +6,8 @@ export default function PublicFooter() {
   return (
     <footer className="public-footer">
       <div className="container">
-        <div>© {new Date().getFullYear()} Universidad Quantum</div>
-        <div>Contacto: max_arana10@hotmail.com</div>
+        <div>© {new Date().getFullYear()} GRUPO RPC _ INVENTARIO</div>
+        <div>Contacto: 971168000</div>
       </div>
     </footer>
   );
