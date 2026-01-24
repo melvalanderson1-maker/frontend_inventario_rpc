@@ -1637,4 +1637,337 @@ validarCambioAlmacen: async (req, res) => {
       res.status(500).json({ error: "Error listando fabricantes" });
     }
   },
+
+
+
+
+
+
+
+
+
+  //CONTABILIDAD
+  // =====================================================
+// ✅ VALIDAR MOVIMIENTO (CORE ERP)
+//// =====================================================
+// ✅ LISTAR PENDIENTES CONTABILIDAD
+// =====================================================
+listarPendientes: async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT m.*, 
+             p.descripcion AS producto,
+             e.nombre AS empresa,
+             a.nombre AS almacen
+      FROM movimientos_inventario m
+      LEFT JOIN productos p ON p.id = m.producto_id
+      LEFT JOIN empresas e ON e.id = m.empresa_id
+      LEFT JOIN almacenes a ON a.id = m.almacen_id
+      WHERE m.estado = 'VALIDADO_LOGISTICA'
+      ORDER BY m.created_at DESC
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error("❌ listarPendientes:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+},
+
+// =====================================================
+// ✅ LISTAR RECHAZADOS CONTABILIDAD
+// =====================================================
+listarRechazadosContabilidad: async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT m.*, 
+             p.descripcion AS producto,
+             e.nombre AS empresa,
+             a.nombre AS almacen
+      FROM movimientos_inventario m
+      LEFT JOIN productos p ON p.id = m.producto_id
+      LEFT JOIN empresas e ON e.id = m.empresa_id
+      LEFT JOIN almacenes a ON a.id = m.almacen_id
+      WHERE m.estado = 'RECHAZADO_CONTABILIDAD'
+      ORDER BY m.fecha_validacion_contabilidad DESC
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error("❌ listarRechazadosContabilidad:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+},
+
+// =====================================================
+// ✅ LISTAR APROBADOS FINAL
+// =====================================================
+listarAprobadosFinal: async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT m.*, 
+             p.descripcion AS producto,
+             e.nombre AS empresa,
+             a.nombre AS almacen
+      FROM movimientos_inventario m
+      LEFT JOIN productos p ON p.id = m.producto_id
+      LEFT JOIN empresas e ON e.id = m.empresa_id
+      LEFT JOIN almacenes a ON a.id = m.almacen_id
+      WHERE m.estado = 'APROBADO_FINAL'
+      ORDER BY m.fecha_validacion_contabilidad DESC
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error("❌ listarAprobadosFinal:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+},
+
+// =====================================================
+// ✅ VALIDAR MOVIMIENTO (CONTABILIDAD) — FIX 500 🔥
+// =====================================================
+validarMovimiento: async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const { movimientoId } = req.params;
+    const usuarioId = req.user.id;
+    const { almacen_id, almacen_nuevo, numero_orden, op_vinculada, observaciones } = req.body;
+
+    // ===================================================
+    // 🔒 BLOQUEAR MOVIMIENTO
+    // ===================================================
+    const [[mov]] = await conn.query(
+      `SELECT * FROM movimientos_inventario WHERE id = ? FOR UPDATE`,
+      [movimientoId]
+    );
+    if (!mov) throw new Error("Movimiento no encontrado");
+    if (mov.estado !== "VALIDADO_LOGISTICA") {
+      throw new Error("Este movimiento ya fue procesado");
+    }
+
+    // ===================================================
+    // 🔐 VALIDAR QUE YA TENGA CANTIDAD REAL
+    // ===================================================
+    if (!mov.cantidad_real || mov.cantidad_real <= 0) {
+      throw new Error("Debe guardar cantidad real antes de validar");
+    }
+
+    // ===================================================
+    // 📦 DETERMINAR ALMACÉN FINAL
+    // ===================================================
+    let almacenFinal = almacen_id || mov.almacen_id || null;
+    if (almacen_nuevo) {
+      const [r] = await conn.query(
+        `INSERT INTO almacenes (nombre, empresa_id, fabricante_id) VALUES (?, ?, ?)`,
+        [almacen_nuevo.trim(), mov.empresa_id, mov.fabricante_id || null]
+      );
+      almacenFinal = r.insertId;
+    }
+
+    // ===================================================
+    // 🔒 ACTUALIZAR MOVIMIENTO
+    // ===================================================
+    await conn.query(
+      `UPDATE movimientos_inventario
+       SET estado='APROBADO_FINAL',
+           usuario_contabilidad_id=?,
+           fecha_validacion_contabilidad=NOW(),
+           almacen_id=?,
+           numero_orden=?,
+           op_vinculada=?,
+           observaciones=?
+       WHERE id=?`,
+      [
+        usuarioId,
+        almacenFinal,
+        numero_orden || null,
+        op_vinculada || null,
+        observaciones || null,
+        movimientoId
+      ]
+    );
+
+    // ===================================================
+    // 📝 REGISTRAR AUDITORÍA
+    // ===================================================
+    await conn.query(
+      `INSERT INTO validaciones_movimiento
+       (movimiento_id, rol, usuario_id, accion, observaciones, created_at)
+       VALUES (?, 'CONTABILIDAD', ?, 'VALIDADO', ?, NOW())`,
+      [movimientoId, usuarioId, observaciones || "Validado por contabilidad"]
+    );
+
+    await conn.commit();
+    res.json({ ok: true });
+  } catch (error) {
+    await conn.rollback();
+    console.error("❌ validarMovimiento:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  } finally {
+    conn.release();
+  }
+},
+
+// =====================================================
+// ❌ RECHAZAR MOVIMIENTO
+// =====================================================
+rechazarMovimiento: async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const { movimientoId } = req.params;
+    const { motivo } = req.body;
+    const usuarioId = req.user.id;
+
+    const [[mov]] = await conn.query(
+      `SELECT * FROM movimientos_inventario WHERE id=? FOR UPDATE`,
+      [movimientoId]
+    );
+    if (!mov) throw new Error("Movimiento no encontrado");
+    if (mov.estado !== "VALIDADO_LOGISTICA") {
+      throw new Error("Este movimiento ya fue procesado");
+    }
+
+    await conn.query(
+      `UPDATE movimientos_inventario
+       SET estado='RECHAZADO_CONTABILIDAD',
+           usuario_contabilidad_id=?,
+           fecha_validacion_contabilidad=NOW()
+       WHERE id=?`,
+      [usuarioId, movimientoId]
+    );
+
+    await conn.query(
+      `INSERT INTO validaciones_movimiento
+       (movimiento_id, rol, usuario_id, accion, observaciones, created_at)
+       VALUES (?, 'CONTABILIDAD', ?, 'RECHAZADO', ?, NOW())`,
+      [movimientoId, usuarioId, motivo || "Rechazado por contabilidad"]
+    );
+
+    await conn.commit();
+    res.json({ ok: true });
+  } catch (error) {
+    await conn.rollback();
+    console.error("❌ rechazarMovimiento:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  } finally {
+    conn.release();
+  }
+},
+
+// =====================================================
+// ✅ DETALLE MOVIMIENTO (CON AUDITORÍA Y IMÁGENES)
+// =====================================================
+detalleMovimiento: async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Datos principales
+    const [movs] = await pool.query(
+      `SELECT 
+         m.*,
+         u.nombre AS usuario_creador,
+         p.descripcion AS producto,
+         e.nombre AS empresa,
+         a.nombre AS almacen,
+         f.nombre AS fabricante
+       FROM movimientos_inventario m
+       LEFT JOIN usuarios u ON u.id = m.usuario_creador_id
+       LEFT JOIN productos p ON p.id = m.producto_id
+       LEFT JOIN empresas e ON e.id = m.empresa_id
+       LEFT JOIN almacenes a ON a.id = m.almacen_id
+       LEFT JOIN fabricantes f ON f.id = m.fabricante_id
+       WHERE m.id = ?`,
+      [id]
+    );
+
+    if (!movs[0])
+      return res.status(404).json({ ok: false, msg: "Movimiento no encontrado" });
+
+    const movimiento = movs[0];
+
+    // 2️⃣ Validaciones
+    const [validaciones] = await pool.query(
+      `SELECT 
+         v.*, 
+         u.nombre AS usuario
+       FROM validaciones_movimiento v
+       LEFT JOIN usuarios u ON u.id = v.usuario_id
+       WHERE v.movimiento_id = ?
+       ORDER BY created_at ASC`,
+      [id]
+    );
+
+    const logistica = validaciones.find(v => v.rol === "LOGISTICA") || {};
+    const contabilidad = validaciones.find(v => v.rol === "CONTABILIDAD") || {};
+
+    const usuario_logistica = logistica.usuario || null;
+    const usuario_contabilidad = contabilidad.usuario || null;
+
+    const observacion_logistica = logistica.observaciones || null;
+    const observacion_contabilidad = contabilidad.observaciones || null;
+
+    // 3️⃣ Imágenes
+    const [imagenes] = await pool.query(
+      `SELECT * FROM imagenes WHERE movimiento_id = ?`,
+      [id]
+    );
+
+    res.json({
+      ...movimiento,
+      usuario_logistica,
+      usuario_contabilidad,
+      observacion_logistica,
+      observacion_contabilidad,
+      validaciones,
+      imagenes
+    });
+  } catch (error) {
+    console.error("❌ detalleMovimiento:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+},
+
+// =====================================================
+// 💾 GUARDAR CANTIDAD REAL
+// =====================================================
+guardarCantidadReal: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cantidad_real } = req.body;
+    const usuarioId = req.user?.id;
+
+    if (!cantidad_real || cantidad_real <= 0)
+      return res.status(400).json({ ok: false, msg: "Cantidad real obligatoria" });
+
+    if (!usuarioId)
+      return res.status(401).json({ ok: false, msg: "Usuario no autenticado" });
+
+    const [movs] = await pool.query(`SELECT * FROM movimientos_inventario WHERE id = ?`, [id]);
+    if (!movs[0])
+      return res.status(404).json({ ok: false, msg: "Movimiento no encontrado" });
+
+    await pool.query(
+      `UPDATE movimientos_inventario SET cantidad_real = ?, updated_at = NOW() WHERE id = ?`,
+      [cantidad_real, id]
+    );
+
+    await pool.query(
+      `INSERT INTO validaciones_movimiento
+       (movimiento_id, rol, usuario_id, accion, observaciones, created_at)
+       VALUES (?, 'CONTABILIDAD', ?, 'VALIDADO', ?, NOW())`,
+      [id, usuarioId, `Cantidad real actualizada: ${cantidad_real}`]
+    );
+
+    res.json({ ok: true, msg: "Cantidad real guardada y auditada correctamente" });
+  } catch (error) {
+    console.error("❌ guardarCantidadReal:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+},
+
 };

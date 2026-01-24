@@ -20,12 +20,7 @@ router.get("/categorias", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.listarCatego
 // =====================
 router.get("/pendientes", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.listarPendientes);
 
-router.post(
-  "/movimientos/:movimientoId/validar",
-  rolMiddleware("ADMIN_CONTABILIDAD"),
-  upload.single("imagen"),
-  ctrl.validarMovimiento
-);
+
 
 router.post(
   "/movimientos/:movimientoId/rechazar",
@@ -135,5 +130,21 @@ router.get(
   rolMiddleware("ADMIN_CONTABILIDAD"),
   ctrl.listarAlmacenesPorProducto
 );
+
+
+
+//CONTABILIDAD
+// ✅ VALIDAR / RECHAZAR
+router.post("/movimientos/:movimientoId/validar", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.validarMovimiento);
+router.post("/movimientos/:movimientoId/rechazar", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.rechazarMovimiento);
+
+// ✅ DETALLE DE MOVIMIENTO
+router.get("/movimientos/:id/detalle", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.detalleMovimiento);
+router.post(
+  "/movimientos/:id/guardar-cantidad-real",
+  rolMiddleware("ADMIN_CONTABILIDAD"),
+  ctrl.guardarCantidadReal
+);
+
 
 module.exports = router;
