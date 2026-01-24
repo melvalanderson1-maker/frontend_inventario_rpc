@@ -20,7 +20,12 @@ router.get("/categorias", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.listarCatego
 // =====================
 router.get("/pendientes", rolMiddleware("ADMIN_CONTABILIDAD"), ctrl.listarPendientes);
 
-
+router.post(
+  "/movimientos/:movimientoId/validar",
+  rolMiddleware("ADMIN_CONTABILIDAD"),
+  upload.single("imagen"),
+  ctrl.validarMovimiento
+);
 
 router.post(
   "/movimientos/:movimientoId/rechazar",

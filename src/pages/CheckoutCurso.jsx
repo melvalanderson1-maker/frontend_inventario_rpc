@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import PublicHeader from "../components/layout/PublicHeader";
 import PublicFooter from "../components/layout/PublicFooter";
-import ModalMensaje from "../components/UI/ModalMensaje";
+import ModalMensaje from "../components/ui/ModalMensaje";
 
 import { iniciarPagoMercadoPago, pagoYapeSimulado } from "../api/pagosApi";
 import { obtenerSeccionesPorCurso } from "../api/seccionesApi";
