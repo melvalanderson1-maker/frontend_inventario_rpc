@@ -5,20 +5,53 @@ let pool;
   pool = await initDB();
 })();
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
+
+
+// 🔐 Validador de contraseña segura
+const validarPasswordSegura = (password) => {
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&      // mayúscula
+    /[a-z]/.test(password) &&      // minúscula
+    /[0-9]/.test(password) &&      // número
+    /[^A-Za-z0-9]/.test(password) // símbolo
+  );
+};
+
+
 
 module.exports = {
   // ─────────────────────────────────────────────
   // USUARIOS
   // ─────────────────────────────────────────────
-  listarUsuarios: async (req, res) => {
-    try {
-      const [rows] = await pool.query("SELECT * FROM usuarios");
-      res.json({ ok: true, usuarios: rows });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: err.message });
-    }
-  },
+
+
+  
+listarUsuarios: async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id,
+        u.nombre,
+        u.apellido_paterno,
+        u.apellido_materno,
+        u.numero_documento,
+        u.telefono,
+        u.estado,
+        u.email AS correo,
+        r.nombre AS rol
+      FROM usuarios u
+      JOIN roles r ON r.id = u.rol_id
+    `);
+
+    res.json({ ok: true, usuarios: rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
 
   obtenerUsuario: async (req, res) => {
     try {
@@ -34,63 +67,220 @@ module.exports = {
 
 
 
-    crearUsuario: async (req, res) => {
-    try {
-        const { correo, nombre, apellido_paterno, apellido_materno, numero_documento, telefono, rol, estado, contraseña } = req.body;
+crearUsuario: async (req, res) => {
+  try {
+    const {
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      numero_documento,
+      telefono,
+      estado,
+      correo,
+      contraseña,
+      rol
+    } = req.body;
 
-        // Validaciones básicas
-        if (!correo || !nombre || !apellido_paterno || !contraseña) {
-        return res.status(400).json({ ok: false, msg: "Faltan datos obligatorios" });
-        }
 
-        // Validar email único
-        const [existing] = await pool.query("SELECT id FROM usuarios WHERE correo=?", [correo]);
-        if (existing.length > 0) {
-        return res.status(400).json({ ok: false, msg: "Correo ya registrado" });
-        }
 
-        // Hashear contraseña
-        const salt = await bcrypt.genSalt(10);
-        const contraseña_hash = await bcrypt.hash(contraseña, salt);
 
-        const data = {
-        correo,
+    // Validaciones mínimas
+    if (!nombre || !apellido_paterno || !correo || !contraseña || !rol) {
+      return res.status(400).json({ msg: "Faltan datos obligatorios" });
+    }
+
+
+            // 🔐 VALIDAR DOMINIO DE CORREO (BACKEND)
+    const dominiosPermitidos = [
+      "gmail.com",
+      "outlook.com",
+      "hotmail.com",
+      "yahoo.com",
+      "icloud.com"
+    ];
+
+    if (!correo.includes("@")) {
+      return res.status(400).json({ msg: "Correo inválido" });
+    }
+
+    const dominio = correo.split("@")[1].toLowerCase();
+
+    if (!dominiosPermitidos.includes(dominio)) {
+      return res.status(400).json({
+        msg: "Dominio de correo no permitido"
+      });
+    }
+
+
+    // Buscar rol
+    const [[rolRow]] = await pool.query(
+      "SELECT id FROM roles WHERE nombre = ?",
+      [rol.trim()]
+    );
+
+    if (!rolRow) {
+      return res.status(400).json({ msg: "Rol inválido" });
+    }
+
+    // 🔐 VALIDAR CONTRASEÑA SEGURA (ANTES DE ENCRIPTAR)
+    if (!validarPasswordSegura(contraseña)) {
+      return res.status(400).json({
+        msg: "La contraseña debe tener mínimo 8 caracteres, mayúscula, minúscula, número y símbolo"
+      });
+    }
+
+
+    // Encriptar contraseña
+    const hash = await bcrypt.hash(contraseña, 10);
+
+
+
+    // 🔎 VALIDAR DUPLICADOS (EMAIL / DOCUMENTO)
+    const [existe] = await pool.query(
+      `
+      SELECT 
+        email,
+        numero_documento
+      FROM usuarios
+      WHERE email = ?
+        OR (numero_documento IS NOT NULL AND numero_documento = ?)
+      `,
+      [correo, numero_documento]
+    );
+
+    if (existe.length > 0) {
+      const errores = [];
+
+      if (existe[0].email === correo) {
+        errores.push("El correo ya está registrado");
+      }
+
+      if (
+        numero_documento &&
+        existe[0].numero_documento === numero_documento
+      ) {
+        errores.push("El número de documento ya está registrado");
+      }
+
+      return res.status(409).json({
+        ok: false,
+        code: "DUPLICADO",
+        errores
+      });
+    }
+
+
+    // INSERT COMPLETO ✅
+    await pool.query(
+      `
+      INSERT INTO usuarios (
         nombre,
         apellido_paterno,
         apellido_materno,
         numero_documento,
         telefono,
-        rol: rol || "ESTUDIANTE",
-        estado: estado || "ACTIVO",
-        contraseña_hash,
-        };
+        estado,
+        email,
+        password,
+        rol_id
+      ) VALUES (?,?,?,?,?,?,?,?,?)
+      `,
+      [
+        nombre,
+        apellido_paterno,
+        apellido_materno || null,
+        numero_documento || null,
+        telefono || null,
+        estado || "ACTIVO",
+        correo,
+        hash,
+        rolRow.id
+      ]
+    );
 
-        await pool.query("INSERT INTO usuarios SET ?", data);
-        res.json({ ok: true, msg: "Usuario creado" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ ok: false, msg: err.message });
+    res.json({ ok: true, msg: "Usuario creado correctamente" });
+
+  } catch (err) {
+    console.error("crearUsuario:", err);
+    res.status(500).json({ msg: err.message });
+  }
+},
+
+
+
+actualizarUsuario: async (req, res) => {
+  try {
+    const {
+      contraseña,
+      correo,
+      rol,
+      ...resto
+    } = req.body;
+
+    const data = { ...resto };
+
+    // correo → email
+    if (correo) data.email = correo;
+
+    // 🔎 VALIDAR CORREO DUPLICADO (EXCEPTO EL MISMO USUARIO)
+    if (correo) {
+      const [existe] = await pool.query(
+        "SELECT id FROM usuarios WHERE email = ? AND id <> ?",
+        [correo, req.params.id]
+      );
+
+      if (existe.length > 0) {
+        return res.status(409).json({
+          ok: false,
+          code: "DUPLICADO",
+          errores: ["El correo ya está registrado por otro usuario"]
+        });
+      }
     }
-    },
 
 
-    actualizarUsuario: async (req, res) => {
-    try {
-        const { contraseña, ...resto } = req.body;
-        let data = { ...resto };
+    // contraseña → password
+    // contraseña → password
+    if (contraseña) {
+      if (!validarPasswordSegura(contraseña)) {
+      return res.status(400).json({
+        ok: false,
+        msg: "La contraseña debe tener mínimo 8 caracteres, mayúscula, minúscula, número y símbolo"
+      });
 
-        if (contraseña) {
-        const salt = await bcrypt.genSalt(10);
-        const contraseña_hash = await bcrypt.hash(contraseña, salt);
-        data.contraseña_hash = contraseña_hash;
-        }
+      }
 
-        await pool.query("UPDATE usuarios SET ? WHERE id=?", [data, req.params.id]);
-        res.json({ ok: true, msg: "Usuario actualizado" });
-    } catch (err) {
-        res.status(500).json({ ok: false, msg: err.message });
+      data.password = await bcrypt.hash(contraseña, 10);
     }
-    },
+
+
+    // rol string → rol_id
+    if (rol) {
+      const [[rolRow]] = await pool.query(
+        "SELECT id FROM roles WHERE nombre=?",
+        [rol.trim()]
+      );
+
+      if (!rolRow) {
+        return res.status(400).json({ msg: "Rol inválido" });
+      }
+
+      data.rol_id = rolRow.id;
+    }
+
+    await pool.query(
+      "UPDATE usuarios SET ? WHERE id=?",
+      [data, req.params.id]
+    );
+
+    res.json({ ok: true, msg: "Usuario actualizado" });
+  } catch (err) {
+    console.error("actualizarUsuario:", err);
+    res.status(500).json({ ok: false, msg: err.message });
+  }
+},
+
+
 
 
 eliminarUsuario: async (req, res) => {
@@ -120,11 +310,16 @@ eliminarUsuario: async (req, res) => {
   // DOCENTES, SECRETARIAS, ALUMNOS
   // ─────────────────────────────────────────────
   listarDocentes: async (req, res) => {
-    const [rows] = await pool.query(
-      "SELECT * FROM usuarios WHERE rol='DOCENTE'"
-    );
+    const [rows] = await pool.query(`
+      SELECT u.*
+      FROM usuarios u
+      JOIN roles r ON r.id = u.rol_id
+      WHERE r.nombre = 'ADMIN_LOGISTICA'
+    `);
+
     res.json({ ok: true, docentes: rows });
   },
+
 
 
   // Listar cursos que dicta un docente

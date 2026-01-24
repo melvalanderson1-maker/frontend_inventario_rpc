@@ -21,6 +21,9 @@ import MpRedirect from "../pages/MpRedirect";
 // ADMIN PAGES
 import DashboardAdmin from "../pages/DashboardAdmin";
 
+import AdminLayout from "../components/layout/AdminLayout";
+
+
 // ADMIN MODULES
 import UsuariosAdmin from "../components/Administrador/UsuariosAdmin";
 import DocentesAdmin from "../components/Administrador/DocentesAdmin";
@@ -46,6 +49,59 @@ import ListaAlumnos from "../components/docente/ListaAlumnos";
 
 
 
+// ADMIN COMPRAS
+import DashboardCompras from "../pages/DashboardCompras";
+import MovimientosCompras from "../components/admin_compras/MovimientosCompras";
+import CrearProducto from "../components/admin_compras/CrearProducto";
+
+import ProductoDetalle from "../components/admin_compras/ProductoDetalle";
+import MovimientoEntrada from "../components/admin_compras/MovimientoEntrada";
+import MovimientoSalida from "../components/admin_compras/MovimientoSalida";
+import AprobacionesCompras from "../components/admin_compras/AprobacionesCompras";
+
+import ProductosCompras from "../components/admin_compras/ProductosCompras";
+
+
+
+import MovimientoSaldoInicial from "../components/admin_compras/MovimientoSaldoInicial";
+
+
+
+
+//ADMIN LOGISTICA
+import ProductosLogistica from "../components/admin_logistica/productos/ProductosLogistica";
+import ProductoDetalleLogistica from "../components/admin_logistica/productos/ProductoDetalleLogistica";
+
+
+
+
+
+
+
+
+// ADMIN LOGISTICA
+import DashboardLogistica from "../pages/DashboardLogistica";
+import MovimientosLogistica from "../components/admin_logistica/MovimientosLogistica";
+import ValidarMovimiento from "../components/admin_logistica/ValidarMovimiento";
+import RechazarMovimiento from "../components/admin_logistica/RechazarMovimiento";
+import CambioAlmacen from "../components/admin_logistica/CambioAlmacen";
+
+
+
+
+//ADMIN CONTABILIDAD
+// ADMIN CONTABILIDAD
+import DashboardContabilidad from "../pages/DashboardContabilidad";
+import ProductosContabilidad from "../components/admin_contabilidad/ProductosContabilidad";
+import ProductoDetalleContabilidad from "../components/admin_contabilidad/ProductoDetalleContabilidad";
+import MovimientosContabilidad from "../components/admin_contabilidad/MovimientosContabilidad";
+import ValidarMovimientoContabilidad from "../components/admin_contabilidad/ValidarMovimientoContabilidad";
+import RechazarMovimientoContabilidad from "../components/admin_contabilidad/RechazarMovimientoContabilidad";
+import CambioAlmacenContabilidad from "../components/admin_contabilidad/CambioAlmacenContabilidad";
+
+import HistorialContabilidad from "../components/admin_contabilidad/tablas/TablaHistorialContabilidad";
+
+
 
 import { AuthContext } from "../context/AuthContext";
 
@@ -54,12 +110,21 @@ import { AuthContext } from "../context/AuthContext";
 const PrivateRoute = ({ children, roles }) => {
   const { usuario, loading } = useContext(AuthContext);
 
+  console.log("✅ PrivateRoute → usuario:", usuario);  // 🔥 agrega esto
+  console.log("✅ PrivateRoute → roles permitidos:", roles);
+
   if (loading) return <div>Cargando...</div>;
   if (!usuario) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(usuario.rol)) return <Navigate to="/" replace />;
+
+  if (roles && !roles.includes(usuario.rol)) {
+    console.log("❌ Rol no permitido:", usuario.rol);
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return children;
 };
+
+
 
 export default function AppRouter() {
   return (
@@ -71,7 +136,167 @@ export default function AppRouter() {
         <Route path="/curso/:id" element={<DetalleCursoPublico />} />
         <Route path="/checkout/:cursoId" element={<CheckoutCurso />} />
 
+
+        <Route
+          path="/compras"
+          element={
+            <PrivateRoute roles={["ADMIN_COMPRAS"]}>
+              <DashboardCompras />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={null} />
+
+          <Route path="productos" element={<ProductosCompras />} />
+       
+
+
+          <Route path="productos/nuevo" element={<CrearProducto />} />
+           
+
+          <Route path="producto/:id" element={<ProductoDetalle />} />
+
+          <Route path="movimientos" element={<MovimientosCompras />} />
+
+          <Route
+            path="aprobaciones"
+            element={<AprobacionesCompras />}
+            
+          />
+
+
+          <Route
+            path="movimiento/entrada/:productoId"
+            element={<MovimientoEntrada />}
+          />
+
+          <Route
+            path="movimiento/:tipo/:productoId"
+            element={<MovimientoSaldoInicial />}
+          />
+
+
+
+          <Route
+            path="movimiento/:tipo/:productoId"
+            element={<MovimientoSaldoInicial />}
+          />
+
+          <Route
+            path="movimiento/salida/:productoId"
+            element={<MovimientoSalida />}
+          />
+
+        </Route>
+
+
+
+
+
+
+        <Route
+          path="/logistica"
+          element={
+            <PrivateRoute roles={["ADMIN_LOGISTICA"]}>
+              <DashboardLogistica />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<MovimientosLogistica />} />
+
+          <Route path="movimientos" element={<MovimientosLogistica />} />
+          <Route path="aprobaciones" element={<ValidarMovimiento />} />
+          <Route path="rechazar/:id" element={<RechazarMovimiento />} />
+          <Route path="cambio-almacen/:productoId" element={<CambioAlmacen />} />
+
+
+          {/* ✅ PRODUCTOS LOGÍSTICA */}
+          <Route path="productos" element={<ProductosLogistica />} />
+          <Route path="producto/:id" element={<ProductoDetalleLogistica />} />
+
+
+        </Route>
+
+
+        <Route
+          path="/contabilidad"
+          element={
+            <PrivateRoute roles={["ADMIN_CONTABILIDAD"]}>
+              <DashboardContabilidad />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<MovimientosContabilidad />} />
+          <Route path="pendientes" element={<MovimientosContabilidad />} />
+          <Route path="productos" element={<ProductosContabilidad />} />
+          <Route path="producto/:id" element={<ProductoDetalleContabilidad />} />
+          <Route path="aprobaciones" element={<ValidarMovimientoContabilidad />} />
+          <Route path="rechazar/:id" element={<RechazarMovimientoContabilidad />} />
+          <Route path="cambio-almacen/:productoId" element={<CambioAlmacenContabilidad />} />
+          <Route path="historial" element={<HistorialContabilidad />} />
+        </Route>
+
+
+
+
+
+
+
+
         
+
+        <Route
+          path="/dashboard/admin"
+          element={
+            <PrivateRoute roles={["ADMIN_MAX","ADMIN_LOGISTICA","ADMIN_CONTABILIDAD"]}>
+              <AdminLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<DashboardAdmin />} />
+          
+
+
+
+
+
+
+          <Route
+            path="usuarios"
+            element={
+              <PrivateRoute roles={["ADMIN_MAX", "ADMIN_LOGISTICA"]}>
+                <UsuariosAdmin />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="cursos"
+            element={
+              <PrivateRoute roles={["ADMIN_MAX","ADMIN_LOGISTICA"]}>
+                <CursosAdmin />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="pagos"
+            element={
+              <PrivateRoute roles={["ADMIN_MAX","ADMIN_CONTABILIDAD"]}>
+                <PagosAdmin />
+              </PrivateRoute>
+            }
+          />
+
+
+
+        </Route>
+
+
+
+
+
+
 
 
         {/* ESTUDIANTE */}
@@ -213,95 +438,7 @@ export default function AppRouter() {
         />
 
 
-        <Route
-          path="/dashboard/admin"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <DashboardAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/usuarios"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <UsuariosAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/docentes"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <DocentesAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/secretarias"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <SecretariasAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/alumnos"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <AlumnosAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/cursos"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <CursosAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/secciones"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <SeccionesAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/pagos"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <PagosAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/facturas"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <FacturasAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/admin/auditoria"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <AuditoriaAdmin />
-            </PrivateRoute>
-          }
-        />
+ 
 
 
 

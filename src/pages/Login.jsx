@@ -17,12 +17,44 @@ export default function Login() {
       const user = await login({ email: form.correo, password: form.password });
 
       // REDIRECCIÓN SEGÚN ROL
-      if (user.rol === "ESTUDIANTE") navigate("/dashboard/estudiante");
-      else if (user.rol === "DOCENTE") navigate("/dashboard/docente");
-      else if (user.rol === "SECRETARIA") navigate("/dashboard/secretaria");
-      else if (user.rol === "ADMIN") navigate("/dashboard/admin");
+      // REDIRECCIÓN SEGÚN ROL REAL
+      switch (user.rol) {
+        case "ADMIN_MAX":
+          navigate("/dashboard/admin");
+          break;
 
-      else navigate("/");
+        case "ADMIN_COMPRAS":
+          navigate("/compras"); // <--- CORREGIDO
+          break;
+
+        case "ADMIN_LOGISTICA":
+          navigate("/logistica");
+          break;
+
+        case "ADMIN_CONTABILIDAD":
+          navigate("/contabilidad");
+          break;
+
+
+        case "ADMIN_VENTAS":
+          navigate("/dashboard/admin/ventas");
+          break;
+
+        case "DOCENTE":
+          navigate("/dashboard/docente");
+          break;
+
+        case "SECRETARIA":
+          navigate("/dashboard/secretaria");
+          break;
+
+        case "ESTUDIANTE":
+          navigate("/dashboard/estudiante");
+          break;
+
+        default:
+          navigate("/");
+      }
 
     } catch (err) {
       alert("Credenciales inválidas");

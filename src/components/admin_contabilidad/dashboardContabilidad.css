@@ -1,0 +1,108 @@
+.contabilidad-main {
+  margin-left: 240px;
+  padding: 24px;
+  width: 100%;
+}
+
+.contabilidad-title {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.contabilidad-subtitle {
+  color: #666;
+  margin-bottom: 18px;
+}
+
+.contabilidad-dashboard-container {
+  max-width: 1200px;
+  margin: 24px auto;
+}
+
+.contabilidad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.contabilidad-card {
+  display: block;
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #eee;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.contabilidad-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+.contabilidad-card .emoji {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.contabilidad-card h3 {
+  margin: 0 0 6px 0;
+}
+
+.contabilidad-card p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Menu */
+.menu-contabilidad {
+  width: 240px;
+  background: #0f1724;
+  color: #fff;
+  min-height: 100vh;
+  padding: 18px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.menu-contabilidad.closed { transform: translateX(-100%); }
+.menu-contabilidad.open { transform: translateX(0); }
+
+.menu-contabilidad .brand {
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.menu-contabilidad nav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.menu-contabilidad a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+.menu-contabilidad a:hover { background: #14213d; color: #fff; }
+.menu-contabilidad a.active { background: #1d4ed8; color: #fff; font-weight: 600; }
+
+.menu-footer { border-top: 1px solid #1e293b; padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.user-info { font-size: 12px; color: #94a3b8; display: flex; flex-direction: column; gap: 2px; }
+.user-name { font-weight: 600; color: #e2e8f0; }
+.user-rol { font-size: 11px; text-transform: uppercase; opacity: 0.8; }
+
+.logout-btn { background: #dc2626; color: white; border: none; padding: 9px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.logout-btn:hover { background: #b91c1c; }
+.menu-toggle {
+  position: fixed; top: 14px; left: 14px; z-index: 1100;
+  background: #1d4ed8; color: #fff; border: none; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer;
+}

@@ -1,37 +1,21 @@
-.dashboard-admin {
-  display: flex;
-}
-
-.admin-menu {
-  width: 250px;
-  background: #1a1a1a;
-  color: white;
-  padding: 20px;
-  min-height: 100vh;
-}
-
-.admin-menu ul {
-  list-style: none;
-  padding: 0;
-}
-
-.admin-menu li {
-  margin: 12px 0;
-}
-
-.admin-menu a {
-  color: #fff;
-  text-decoration: none;
-  padding: 6px 8px;
-  display: block;
-  border-radius: 4px;
-}
-
-.admin-menu a:hover {
-  background: #333;
-}
-
 .admin-content {
-  padding: 30px;
-  width: 100%;
+  padding: 32px;
+  transition: margin-left 0.3s ease;
+}
+
+/* menú abierto */
+.admin-content.menu-open {
+  margin-left: 240px;
+}
+
+/* menú cerrado */
+.admin-content.menu-closed {
+  margin-left: 0;
+}
+
+/* móvil */
+@media (max-width: 1024px) {
+  .admin-content.menu-open {
+    margin-left: 0;
+  }
 }

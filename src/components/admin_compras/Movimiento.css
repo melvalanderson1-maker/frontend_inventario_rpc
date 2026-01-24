@@ -1,0 +1,427 @@
+    /* ===============================
+    CONTENEDOR GENERAL
+    ================================ */
+    .mov-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    }
+
+    /* ===============================
+    BOTÓN VOLVER
+    ================================ */
+    .btn-back {
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 16px;
+    color: #2563eb;
+    }
+
+    .btn-back:hover {
+    text-decoration: underline;
+    }
+
+    /* ===============================
+    CARD PRINCIPAL
+    ================================ */
+    .mov-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ===============================
+    TÍTULO
+    ================================ */
+    .mov-card h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    }
+
+    /* ===============================
+    BADGES
+    ================================ */
+    .badges {
+    display: flex;
+    gap: 10px;
+    margin: 14px 0 26px;
+    }
+
+    .badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    }
+
+    .badge.blue {
+    background: #2563eb;
+    color: white;
+    }
+
+    .badge.red {
+    background: #dc2626;
+    color: white;
+    }
+
+    .badge.gray {
+    background: #e5e7eb;
+    color: #374151;
+    }
+
+    /* ===============================
+    GRID DEL FORMULARIO
+    ================================ */
+    .mov-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 20px;
+    }
+
+    /* ===============================
+    CAMPOS
+    ================================ */
+    .mov-grid label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: #374151;
+    }
+
+    .mov-grid input,
+    .mov-grid select,
+    .mov-grid textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    }
+
+    .mov-grid textarea {
+    resize: vertical;
+    min-height: 80px;
+    }
+
+    /* Select + input juntos */
+    .mov-grid select + input {
+    margin-top: 8px;
+    }
+
+    /* Focus */
+    .mov-grid input:focus,
+    .mov-grid select:focus,
+    .mov-grid textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Disabled */
+    .mov-grid input:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    }
+
+    /* ===============================
+    ACCIONES
+    ================================ */
+    .mov-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 30px;
+    }
+
+
+
+  .btn-save {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    border: none;
+    padding: 11px 26px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.55;
+  }
+
+  .btn-save:not(:disabled) {
+  opacity: 1;
+  box-shadow: 0 10px 22px rgba(37,99,235,.35);
+}
+
+.btn-save:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(37,99,235,.45);
+}
+
+.btn-save:disabled {
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.btn-cancel:hover {
+  background: #000000;
+}
+
+
+    .btn-save:hover {
+    background: #0051ff;
+    }
+
+
+
+
+    /* ===============================
+CARD PRODUCTO (IMAGEN PEQUEÑA Y ELEGANTE)
+================================ */
+
+.product-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+}
+
+/* CONTENEDOR DE IMAGEN */
+.product-card img {
+  width: 300px;          /* 👈 tamaño controlado */
+  height: 300px;
+  object-fit: contain;  /* 👈 no se deforma */
+  border-radius: 10px;
+  background: #f9fafb;
+  padding: 6px;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+}
+
+/* INFO PRODUCTO */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.product-sub {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.product-info .stock {
+  font-size: 13px;
+  color: #374151;
+}
+
+
+/* ===============================
+ ALERTA DE ERROR (STOCK INSUFICIENTE)
+================================ */
+.mov-alert {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.mov-alert.error {
+  background: linear-gradient(135deg, #fdecea, #fff5f5);
+  color: #7f1d1d;
+  border-left: 5px solid #dc2626;
+  font-size: 14px;
+}
+
+.mov-alert.error strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+
+.mov-alert.success {
+  background: #edf7ed;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+    /* ===============================
+    RESPONSIVE
+    ================================ */
+
+    /* Tablets */
+    @media (max-width: 1024px) {
+    .mov-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+    .mov-container {
+        padding: 14px;
+    }
+
+    .mov-card {
+        padding: 20px;
+    }
+
+    .mov-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mov-actions {
+        flex-direction: column;
+    }
+
+    .btn-save,
+    .btn-cancel {
+        width: 100%;
+    }
+    }
+
+
+    @media (max-width: 640px) {
+  .product-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .product-card img {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+
+/* ===============================
+   MODAL CERRAR SESIÓN
+================================ */
+.logout-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+}
+
+.logout-modal {
+  background: white;
+  border-radius: 14px;
+  padding: 22px 26px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: modalPop 0.2s ease;
+  text-align: center;
+}
+
+.logout-modal h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.logout-modal p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.logout-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logout-modal-actions .btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-modal-actions .btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.logout-modal-actions .btn-confirm {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.35);
+}
+
+.logout-modal-actions .btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.45);
+}
+
+/* Animaciones */
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

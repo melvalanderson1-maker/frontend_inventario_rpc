@@ -1,0 +1,279 @@
+/* ===============================
+   TABLAS DE MOVIMIENTOS – ERP PRO
+================================ */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ===============================
+   TABLA BASE
+================================ */
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  background: #ffffff;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+th {
+  text-align: left;
+  padding: 7px 8px;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #d1d5db;
+  white-space: nowrap;
+}
+
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+  vertical-align: middle;
+
+  /* CLAVE: permitir leer textos largos */
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Hover profesional */
+tbody tr {
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+tbody tr:hover {
+  box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.035);
+}
+
+/* ===============================
+   ANCHOS OPTIMIZADOS (LEGIBLES)
+================================ */
+
+/* Tipo */
+th:nth-child(1),
+td:nth-child(1) {
+  width: 70px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* OP */
+th:nth-child(2),
+td:nth-child(2) {
+  width: 95px;
+}
+
+/* Fabricante */
+th:nth-child(3),
+td:nth-child(3) {
+  width: 150px;
+}
+
+/* Precio */
+th:nth-child(4),
+td:nth-child(4) {
+  width: 75px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cantidad */
+th:nth-child(5),
+td:nth-child(5) {
+  width: 80px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empresa */
+th:nth-child(6),
+td:nth-child(6) {
+  width: 180px;
+}
+
+/* Fecha registro */
+th:nth-child(7),
+td:nth-child(7) {
+  width: 135px;
+  font-size: 11px;
+}
+
+/* Lugar almacén */
+th:nth-child(8),
+td:nth-child(8) {
+  width: 160px;
+}
+
+/* Fecha almacén */
+th:nth-child(9),
+td:nth-child(9) {
+  width: 135px;
+  font-size: 11px;
+}
+
+/* Estado */
+th:nth-child(10),
+td:nth-child(10) {
+  width: 150px;
+}
+
+/* ===============================
+   COLORES DE FILA COMPLETA
+================================ */
+
+.row-entrada {
+  background: #f0fdf4;
+}
+
+.row-salida {
+  background: #fef2f2;
+}
+
+.row-ajuste {
+  background: #fffbeb;
+}
+
+/* Borde izquierdo sutil ERP */
+.row-entrada td:first-child {
+  border-left: 4px solid #16a34a;
+}
+
+.row-salida td:first-child {
+  border-left: 4px solid #dc2626;
+}
+
+.row-ajuste td:first-child {
+  border-left: 4px solid #ca8a04;
+}
+
+/* Hover mantiene identidad */
+.row-entrada:hover {
+  background: #dcfce7;
+}
+
+.row-salida:hover {
+  background: #fee2e2;
+}
+
+.row-ajuste:hover {
+  background: #fef3c7;
+}
+
+/* ===============================
+   BADGES DE ESTADO – ERP
+================================ */
+
+.estado {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-block;
+  letter-spacing: 0.25px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.estado-PENDIENTE_LOGISTICA {
+  background: #ffffff;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.estado-VALIDADO_LOGISTICA {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.estado-RECHAZADO_LOGISTICA {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.estado-APROBADO_FINAL {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+/* ===============================
+   CELDAS NUMÉRICAS
+================================ */
+
+.td-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===============================
+   RESPONSIVE REAL
+================================ */
+
+@media (max-width: 900px) {
+  table {
+    font-size: 11px;
+  }
+
+  th,
+  td {
+    padding: 6px 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 6px;
+    padding: 10px 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+    white-space: normal;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+  }
+}
+
+
+/* ===============================
+   FILAS POR EMPRESA (STOCK)
+================================ */
+
+/* ===============================
+   FILAS POR EMPRESA – ERP REAL
+================================ */
+
+.row-empresa td:first-child {
+  border-left: 4px solid rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
+.row-empresa:hover {
+  filter: brightness(0.97);
+}

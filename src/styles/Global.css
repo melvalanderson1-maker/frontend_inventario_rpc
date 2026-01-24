@@ -8,3 +8,10 @@
 body { font-family: Inter, Arial, sans-serif; margin:0; background:var(--bg); color:#222; }
 .container { max-width:1100px; margin:0 auto; padding:0 16px; }
 a { color:inherit; }
+
+
+/* 🔒 EVITA SCROLL HORIZONTAL EN TODO EL LAYOUT */
+html,
+body {
+  overflow-x: hidden;
+}

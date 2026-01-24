@@ -21,15 +21,33 @@ exports.obtenerUsuario = async (req, res) => {
 
 exports.crearUsuario = async (req, res) => {
   try {
-    const { nombre, apellido_paterno, apellido_materno, correo, numero_documento, rol } = req.body;
-    if (!correo || !nombre) return res.status(400).json({ error: "Datos incompletos" });
+    const { nombre, email, rol_id } = req.body;
+
+    if (!nombre || !email || !rol_id) {
+      return res.status(400).json({ error: "Datos incompletos" });
+    }
+
     const db = await initDB();
+
     const passTemp = Math.random().toString(36).slice(-8);
     const hash = await bcrypt.hash(passTemp, 10);
-    const [ins] = await db.query(`INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, correo, contraseña_hash, numero_documento, rol) VALUES (?,?,?,?,?,?,?)`,
-      [nombre, apellido_paterno, apellido_materno, correo, hash, numero_documento || null, rol || "ESTUDIANTE"]);
-    res.json({ ok: true, id: ins.insertId });
-  } catch (e) { console.error(e); res.status(500).json({ error: "Error creando usuario" }); }
+
+    const [result] = await db.query(
+      `INSERT INTO usuarios (nombre, email, password, rol_id)
+       VALUES (?, ?, ?, ?)`,
+      [nombre, email, hash, rol_id]
+    );
+
+    res.json({
+      ok: true,
+      id: result.insertId,
+      passwordTemporal: passTemp
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Error creando usuario" });
+  }
 };
 
 exports.actualizarUsuario = async (req, res) => {

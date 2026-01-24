@@ -18,6 +18,11 @@ const seccionesRoutes = require("./routes/secciones.routes");
 const facturasRoutes = require("./routes/facturas.routes");
 
 
+
+const comprasRoutes = require("./routes/compras.routes");
+const catalogosRoutes = require("./routes/catalogos.routes");
+
+
 const app = express();
 
 console.log("TOKEN MP:", process.env.MP_ACCESS_TOKEN);
@@ -45,8 +50,11 @@ app.use(
       }
     },
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
   })
 );
+
 
 
 app.use(bodyParser.json());
@@ -65,7 +73,7 @@ app.use(bodyParser.json());
 // 🔵 RUTAS API
 app.use("/pagos", pagosRoutes);          // ESTE PRIMERO SIEMPRE
 app.use("/auth", authRoutes);
-app.use("/cursos", cursosRoutes);
+
 
 app.use("/secciones", seccionesRoutes);
 
@@ -86,10 +94,31 @@ app.use("/estudiantes", require("./routes/estudiantes.routes"));
 
 app.use("/secretaria", require("./routes/secretaria.routes"));
 
-app.use("/cursos", require("./routes/cursos.routes"));
+
 
 // registrar rutas docentes (colócalo junto a las otras `app.use(...)`)
 app.use("/docentes", require("./routes/docentes.routes"));
+
+
+app.use("/api/logistica", require("./routes/logistica.routes"));
+app.use("/api/contabilidad", require("./routes/contabilidad.routes"));
+
+
+
+
+
+
+app.use("/api/compras", require("./routes/compras.routes"));
+
+app.use("/api/categorias", require("./routes/categorias.routes"));
+app.use("/api/atributos", require("./routes/atributos.routes"));
+
+
+
+
+app.use("/api/compras", comprasRoutes);
+app.use("/api", catalogosRoutes);
+
 
 
 

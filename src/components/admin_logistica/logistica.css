@@ -1,0 +1,73 @@
+.logistica-layout {
+  display: flex;
+}
+
+.menu-logistica {
+  width: 220px;
+  background: #1f2937;
+  color: #fff;
+  padding: 20px;
+}
+
+.menu-logistica a {
+  display: block;
+  color: #d1d5db;
+  margin: 10px 0;
+  text-decoration: none;
+}
+
+.menu-logistica a.active {
+  color: #fff;
+  font-weight: bold;
+}
+
+.logistica-main {
+  padding: 20px;
+  flex: 1;
+}
+
+.cards-logistica {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.logistica-card {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.btn-validar {
+  display: inline-block;
+  margin-top: 10px;
+  background: #2563eb;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.tabla-logistica table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.tabla-logistica th,
+.tabla-logistica td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.form-logistica {
+  max-width: 400px;
+  margin: auto;
+}
+
+.form-logistica input,
+.form-logistica textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+}

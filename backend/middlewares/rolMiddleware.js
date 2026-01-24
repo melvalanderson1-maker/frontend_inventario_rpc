@@ -1,24 +1,18 @@
-// middleware para validar roles
+// middlewares/rolMiddleware.js
+const rolMiddleware = (rolesPermitidos) => (req, res, next) => {
+  const usuario = req.user; // ⚡ asegúrate de usar req.user
 
-function rolMiddleware(...rolesPermitidos) {
-  return (req, res, next) => {
-    try {
-      const rolUsuario = req.user?.rol;
+  console.log("💡 rolMiddleware → usuario:", usuario);
 
-      if (!rolUsuario) {
-        return res.status(401).json({ message: "No autorizado: usuario sin rol" });
-      }
+  if (!usuario) return res.status(403).json({ message: "No autorizado" });
 
-      if (!rolesPermitidos.includes(rolUsuario)) {
-        return res.status(403).json({ message: "Acceso denegado: rol insuficiente" });
-      }
+  // rolesPermitidos puede ser string o array
+  const roles = Array.isArray(rolesPermitidos) ? rolesPermitidos : [rolesPermitidos];
 
-      next();
-    } catch (err) {
-      console.error("Error en rolMiddleware:", err);
-      return res.status(500).json({ message: "Error interno en middleware de roles" });
-    }
-  };
-}
+  if (!roles.includes(usuario.rol))
+    return res.status(403).json({ message: "Rol no permitido" });
+
+  next();
+};
 
 module.exports = { rolMiddleware };

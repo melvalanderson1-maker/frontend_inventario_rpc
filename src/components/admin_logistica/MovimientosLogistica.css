@@ -1,0 +1,49 @@
+.logistica-page {
+  width: 100%;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+.page-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.tabs button {
+  background: #e2e8f0;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.tabs button:hover {
+  background: #cbd5f5;
+}
+
+.tabs button.active {
+  background: #1d4ed8;
+  color: white;
+  font-weight: 600;
+}
+
+.tab-content {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}

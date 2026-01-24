@@ -1,0 +1,140 @@
+import React, { useEffect, useState, useMemo } from "react";
+import api from "../../../api/api";
+import ModalValidarCambioAlmacen from "../ModalValidarCambioAlmacen";
+
+function formatFecha(fecha) {
+  if (!fecha) return "-";
+  const d = new Date(fecha);
+  return d.toLocaleString("es-PE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function TablaCambiosAlmacenPendientes({
+  productoId,
+  filtro = "",
+}) {
+  const [rows, setRows] = useState([]);
+  const [cambioSeleccionado, setCambioSeleccionado] = useState(null);
+
+  const cargar = () => {
+    api
+      .get("/api/logistica/cambios-almacen/pendientes")
+      .then((res) => {
+        const data = res.data || [];
+        setRows(
+          productoId
+            ? data.filter((r) => String(r.producto_id) === String(productoId))
+            : data
+        );
+      })
+      .catch(() => setRows([]));
+  };
+
+  useEffect(() => {
+    cargar();
+  }, [productoId]);
+
+  const rowsFiltrados = useMemo(() => {
+    const texto = filtro.toLowerCase().trim();
+    if (!texto) return rows;
+
+    return rows.filter((r) =>
+      [
+        r.empresa,
+        r.almacen_origen,
+        r.almacen_destino,
+        r.fabricante,
+        r.producto,
+        r.cantidad,
+        r.estado,
+      ]
+        .filter(Boolean)
+        .some((campo) => campo.toString().toLowerCase().includes(texto))
+    );
+  }, [rows, filtro]);
+
+  const rechazar = async (id) => {
+    const obs = prompt("Motivo del rechazo:");
+    if (!obs?.trim()) return;
+    try {
+      await api.post(`/api/logistica/cambios-almacen/${id}/rechazar`, {
+        observaciones: obs,
+      });
+      setRows((r) => r.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.response?.data?.error || "Error rechazando cambio");
+    }
+  };
+
+  return (
+    <>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Empresa</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Fabricante</th>
+              <th>Cantidad</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rowsFiltrados.length === 0 ? (
+              <tr>
+                <td colSpan="9" style={{ textAlign: "center", padding: 16 }}>
+                  No hay cambios pendientes
+                </td>
+              </tr>
+            ) : (
+              rowsFiltrados.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.codigo_modelo || r.codigo_producto}</td>
+                  <td>{r.empresa_origen}</td>
+                  <td>{r.almacen_origen}</td>
+                  <td>{r.almacen_destino}</td>
+                  <td>{r.fabricante || "-"}</td>
+                  <td className="td-num">{r.cantidad}</td>
+                  <td>{formatFecha(r.created_at)}</td>
+                  <td>{r.estado}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    <button
+                      className="btn-mini success"
+                      onClick={() => setCambioSeleccionado(r)}
+                    >
+                      Validar
+                    </button>
+                    <button
+                      className="btn-mini danger"
+                      onClick={() => rechazar(r.id)}
+                      style={{ marginLeft: 6 }}
+                    >
+                      Rechazar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {cambioSeleccionado && (
+        <ModalValidarCambioAlmacen
+          cambio={cambioSeleccionado}
+          onClose={() => setCambioSeleccionado(null)}
+          onSuccess={cargar}
+        />
+      )}
+    </>
+  );
+}

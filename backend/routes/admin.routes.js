@@ -1,83 +1,136 @@
-// backend/routes/admin.routes.js
 const express = require("express");
 const router = express.Router();
+
+// Controllers
 const adminController = require("../controllers/admin.controller");
 
-// 🔐 Middleware opcional si deseas validar rol admin
-function soloAdmin(req, res, next) {
-  try {
-    const usuario = req.user;
-    if (!usuario || usuario.rol !== "ADMIN") {
-      return res.status(403).json({ ok: false, msg: "Acceso denegado" });
-    }
-    next();
-  } catch (err) {
-    res.status(500).json({ ok: false, msg: "Error autenticación" });
-  }
-}
+// Middlewares
+const authMiddleware = require("../middlewares/authMiddleware");
+const { rolMiddleware } = require("../middlewares/rolMiddleware");
 
 // ─────────────────────────────────────────────
-// USUARIOS
+// 🔐 AUTENTICACIÓN GLOBAL (SOLO LOGIN)
 // ─────────────────────────────────────────────
-router.get("/usuarios", adminController.listarUsuarios);
-router.get("/usuarios/:id", adminController.obtenerUsuario);
-router.post("/usuarios", adminController.crearUsuario);
-router.put("/usuarios/:id", adminController.actualizarUsuario);
-router.delete("/usuarios/:id", adminController.eliminarUsuario);
+router.use(authMiddleware);
 
 // ─────────────────────────────────────────────
-// ROLES ESPECÍFICOS
+// 👥 USUARIOS
+// ADMIN_MAX + LOGÍSTICA
 // ─────────────────────────────────────────────
-router.get("/docentes", adminController.listarDocentes);
-router.get("/secretarias", adminController.listarSecretarias);
-router.get("/alumnos", adminController.listarAlumnos);
-// Cursos de un docente
-router.get("/docentes/:id/cursos", adminController.listarCursosDocente);
+router.get(
+  "/usuarios",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.listarUsuarios
+);
 
-// ─────────────────────────────────────────────
-// CURSOS
-// ─────────────────────────────────────────────
-router.get("/cursos", adminController.listarCursos);
-router.post("/cursos", adminController.crearCurso);
-router.put("/cursos/:id", adminController.actualizarCurso);
-router.delete("/cursos/:id", adminController.eliminarCurso);
-// backend/routes/admin.routes.js
-router.get("/secciones/:id/alumnos", adminController.listarAlumnosSeccion);
+router.get(
+  "/usuarios/:id",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.obtenerUsuario
+);
 
-// SESIONES
+router.post(
+  "/usuarios",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.crearUsuario
+);
 
-router.get("/secciones/:id/sesiones", adminController.listarSesiones);
-router.post("/sesiones", adminController.crearSesion);
-router.put("/sesiones/:id", adminController.actualizarSesion);
-router.delete("/sesiones/:id", adminController.eliminarSesion);
+router.put(
+  "/usuarios/:id",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.actualizarUsuario
+);
 
-// HORARIOS
-// HORARIOS
-router.get("/secciones/:id/horarios", adminController.listarHorarios);
-router.post("/horarios", adminController.crearHorario);
-router.delete("/horarios/:id", adminController.eliminarHorario);
-
-
-// GENERAR SESIONES
-router.post("/secciones/:id/generar-sesiones", adminController.generarSesionesAutomaticas);
-
-
+router.delete(
+  "/usuarios/:id",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.eliminarUsuario
+);
 
 // ─────────────────────────────────────────────
-// SECCIONES
+// 📚 CURSOS
+// ADMIN_MAX + LOGÍSTICA
 // ─────────────────────────────────────────────
-router.get("/secciones", adminController.listarSecciones);
-router.post("/secciones", adminController.crearSeccion);
-router.put("/secciones/:id", adminController.actualizarSeccion);
-router.delete("/secciones/:id", adminController.eliminarSeccion);
+router.get(
+  "/cursos",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.listarCursos
+);
+
+router.post(
+  "/cursos",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.crearCurso
+);
+
+router.put(
+  "/cursos/:id",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.actualizarCurso
+);
+
+router.delete(
+  "/cursos/:id",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.eliminarCurso
+);
 
 // ─────────────────────────────────────────────
-// PAGOS / FACTURAS / AUDITORIA
+// 🏫 SECCIONES
+// ADMIN_MAX + LOGÍSTICA
 // ─────────────────────────────────────────────
-router.get("/pagos", adminController.listarPagos);
-router.get("/facturas", adminController.listarFacturas);
-router.get("/auditoria", adminController.listarAuditoria);
+router.get(
+  "/secciones",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.listarSecciones
+);
 
+router.post(
+  "/secciones",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.crearSeccion
+);
 
+router.put(
+  "/secciones/:id",
+  rolMiddleware("ADMIN_MAX", "ADMIN_LOGISTICA"),
+  adminController.actualizarSeccion
+);
+
+router.delete(
+  "/secciones/:id",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.eliminarSeccion
+);
+
+// ─────────────────────────────────────────────
+// 💰 PAGOS
+// ADMIN_MAX + CONTABILIDAD
+// ─────────────────────────────────────────────
+router.get(
+  "/pagos",
+  rolMiddleware("ADMIN_MAX", "ADMIN_CONTABILIDAD"),
+  adminController.listarPagos
+);
+
+// ─────────────────────────────────────────────
+// 📄 FACTURAS
+// ADMIN_MAX + CONTABILIDAD
+// ─────────────────────────────────────────────
+router.get(
+  "/facturas",
+  rolMiddleware("ADMIN_MAX", "ADMIN_CONTABILIDAD"),
+  adminController.listarFacturas
+);
+
+// ─────────────────────────────────────────────
+// 📊 AUDITORÍA
+// SOLO ADMIN_MAX
+// ─────────────────────────────────────────────
+router.get(
+  "/auditoria",
+  rolMiddleware("ADMIN_MAX"),
+  adminController.listarAuditoria
+);
 
 module.exports = router;
