@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "https://api.gruecolimp.com"
+  baseURL: "https://server.gruecolimp.com"
 });
 
 axiosClient.interceptors.request.use(

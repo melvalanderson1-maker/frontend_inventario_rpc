@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://api.gruecolimp.com"
+  baseURL: "https://server.gruecolimp.com"
 });
 
 api.interceptors.request.use(
