@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import "./SelectOrInput.css"; // o la ruta correcta
+
 
 export default function SelectOrInput({
   label,
@@ -56,7 +58,7 @@ export default function SelectOrInput({
       <label>{label}</label>
 
       {!modoInput ? (
-        <>
+        <div className="select-container">
           <select name={nameId} value={value || ""} onChange={onChange}>
             <option value="">Seleccionar</option>
             {options.map((o, i) => (
@@ -67,14 +69,14 @@ export default function SelectOrInput({
           </select>
 
           <small
-            style={{ cursor: "pointer", color: "#2563eb" }}
+            className="crear-nuevo"
             onClick={cambiarAInput}
           >
             + Crear nuevo
           </small>
-        </>
+        </div>
       ) : (
-        <>
+        <div className="select-container">
           <input
             name={nameNuevo}
             value={valueNuevo || ""}
@@ -83,13 +85,14 @@ export default function SelectOrInput({
           />
 
           <small
-            style={{ cursor: "pointer", color: "#dc2626" }}
+            className="volver-select"
             onClick={cambiarASelect}
           >
             ← Volver a lista
           </small>
-        </>
+        </div>
       )}
+
 
       {error && <span className="error-text">{error}</span>}
     </div>

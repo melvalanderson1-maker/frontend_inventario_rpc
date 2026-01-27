@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import "./CrearProducto.css";
+import "./SelectOrInput.css";// 🔹 Esto es necesario para que los colores funcionen
+
 import SelectOrInput from "./SelectOrInput";
 
 

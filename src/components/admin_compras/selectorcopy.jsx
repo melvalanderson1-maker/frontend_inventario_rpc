@@ -67,11 +67,12 @@ export default function SelectOrInput({
           </select>
 
           <small
-            style={{ cursor: "pointer", color: "#2563eb" }}
+            className="crear-nuevo"
             onClick={cambiarAInput}
           >
             + Crear nuevo
           </small>
+
         </>
       ) : (
         <>
