@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://inventario-quantum-production.up.railway.app"
+  baseURL: "https://api.gruecolimp.com"
 });
 
 api.interceptors.request.use(

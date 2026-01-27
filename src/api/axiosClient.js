@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "https://inventario-quantum-production.up.railway.app"
+  baseURL: "https://api.gruecolimp.com"
 });
 
 axiosClient.interceptors.request.use(
