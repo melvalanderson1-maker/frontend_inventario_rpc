@@ -28,10 +28,11 @@
 
     const formatFecha = (fecha) => {
       if (!fecha) return "-";
-      const d = new Date(fecha + "Z");
-      if (isNaN(d)) return "-";
-      const pad = (n) => n.toString().padStart(2, "0");
-      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+      // fecha viene como "2026-01-28 09:03:07"
+      const [datePart, timePart] = fecha.split(" ");
+      const [y, m, d] = datePart.split("-");
+      return `${d}/${m}/${y} ${timePart}`;
     };
 
 
