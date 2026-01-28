@@ -146,12 +146,9 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
 
             <tr>
               <td>Motivo de Rechazo</td>
-              <td>
-                {movimiento.motivo_rechazo
-                  ? `${movimiento.motivo_rechazo} (${movimiento.rechazo_por})`
-                  : "-"}
-              </td>
+              <td>{movimiento.motivo_contabilidad || "-"}</td>
             </tr>
+
           </tbody>
         </table>
 
