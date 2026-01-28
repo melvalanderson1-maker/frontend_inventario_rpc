@@ -28,21 +28,12 @@
 
     const formatFecha = (fecha) => {
       if (!fecha) return "-";
-      const d = new Date(fecha);
+      const d = new Date(fecha + "Z");
       if (isNaN(d)) return "-";
-
-      // Formato dd/mm/yyyy hh:mm:ss
       const pad = (n) => n.toString().padStart(2, "0");
-
-      const dia = pad(d.getDate());
-      const mes = pad(d.getMonth() + 1); // Mes empieza en 0
-      const año = d.getFullYear();
-      const horas = pad(d.getHours());
-      const minutos = pad(d.getMinutes());
-      const segundos = pad(d.getSeconds());
-
-      return `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     };
+
 
 
     const getRowClass = (tipo) => {
