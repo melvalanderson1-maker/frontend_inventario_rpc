@@ -153,31 +153,9 @@ export default function ModalValidarMovimiento({
       if (!esSalida && almacenId) formData.append("almacen_id", almacenId);
       if (almacenNuevo) formData.append("almacen_nuevo", almacenNuevo);
 
-      // 🔹 Fecha y hora local
-      const ahora = new Date();
-      const fechaConHoraLocal = new Date(
-        fechaLogistica + "T" + ahora.toTimeString().slice(0, 8)
-      );
-      const formatLocalDateTime = (date) => {
-        const pad = (n) => n.toString().padStart(2, "0");
-        return (
-          date.getFullYear() +
-          "-" +
-          pad(date.getMonth() + 1) +
-          "-" +
-          pad(date.getDate()) +
-          " " +
-          pad(date.getHours()) +
-          ":" +
-          pad(date.getMinutes()) +
-          ":" +
-          pad(date.getSeconds())
-        );
-      };
-      formData.append(
-        "fecha_validacion_logistica",
-        formatLocalDateTime(fechaConHoraLocal)
-      );
+      //FECHAA
+      formData.append("fecha_validacion_logistica", fechaLogistica);
+
 
       if (numeroOrden) formData.append("numero_orden", numeroOrden);
       if (opVinculada) formData.append("op_vinculada", opVinculada);
