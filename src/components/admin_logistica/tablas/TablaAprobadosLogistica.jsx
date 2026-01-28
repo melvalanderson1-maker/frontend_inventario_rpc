@@ -28,12 +28,10 @@
 
     const formatFecha = (fecha) => {
       if (!fecha) return "-";
-
-      // fecha viene como "2026-01-28 09:03:07"
-      const [datePart, timePart] = fecha.split(" ");
-      const [y, m, d] = datePart.split("-");
-      return `${d}/${m}/${y} ${timePart}`;
+      const d = new Date(fecha);
+      return isNaN(d) ? "-" : d.toLocaleString();
     };
+
 
 
 
