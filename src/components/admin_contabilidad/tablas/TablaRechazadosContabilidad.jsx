@@ -102,7 +102,10 @@ export default function TablaRechazadosContabilidad({
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
                 <td>{r.almacen}</td>
-                <td className="texto-error">{r.motivo_rechazo || "—"}</td>
+                <td className="texto-error">
+                  {r.observaciones_contabilidad || r.observaciones || "—"}
+                </td>
+
 
                 <td>
                   <span className={`estado estado-${r.estado}`}>

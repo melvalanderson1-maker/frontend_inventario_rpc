@@ -1,0 +1,33 @@
+/* =====================================
+   🎯 TABS SOLO CONTABILIDAD
+===================================== */
+
+/* Todos los tabs en mayúscula */
+.detalle-contabilidad-container .tabs-header button {
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Tabs que deben ser AZULES */
+.detalle-contabilidad-container .tabs-header button:nth-child(1), /* historial */
+.detalle-contabilidad-container .tabs-header button:nth-child(2), /* stock_empresa */
+.detalle-contabilidad-container .tabs-header button:nth-child(3), /* aprobados por log */
+.detalle-contabilidad-container .tabs-header button:nth-child(6)  /* aprobados y rechazados cont */
+{
+  background-color: #1e40af;
+  color: white;
+  border-color: #1e40af;
+}
+
+/* Hover azul */
+.detalle-contabilidad-container .tabs-header button:nth-child(1):hover,
+.detalle-contabilidad-container .tabs-header button:nth-child(2):hover,
+.detalle-contabilidad-container .tabs-header button:nth-child(3):hover,
+.detalle-contabilidad-container .tabs-header button:nth-child(6):hover {
+  background-color: #1e3a8a;
+}
+
+/* Tab activo */
+.detalle-contabilidad-container .tabs-header button.active {
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.3);
+}

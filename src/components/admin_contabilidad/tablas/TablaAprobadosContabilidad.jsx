@@ -59,15 +59,19 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
     );
   }, [rows, filtro]);
 
-  const handleValidar = (id) => {
-    api.post(`/api/contabilidad/movimientos/${id}/validar`).then(() => fetchMovimientos());
+  const handleValidar = async (id) => {
+    await api.post(`/api/contabilidad/movimientos/${id}/validar`, {});
+    fetchMovimientos();
   };
 
-  const handleRechazar = (id) => {
-    const motivo = prompt("Ingrese el motivo del rechazo:");
-    if (!motivo) return;
-    api.post(`/api/contabilidad/movimientos/${id}/rechazar`, { motivo }).then(() => fetchMovimientos());
+
+  const handleRechazar = async (id) => {
+    const observaciones = prompt("Ingrese el motivo del rechazo:");
+    if (!observaciones) return;
+    await api.post(`/api/contabilidad/movimientos/${id}/rechazar`, { observaciones });
+    fetchMovimientos();
   };
+
 
   return (
     <div className="table-wrapper">
