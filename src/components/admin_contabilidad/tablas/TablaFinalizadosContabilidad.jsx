@@ -3,33 +3,41 @@ import api from "../../../api/api";
 import ModalMovimientoDetalle from "../modales/ModalMovimientoDetalle";
 import "./MovimientosTablas.css";
 
-export default function TablaAprobadosContabilidad({ productoId, varianteId, filtro = "" }) {
+export default function TablaFinalizadosContabilidad({
+  productoId,
+  varianteId,
+  filtro = "",
+}) {
   const [rows, setRows] = useState([]);
   const [modalMovimiento, setModalMovimiento] = useState(null);
-const fetchMovimientos = () => {
-  api
-    .get("/api/contabilidad/movimientos", {
-      params: {
-        productoId: varianteId || productoId,
-        estados: "APROBADO_FINAL,RECHAZADO_CONTABILIDAD",
-      },
-    })
-    .then((res) => setRows(res.data || []))
-    .catch(() => setRows([]));
-};
 
+  const fetchMovimientos = () => {
+    api
+      .get("/api/contabilidad/movimientos", {
+        params: {
+          productoId: varianteId || productoId,
+          estados: "APROBADO_FINAL,RECHAZADO_CONTABILIDAD",
+        },
+      })
+      .then((res) => setRows(res.data || []))
+      .catch(() => setRows([]));
+  };
 
   useEffect(() => {
     fetchMovimientos();
   }, [productoId, varianteId]);
 
-  const formatPrecio = (precio) => (precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`);
+  const formatPrecio = (precio) =>
+    precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`;
+
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
     if (isNaN(d)) return "-";
     const pad = (n) => n.toString().padStart(2, "0");
-    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
   const getRowClass = (tipo) => {
@@ -58,19 +66,11 @@ const fetchMovimientos = () => {
         r.fecha_validacion_logistica,
       ]
         .filter(Boolean)
-        .some((campo) => campo.toString().toLowerCase().includes(texto))
+        .some((campo) =>
+          campo.toString().toLowerCase().includes(texto)
+        )
     );
   }, [rows, filtro]);
-
-  const handleValidar = (id) => {
-    api.post(`/api/contabilidad/movimientos/${id}/validar`).then(() => fetchMovimientos());
-  };
-
-  const handleRechazar = (id) => {
-    const motivo = prompt("Ingrese el motivo del rechazo:");
-    if (!motivo) return;
-    api.post(`/api/contabilidad/movimientos/${id}/rechazar`, { motivo }).then(() => fetchMovimientos());
-  };
 
   return (
     <div className="table-wrapper">
@@ -87,13 +87,15 @@ const fetchMovimientos = () => {
             <th>Lug Almac</th>
             <th>F Validación</th>
             <th>Estado</th>
-            <th></th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {rowsFiltrados.length === 0 ? (
             <tr>
-              <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>No se encontraron resultados</td>
+              <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>
+                No se encontraron resultados
+              </td>
             </tr>
           ) : (
             rowsFiltrados.map((r) => (
@@ -107,8 +109,16 @@ const fetchMovimientos = () => {
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>{r.almacen}</td>
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
-                <td><span className={`estado estado-${r.estado}`}>{r.estado.replaceAll("_", " ")}</span></td>
-
+                <td>
+                  <span className={`estado estado-${r.estado}`}>
+                    {r.estado.replaceAll("_", " ")}
+                  </span>
+                </td>
+                <td>
+                  <button onClick={() => setModalMovimiento(r.id)}>
+                    Detalles
+                  </button>
+                </td>
               </tr>
             ))
           )}

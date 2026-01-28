@@ -9,7 +9,7 @@ import TablaStockEmpresa from "./tablas/TablaStockEmpresaContabilidad";
 import TablaAprobadosContabilidad from "./tablas/TablaAprobadosContabilidad";
 import TablaPendientesContabilidad from "./tablas/TablaPendientesContabilidad";
 import TablaRechazadosContabilidad from "./tablas/TablaRechazadosContabilidad";
-import TablaRechazadosContabilidadO from "./tablas/TablaRechazadosContabilidadO";
+import TablaFinalizadosContabilidad from "./tablas/TablaFinalizadosContabilidad";
 import TablaCambiosAlmacenPendientesContabilidad from "./tablas/TablaCambiosAlmacenPendientesContabilidad";
 
 import "./ProductoDetalleContabilidad.css";
@@ -137,7 +137,7 @@ export default function ProductoDetalleContabilidad() {
             <TablaRechazadosContabilidad productoId={contexto.id} filtro={filtro} />
           )}
           {tab === "Aprobados y Rechazados Cont" && (
-            <TablaRechazadosContabilidadO productoId={contexto.id} filtro={filtro} />
+            <TablaFinalizadosContabilidad productoId={contexto.id} filtro={filtro} />
           )}
           {tab === "cambios_almacen" && (
             <TablaCambiosAlmacenPendientesContabilidad

@@ -7,7 +7,6 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   const [cantidadReal, setCantidadReal] = useState(0);
   const [guardando, setGuardando] = useState(false);
 
-  // Cargar detalle
   useEffect(() => {
     if (!movimientoId) return;
 
@@ -18,7 +17,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
         setCantidadReal(res.data.cantidad_real || res.data.cantidad || 0);
       })
       .catch((err) => {
-        console.error("Error cargando detalle:", err.response?.status, err.response?.data);
+        console.error("Error cargando detalle:", err.response?.data || err);
         alert("No se pudo cargar el detalle del movimiento.");
         onClose();
       });
@@ -26,7 +25,6 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
 
   if (!movimiento) return null;
 
-  // Formateos
   const formatPrecio = (precio) =>
     precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`;
 
@@ -40,36 +38,24 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
     )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
-  // Último motivo de rechazo LOGISTICA
-  const validacionesRechazo = (validaciones) => {
-    const logRechazo = validaciones
-      .filter((v) => v.rol === "LOGISTICA" && v.accion === "RECHAZADO")
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+  const handleGuardarCantidadReal = async () => {
+    if (cantidadReal <= 0) return alert("La cantidad real debe ser mayor que 0");
 
-    return logRechazo?.observaciones || null;
+    setGuardando(true);
+    try {
+      const res = await api.post(
+        `/api/contabilidad/movimientos/${movimiento.id}/guardar-cantidad-real`,
+        { cantidad_real: cantidadReal }
+      );
+
+      alert(res.data.msg || "Cantidad real guardada ✅");
+    } catch (error) {
+      console.error("Error guardando cantidad real:", error.response?.data || error);
+      alert(error.response?.data?.msg || "No se pudo guardar. Verifica tu sesión");
+    } finally {
+      setGuardando(false);
+    }
   };
-
-  // Guardar cantidad real en backend
-const handleGuardarCantidadReal = async () => {
-  if (cantidadReal <= 0) return alert("La cantidad real debe ser mayor que 0");
-
-  setGuardando(true);
-  try {
-    const res = await api.post(
-      `/api/contabilidad/movimientos/${movimiento.id}/guardar-cantidad-real`,
-      { cantidad_real: cantidadReal }
-    );
-
-    alert(res.data.msg || "Cantidad real guardada ✅");
-  } catch (error) {
-    console.error("Error guardando cantidad real:", error.response?.data || error);
-    alert(error.response?.data?.msg || "No se pudo guardar. Verifica tu sesión");
-  } finally {
-    setGuardando(false);
-  }
-};
-
-
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -157,12 +143,13 @@ const handleGuardarCantidadReal = async () => {
               <td>Observaciones Contabilidad</td>
               <td>{movimiento.observacion_contabilidad || "-"}</td>
             </tr>
+
             <tr>
-              <td>Motivo Rechazo</td>
+              <td>Motivo de Rechazo</td>
               <td>
-                {movimiento.observacion_logistica &&
-                  validacionesRechazo(movimiento.validaciones) ||
-                  "-"}
+                {movimiento.motivo_rechazo
+                  ? `${movimiento.motivo_rechazo} (${movimiento.rechazo_por})`
+                  : "-"}
               </td>
             </tr>
           </tbody>
