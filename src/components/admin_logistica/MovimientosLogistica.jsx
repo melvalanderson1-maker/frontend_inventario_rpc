@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import TablaPendientesLogistica from "./tablas/TablaPendientesLogistica";
-import TablaAprobadosLogistica from "./tablas/TablaAprobadosLogistica";
-import TablaHistorial from "./tablas/TablaHistorial";
+import TablaPendientesLogistica from "./tablaAll/TablaPendientesLogistica";
+import TablaAprobadosLogistica from "./tablaAll/TablaAprobadosLogistica";
+import TablaRechazadosLogistica from "./tablaAll/TablaRechazadosLogistica";
+import TablaHistorial from "./tablaAll/TablaHistorial";
+import TablaCambiosAlmacenPendientes from "./tablaAll/TablaCambiosAlmacenPendientes";
 import "./MovimientosLogistica.css";
 
 export default function MovimientosLogistica() {
@@ -11,33 +13,32 @@ export default function MovimientosLogistica() {
     <div className="logistica-page">
       <div className="page-header">
         <h1>Movimientos</h1>
-        <p>Gestión de entradas, salidas y validaciones de almacén</p>
+        <p>Gestión de validaciones de logística</p>
       </div>
 
       <div className="tabs">
-        <button
-          className={tab === "pendientes" ? "active" : ""}
-          onClick={() => setTab("pendientes")}
-        >
+        <button className={tab === "pendientes" ? "active" : ""} onClick={() => setTab("pendientes")}>
           Pendientes
         </button>
-        <button
-          className={tab === "aprobados" ? "active" : ""}
-          onClick={() => setTab("aprobados")}
-        >
+        <button className={tab === "rechazados" ? "active" : ""} onClick={() => setTab("rechazados")}>
+          Rechazados
+        </button>
+        <button className={tab === "aprobados" ? "active" : ""} onClick={() => setTab("aprobados")}>
           Aprobados
         </button>
-        <button
-          className={tab === "historial" ? "active" : ""}
-          onClick={() => setTab("historial")}
-        >
+        <button className={tab === "cambios_almacen" ? "active" : ""} onClick={() => setTab("cambios_almacen")}>
+          Cambios de almacén
+        </button>
+        <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
           Historial
         </button>
       </div>
 
       <div className="tab-content">
         {tab === "pendientes" && <TablaPendientesLogistica />}
+        {tab === "rechazados" && <TablaRechazadosLogistica />}
         {tab === "aprobados" && <TablaAprobadosLogistica />}
+        {tab === "cambios_almacen" && <TablaCambiosAlmacenPendientes />}
         {tab === "historial" && <TablaHistorial />}
       </div>
     </div>
