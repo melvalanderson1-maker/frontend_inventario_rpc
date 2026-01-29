@@ -2,30 +2,27 @@ import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import { Link } from "react-router-dom";
 
-export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
+export default function TablaRechazadosContabilidad({ filtro = "" }) {
   const [rows, setRows] = useState([]);
-  const [modo, setModo] = useState("pendientes"); // pendientes | todos
+  const [modo, setModo] = useState("logistica"); // logistica | todos
   const [loading, setLoading] = useState(false);
 
-  // ==========================
-  // Cargar cambios
-  // ==========================
   const cargar = () => {
     setLoading(true);
 
-    // Si quieres en el futuro filtrar por "todos" vs "pendientes"
     const estados =
       modo === "todos"
-        ? "PENDIENTE_SALIDA,PENDIENTE_INGRESO,VALIDADO_LOGISTICA,VALIDADO_CONTABILIDAD"
-        : "PENDIENTE_SALIDA,PENDIENTE_INGRESO";
+        ? "RECHAZADO_LOGISTICA"
+        : "RECHAZADO_LOGISTICA";
 
     api
-      .get("/api/logistica/cambios-almacen/todos", { params: { estados } })
+      .get("/api/logistica/movimientos/todos", { params: { estados } })
       .then((res) => {
+        console.log("🧪 MOVIMIENTOS FRONT:", res.data);
         setRows(res.data || []);
       })
       .catch((err) => {
-        console.error("❌ Error cargando cambios:", err);
+        console.error("❌ Error cargando movimientos:", err);
         setRows([]);
       })
       .finally(() => setLoading(false));
@@ -35,52 +32,45 @@ export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
     cargar();
   }, [modo]);
 
-  // ==========================
-  // Formateo de fecha
-  // ==========================
+  const formatPrecio = (precio) => {
+    if (precio === null || precio === undefined) return "-";
+    return `S/ ${Number(precio).toFixed(2)}`;
+  };
+
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
-    return isNaN(d) ? "-" : d.toLocaleString("es-PE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return isNaN(d) ? "-" : d.toLocaleString();
   };
 
-  // ==========================
-  // Clase de fila (opcional)
-  // ==========================
-  const getRowClass = (estado) => {
-    if (!estado) return "";
-    const e = estado.toLowerCase();
-    if (e.includes("salida")) return "row-salida";
-    if (e.includes("entrada")) return "row-entrada";
-    if (e.includes("ajuste")) return "row-ajuste";
+  const getRowClass = (tipo) => {
+    if (!tipo) return "";
+    const t = tipo.toLowerCase();
+    if (t.includes("entrada")) return "row-entrada";
+    if (t.includes("salida")) return "row-salida";
+    if (t.includes("ajuste")) return "row-ajuste";
     return "";
   };
 
-  // ==========================
-  // Filtrado por texto
-  // ==========================
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
 
     return rows.filter((r) =>
       [
-        r.producto,
-        r.codigo_producto,
-        r.codigo_modelo,
-        r.empresa_origen,
-        r.empresa_destino,
-        r.almacen_origen,
-        r.almacen_destino,
-        r.fabricante_origen,
-        r.fabricante_destino,
+        r.tipo_movimiento,
+        r.op_vinculada,
+        r.fabricante,
+        r.precio,
+        r.cantidad,
+        r.empresa,
+        r.almacen,
         r.estado,
+        r.fecha_creacion,
+        r.fecha_validacion_logistica,
+        r.producto_codigo,
+        r.codigo_modelo,
+        r.producto_descripcion,
       ]
         .filter(Boolean)
         .some((campo) => campo.toString().toLowerCase().includes(texto))
@@ -96,16 +86,14 @@ export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
           marginBottom: 10,
         }}
       >
-        <strong>Historial de cambios de almacén</strong>
+        <strong>Historial de movimientos</strong>
 
         <button
-          onClick={() =>
-            setModo((m) => (m === "pendientes" ? "todos" : "pendientes"))
-          }
+          onClick={() => setModo((m) => (m === "logistica" ? "todos" : "logistica"))}
           className="btn-ir"
           style={{ padding: "6px 12px" }}
         >
-          {modo === "todos" ? "Solo pendientes" : "Listar todo"}
+          {modo === "todos" ? "Solo logística" : "Listar todo"}
         </button>
       </div>
 
@@ -113,15 +101,16 @@ export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
         <thead>
           <tr>
             <th>Producto</th>
-            <th>Emp.Origen</th>
-            <th>Alm.Origen</th>
-            <th>Fabricante Origen</th>
-            <th>Emp.Destino</th>
-            <th>Alm.Destino</th>
-            <th>Fabricante Destino</th>
-            <th>Stock</th>
-            <th>Cantidad</th>
-            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>OP</th>
+            
+            <th>Fabricante</th>
+            <th>Precio</th>
+            <th>Cant</th>
+            <th>Empresa</th>
+            <th>F Registro</th>
+            <th>Almacén</th>
+            <th>F Validación</th>
             <th>Estado</th>
             <th></th>
           </tr>
@@ -142,24 +131,26 @@ export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
             </tr>
           ) : (
             rowsFiltrados.map((r) => (
-              <tr key={r.id} className={getRowClass(r.estado)}>
+              <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
+                                {/* ✅ PRODUCTO: CÓDIGO + MODELO + DESCRIPCIÓN */}
                 <td>
                   <div style={{ fontWeight: 600 }}>
-                    {r.codigo_producto || "-"}
+                    {r.producto_codigo || "-"}
                     {r.codigo_modelo && ` · ${r.codigo_modelo}`}
-                    <br />
-                    {r.producto || "-"}
                   </div>
                 </td>
-                <td>{r.empresa_origen || "-"}</td>
-                <td>{r.almacen_origen || "-"}</td>
-                <td>{r.fabricante_origen || "-"}</td>
-                <td>{r.empresa_destino || "-"}</td>
-                <td>{r.almacen_destino || "-"}</td>
-                <td>{r.fabricante_destino || "-"}</td>
-                <td>{r.cantidad_disponible}</td>
+                <td>{r.tipo_movimiento}</td>
+                <td>{r.op_vinculada || "-"}</td>
+
+
+
+                <td>{r.fabricante || "-"}</td>
+                <td className="td-num">{formatPrecio(r.precio)}</td>
                 <td>{r.cantidad}</td>
-                <td>{formatFecha(r.created_at)}</td>
+                <td>{r.empresa}</td>
+                <td>{formatFecha(r.fecha_creacion)}</td>
+                <td>{r.almacen}</td>
+                <td>{formatFecha(r.fecha_validacion_logistica)}</td>
                 <td>
                   <span className={`estado estado-${r.estado}`}>
                     {r.estado.replaceAll("_", " ")}

@@ -228,6 +228,7 @@ export default function AppRouter() {
         >
           <Route index element={<MovimientosContabilidad />} />
           <Route path="pendientes" element={<MovimientosContabilidad />} />
+          <Route path="movimientos" element={<MovimientosContabilidad />} />
           <Route path="productos" element={<ProductosContabilidad />} />
           <Route path="producto/:id" element={<ProductoDetalleContabilidad />} />
           <Route path="aprobaciones" element={<ValidarMovimientoContabilidad />} />

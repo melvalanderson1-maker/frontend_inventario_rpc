@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import { Link } from "react-router-dom";
 
-export default function TablaCambiosAlmacenTodos({ filtro = "" }) {
+export default function TablaCambiosAlmacenPendientesContabilidad({ filtro = "" }) {
   const [rows, setRows] = useState([]);
   const [modo, setModo] = useState("pendientes"); // pendientes | todos
   const [loading, setLoading] = useState(false);

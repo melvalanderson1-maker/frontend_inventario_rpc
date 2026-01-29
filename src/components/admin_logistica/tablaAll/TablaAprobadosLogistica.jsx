@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import { Link } from "react-router-dom";
+import "./BotonElegante.css";
+
+
 
 export default function TablaAprobadosLogistica({ filtro = "" }) {
   const [rows, setRows] = useState([]);
