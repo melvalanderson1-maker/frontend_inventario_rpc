@@ -81,7 +81,11 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
               <td>{formatPrecio(movimiento.precio)}</td>
             </tr>
             <tr>
-              <td>Cantidad Solicitada</td>
+              <td>Cantidad Validado por Compras</td>
+              <td>{movimiento.cantidad_solicitada}</td>
+            </tr>
+            <tr>
+              <td>Cantidad Validado por Logística</td>
               <td>{movimiento.cantidad}</td>
             </tr>
             <tr>
@@ -129,11 +133,26 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
             </tr>
             <tr>
               <td>Estado</td>
-              <td>{movimiento.estado.replaceAll("_", " ")}</td>
+              <td
+                className={
+                  movimiento.estado === "APROBADO_FINAL"
+                    ? "estado-aprobado"
+                    : movimiento.estado === "RECHAZADO_CONTABILIDAD"
+                    ? "estado-rechazado"
+                    : ""
+                }
+              >
+                {movimiento.estado.replaceAll("_", " ")}
+              </td>
             </tr>
+
             <tr>
               <td>Número de Orden</td>
               <td>{movimiento.numero_orden || "-"}</td>
+            </tr>
+            <tr>
+              <td>Observaciones Compras</td>
+              <td>{movimiento.observaciones || "-"}</td>
             </tr>
             <tr>
               <td>Observaciones Logística</td>

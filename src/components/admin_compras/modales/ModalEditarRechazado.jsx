@@ -59,15 +59,16 @@ export default function ModalEditarRechazado({
         fabricante_nuevo: "",
         motivo_id: mov.motivo_id || "",
         motivo_nuevo: "",
-        op_vinculada: mov.op_vinculada || "",
-        op_vinculada_nueva: "",
+        op_vinculada: "",                 // 👈 SIEMPRE vacío
+        op_vinculada_nueva: mov.op_vinculada || "", // 👈 AQUÍ VA LA OP
         cantidad: mov.cantidad ? String(mov.cantidad) : "",
         precio:
           mov.precio !== null && mov.precio !== undefined
             ? String(mov.precio)
             : "",
-        observaciones: mov.observaciones_admin_compras || "" // solo admin compras
+        observaciones: mov.observaciones_admin_compras || ""
       });
+
     });
 
     api
@@ -271,13 +272,14 @@ export default function ModalEditarRechazado({
               label="OP Vinculada"
               nameId="op_vinculada"
               nameNuevo="op_vinculada_nueva"
-              options={[]}
+              options={[]} // no hay catálogo → siempre input libre
               optionLabel="codigo"
               optionValue="codigo"
               value={form.op_vinculada}
               valueNuevo={form.op_vinculada_nueva}
               onChange={handleChange}
             />
+
 
             <SelectOrInput
               label="Almacén *"
