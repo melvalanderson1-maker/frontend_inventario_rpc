@@ -20,7 +20,7 @@ export default function TablaCambiosAlmacenPendientesContabilidad({ filtro = "" 
         : "PENDIENTE_SALIDA,PENDIENTE_INGRESO";
 
     api
-      .get("/api/logistica/cambios-almacen/todos", { params: { estados } })
+      .get("/api/contabilidad/cambios-almacen/todos", { params: { estados } })
       .then((res) => {
         setRows(res.data || []);
       })
@@ -167,7 +167,7 @@ export default function TablaCambiosAlmacenPendientesContabilidad({ filtro = "" 
                 </td>
                 <td>
                   <Link
-                    to={`/logistica/producto/${r.producto_id}`}
+                    to={`/contabilidad/producto/${r.producto_id}`}
                     className="btn-ir"
                   >
                     Ir →

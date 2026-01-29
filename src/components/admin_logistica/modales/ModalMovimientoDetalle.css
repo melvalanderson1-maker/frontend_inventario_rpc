@@ -1,0 +1,159 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  max-width: 760px;
+  width: 96%;
+  overflow: visible; /* 🚫 sin scroll interno */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ================= HEADER ================= */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-logo img {
+  height: 42px;
+  object-fit: contain;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-actions button {
+  border: none;
+  background: #f1f3f5;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.15s;
+}
+
+.modal-actions button:hover {
+  background: #e2e6ea;
+}
+
+.btn-whatsapp {
+  background: #25d366 !important;
+  color: white;
+}
+
+.btn-whatsapp:hover {
+  background: #1ebe5d !important;
+}
+
+.formato-select {
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+/* ================= CONTENIDO PDF / IMAGEN ================= */
+.modal-print-area {
+  background: white;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.doc-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.doc-logo {
+  height: 48px;
+  object-fit: contain;
+}
+
+.doc-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.doc-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin: 2px 0 0;
+}
+
+.detalle-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px; /* 🔥 compacta para entrar en una hoja */
+}
+
+.detalle-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.detalle-table td:first-child {
+  font-weight: 600;
+  color: #333;
+  width: 45%;
+}
+
+.estado-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.estado-aprobado {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.estado-rechazado {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* ================= FOOTER DOC ================= */
+.doc-footer {
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed #ddd;
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ================= BOTÓN CERRAR ================= */
+.modal-close-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  background: #444;
+  color: white;
+  font-size: 14px;
+}

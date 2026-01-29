@@ -19,19 +19,20 @@ export default function MovimientosLogistica() {
 
       <div className="tabs">
         <button className={tab === "pendientes" ? "active" : ""} onClick={() => setTab("pendientes")}>
-          Pendientes
-        </button>
-        <button className={tab === "rechazados" ? "active" : ""} onClick={() => setTab("rechazados")}>
-          Rechazados
+          VALIDAR MOVIMIENTOS
         </button>
         <button className={tab === "aprobados" ? "active" : ""} onClick={() => setTab("aprobados")}>
-          Aprobados
+          RECHAZADOS Y APROBADOS POR CONTABILIDAD
         </button>
+        <button className={tab === "rechazados" ? "active" : ""} onClick={() => setTab("rechazados")}>
+          RECHAZADOS POR LOGÍSTICA
+        </button>
+
         <button className={tab === "cambios_almacen" ? "active" : ""} onClick={() => setTab("cambios_almacen")}>
-          Cambios de almacén
+          CAMBIOS DE ALMACÉN
         </button>
         <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
-          Historial
+          HISTORIAL
         </button>
       </div>
 

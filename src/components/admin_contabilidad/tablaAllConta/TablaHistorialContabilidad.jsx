@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function TablaHistorial({ filtro = "" }) {
   const [rows, setRows] = useState([]);
-  const [modo, setModo] = useState("logistica"); // logistica | todos
+  const [modo, setModo] = useState("contabilidad"); // logistica | todos
   const [loading, setLoading] = useState(false);
 
   const cargar = () => {
@@ -89,11 +89,11 @@ export default function TablaHistorial({ filtro = "" }) {
         <strong>Historial de movimientos</strong>
 
         <button
-          onClick={() => setModo((m) => (m === "logistica" ? "todos" : "logistica"))}
+          onClick={() => setModo((m) => (m === "contabilidad" ? "todos" : "contabilidad"))}
           className="btn-ir"
           style={{ padding: "6px 12px" }}
         >
-          {modo === "todos" ? "Solo logística" : "Listar todo"}
+          {modo === "todos" ? "Solo contabilidad" : "Listar todo"}
         </button>
       </div>
 

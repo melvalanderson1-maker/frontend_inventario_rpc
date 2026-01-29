@@ -9,7 +9,7 @@ import TablaAprobadosLogistica from "../tablas/TablaAprobadosLogistica";
 import TablaPendientesLogistica from "../tablas/TablaPendientesLogistica";
 import TablaRechazadosLogistica from "../tablas/TablaRechazadosLogistica";
 import TablaCambiosAlmacenPendientes from "../tablas/TablaCambiosAlmacenPendientes";
-
+import TablaFinalizadosLogisticaUnico from "../tablas/TablaFinalizadosLogisticaUnico";
 import "./ProductoDetalle.css";
 
 export default function ProductoDetalle() {
@@ -90,6 +90,7 @@ export default function ProductoDetalle() {
         <div className="tabs-header">
           {[
             "historial",
+            "finalizados",
             "stock_empresa",
             "aprobados",
             "pendientes",
@@ -115,6 +116,7 @@ export default function ProductoDetalle() {
 
         <div className="tabla-container">
           {tab === "historial" && <TablaHistorial productoId={contexto.id} filtro={filtro} />}
+          {tab === "finalizados" && <TablaFinalizadosLogisticaUnico productoId={contexto.id} filtro={filtro} />}
           {tab === "stock_empresa" && <TablaStockEmpresa productoId={contexto.id} filtro={filtro} />}
           {tab === "aprobados" && <TablaAprobadosLogistica productoId={contexto.id} filtro={filtro} />}
           {tab === "pendientes" && <TablaPendientesLogistica productoId={contexto.id} filtro={filtro} />}

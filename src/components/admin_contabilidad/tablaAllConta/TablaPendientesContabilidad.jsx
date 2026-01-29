@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function TablaPendientesContabilidad({ filtro = "" }) {
   const [rows, setRows] = useState([]);
-  const [modo, setModo] = useState("logistica"); // logistica | todos
+  const [modo, setModo] = useState("contabilidad"); // logistica | todos
   const [loading, setLoading] = useState(false);
 
   const cargar = () => {
@@ -12,11 +12,11 @@ export default function TablaPendientesContabilidad({ filtro = "" }) {
 
     const estados =
       modo === "todos"
-        ? "PENDIENTE_LOGISTICA"
-        : "PENDIENTE_LOGISTICA";
+        ? "VALIDADO_LOGISTICA"
+        : "VALIDADO_LOGISTICA";
 
     api
-      .get("/api/logistica/movimientos/todos", { params: { estados } })
+      .get("/api/contabilidad/movimientos/todos", { params: { estados } })
       .then((res) => {
         console.log("🧪 MOVIMIENTOS FRONT:", res.data);
         setRows(res.data || []);
@@ -89,11 +89,11 @@ export default function TablaPendientesContabilidad({ filtro = "" }) {
         <strong>Historial de movimientos</strong>
 
         <button
-          onClick={() => setModo((m) => (m === "logistica" ? "todos" : "logistica"))}
+          onClick={() => setModo((m) => (m === "contabilidad" ? "todos" : "contabilidad"))}
           className="btn-ir"
           style={{ padding: "6px 12px" }}
         >
-          {modo === "todos" ? "Solo logística" : "Listar todo"}
+          {modo === "todos" ? "Solo contabilidad" : "Listar todo"}
         </button>
       </div>
 
@@ -158,7 +158,7 @@ export default function TablaPendientesContabilidad({ filtro = "" }) {
                 </td>
                 <td>
                   <Link
-                    to={`/logistica/producto/${r.producto_id}`}
+                    to={`/contabilidad/producto/${r.producto_id}`}
                     className="btn-ir"
                   >
                     Ir →

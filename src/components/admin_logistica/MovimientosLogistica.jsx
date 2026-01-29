@@ -5,6 +5,7 @@ import TablaRechazadosLogistica from "./tablaAll/TablaRechazadosLogistica";
 import TablaHistorial from "./tablaAll/TablaHistorial";
 import TablaCambiosAlmacenPendientes from "./tablaAll/TablaCambiosAlmacenPendientes";
 import "./MovimientosLogistica.css";
+import TablaFinalizadosLogistica from "./tablaAll/TablaFinalizadosLogistica";
 
 export default function MovimientosLogistica() {
   const [tab, setTab] = useState("pendientes");
@@ -19,6 +20,9 @@ export default function MovimientosLogistica() {
       <div className="tabs">
         <button className={tab === "pendientes" ? "active" : ""} onClick={() => setTab("pendientes")}>
           Pendientes
+        </button>
+        <button className={tab === "finalizados" ? "active" : ""} onClick={() => setTab("finalizados")}>
+          Finalizados
         </button>
         <button className={tab === "rechazados" ? "active" : ""} onClick={() => setTab("rechazados")}>
           Rechazados
@@ -36,6 +40,7 @@ export default function MovimientosLogistica() {
 
       <div className="tab-content">
         {tab === "pendientes" && <TablaPendientesLogistica />}
+        {tab === "finalizados" && <TablaFinalizadosLogistica />}
         {tab === "rechazados" && <TablaRechazadosLogistica />}
         {tab === "aprobados" && <TablaAprobadosLogistica />}
         {tab === "cambios_almacen" && <TablaCambiosAlmacenPendientes />}

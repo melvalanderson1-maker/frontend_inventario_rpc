@@ -47,15 +47,6 @@ export default function MenuLogistica() {
           <NavLink to="/logistica/movimientos">
             Movimientos
           </NavLink>
-
-          <NavLink to="/logistica/aprobaciones">
-            Aprobaciones
-          </NavLink>
-
-          <NavLink to="/logistica/cambio-almacen">
-
-            Cambio de almacén
-          </NavLink>
         </nav>
 
         <div className="menu-footer">

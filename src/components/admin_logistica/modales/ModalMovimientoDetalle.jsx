@@ -7,8 +7,6 @@ import { FaWhatsapp, FaDownload } from "react-icons/fa";
 
 export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   const [movimiento, setMovimiento] = useState(null);
-  const [cantidadReal, setCantidadReal] = useState(0);
-  const [guardando, setGuardando] = useState(false);
   const [formato, setFormato] = useState("pdf"); // pdf | imagen
   const contentRef = useRef();
 
@@ -16,11 +14,8 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
     if (!movimientoId) return;
 
     api
-      .get(`/api/contabilidad/movimientos/${movimientoId}/detalle`)
-      .then((res) => {
-        setMovimiento(res.data);
-        setCantidadReal(res.data.cantidad_real || res.data.cantidad || 0);
-      })
+      .get(`/api/logistica/movimientos/${movimientoId}/detalle`)
+      .then((res) => setMovimiento(res.data))
       .catch((err) => {
         console.error("Error cargando detalle:", err.response?.data || err);
         alert("No se pudo cargar el detalle del movimiento.");
@@ -44,7 +39,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   };
 
   // =============================
-  // 🖼️ IMAGEN
+  // 🖼️ GENERAR IMAGEN
   // =============================
   const generarImagen = async () => {
     const canvas = await html2canvas(contentRef.current, {
@@ -56,7 +51,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   };
 
   // =============================
-  // 📄 PDF (UNA SOLA HOJA)
+  // 📄 GENERAR PDF (UNA SOLA HOJA SIEMPRE)
   // =============================
   const generarPDF = async () => {
     const canvas = await html2canvas(contentRef.current, {
@@ -112,32 +107,8 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
     const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(url, "_blank");
 
+    // Le dejamos el archivo listo descargado
     await descargar();
-  };
-
-  // =============================
-  // 💾 GUARDAR CANTIDAD REAL
-  // =============================
-  const handleGuardarCantidadReal = async () => {
-    if (cantidadReal <= 0) return alert("La cantidad real debe ser mayor que 0");
-
-    setGuardando(true);
-    try {
-      const res = await api.post(
-        `/api/contabilidad/movimientos/${movimiento.id}/guardar-cantidad-real`,
-        { cantidad_real: cantidadReal }
-      );
-
-      alert(res.data.msg || "Cantidad real guardada ✅");
-    } catch (error) {
-      console.error(
-        "Error guardando cantidad real:",
-        error.response?.data || error
-      );
-      alert(error.response?.data?.msg || "No se pudo guardar. Verifica tu sesión");
-    } finally {
-      setGuardando(false);
-    }
   };
 
   return (
@@ -146,6 +117,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
         {/* ================= HEADER ================= */}
         <div className="modal-header">
           <div className="modal-logo">
+            {/* ⚠️ Coloca tu logo real aquí */}
             <img src="/images/logi.png" alt="Logo Empresa" />
           </div>
 
@@ -211,28 +183,10 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
                 <td>Cantidad Logística</td>
                 <td>{movimiento.cantidad}</td>
               </tr>
-
-              {/* 👇 EDITABLE + GUARDAR */}
               <tr>
                 <td>Cantidad Real</td>
-                <td className="cantidad-real-cell">
-                  <input
-                    type="number"
-                    value={cantidadReal}
-                    onChange={(e) => setCantidadReal(Number(e.target.value))}
-                    min={0}
-                    className="cantidad-input"
-                  />
-                  <button
-                    onClick={handleGuardarCantidadReal}
-                    disabled={guardando}
-                    className="btn-guardar"
-                  >
-                    {guardando ? "Guardando..." : "Guardar"}
-                  </button>
-                </td>
+                <td>{movimiento.cantidad_real ?? "-"}</td>
               </tr>
-
               <tr>
                 <td>Empresa</td>
                 <td>{movimiento.empresa || "-"}</td>

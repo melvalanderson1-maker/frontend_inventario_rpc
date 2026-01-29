@@ -1,28 +1,33 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import { Link } from "react-router-dom";
+import ModalMovimientoDetalle from "../modales/ModalMovimientoDetalle";
+import "./BotonElegante.css";
 
-export default function TablaRechazadosContabilidad({ filtro = "" }) {
+export default function TablaFinalizadosLogistica({ filtro = "" }) {
   const [rows, setRows] = useState([]);
-  const [modo, setModo] = useState("contabilidad"); // logistica | todos
+  const [modo, setModo] = useState("logistica"); // logistica | todos
   const [loading, setLoading] = useState(false);
+  const [modalMovimiento, setModalMovimiento] = useState(null);
 
+  // Función para cargar movimientos
   const cargar = () => {
     setLoading(true);
 
+    // Estados que se filtrarán
     const estados =
       modo === "todos"
-        ? "RECHAZADO_LOGISTICA"
-        : "RECHAZADO_LOGISTICA";
+        ? "APROBADO_FINAL,RECHAZADO_CONTABILIDAD"
+        : "APROBADO_FINAL,RECHAZADO_CONTABILIDAD";
 
     api
-      .get("/api/contabilidad/movimientos/todos", { params: { estados } })
+      .get("/api/logistica/movimientos/todos", { params: { estados } })
       .then((res) => {
-        console.log("🧪 MOVIMIENTOS FRONT:", res.data);
+        console.log("🧪 MOVIMIENTOS FRONT LOGISTICA:", res.data);
         setRows(res.data || []);
       })
       .catch((err) => {
-        console.error("❌ Error cargando movimientos:", err);
+        console.error("❌ Error cargando movimientos LOGISTICA:", err);
         setRows([]);
       })
       .finally(() => setLoading(false));
@@ -32,17 +37,24 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
     cargar();
   }, [modo]);
 
+  // Formateo de precios
   const formatPrecio = (precio) => {
     if (precio === null || precio === undefined) return "-";
     return `S/ ${Number(precio).toFixed(2)}`;
   };
 
+  // Formateo de fechas
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
-    return isNaN(d) ? "-" : d.toLocaleString();
+    if (isNaN(d)) return "-";
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
+  // Clases para filas según tipo
   const getRowClass = (tipo) => {
     if (!tipo) return "";
     const t = tipo.toLowerCase();
@@ -52,6 +64,7 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
     return "";
   };
 
+  // Filtrado de filas según texto
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
@@ -86,14 +99,16 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
           marginBottom: 10,
         }}
       >
-        <strong>Historial de movimientos</strong>
+        <strong>Movimientos Finalizados Por Contabilidad</strong>
 
         <button
-          onClick={() => setModo((m) => (m === "contabilidad" ? "todos" : "contabilidad"))}
+          onClick={() =>
+            setModo((m) => (m === "logistica" ? "todos" : "logistica"))
+          }
           className="btn-ir"
           style={{ padding: "6px 12px" }}
         >
-          {modo === "todos" ? "Solo contabilidad" : "Listar todo"}
+          {modo === "todos" ? "Solo logística" : "Listar todo"}
         </button>
       </div>
 
@@ -103,7 +118,6 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
             <th>Producto</th>
             <th>Tipo</th>
             <th>OP</th>
-            
             <th>Fabricante</th>
             <th>Precio</th>
             <th>Cant</th>
@@ -112,7 +126,7 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
             <th>Almacén</th>
             <th>F Validación</th>
             <th>Estado</th>
-            <th></th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
@@ -132,7 +146,6 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
           ) : (
             rowsFiltrados.map((r) => (
               <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
-                                {/* ✅ PRODUCTO: CÓDIGO + MODELO + DESCRIPCIÓN */}
                 <td>
                   <div style={{ fontWeight: 600 }}>
                     {r.producto_codigo || "-"}
@@ -141,9 +154,6 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
                 </td>
                 <td>{r.tipo_movimiento}</td>
                 <td>{r.op_vinculada || "-"}</td>
-
-
-
                 <td>{r.fabricante || "-"}</td>
                 <td className="td-num">{formatPrecio(r.precio)}</td>
                 <td>{r.cantidad}</td>
@@ -157,9 +167,13 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
                   </span>
                 </td>
                 <td>
+                  <button onClick={() => setModalMovimiento(r.id)}>
+                    Detalles
+                  </button>
                   <Link
-                    to={`/contabilidad/producto/${r.producto_id}`}
+                    to={`/logistica/producto/${r.producto_id}`}
                     className="btn-ir"
+                    style={{ marginLeft: 8 }}
                   >
                     Ir →
                   </Link>
@@ -169,6 +183,13 @@ export default function TablaRechazadosContabilidad({ filtro = "" }) {
           )}
         </tbody>
       </table>
+
+      {modalMovimiento && (
+        <ModalMovimientoDetalle
+          movimientoId={modalMovimiento}
+          onClose={() => setModalMovimiento(null)}
+        />
+      )}
     </div>
   );
 }

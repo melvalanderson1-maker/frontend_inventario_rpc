@@ -50,14 +50,9 @@ export default function MenuContabilidad() {
             Movimientos
           </NavLink>
 
-          <NavLink to="/contabilidad/aprobaciones">
-            Aprobaciones
-          </NavLink>
 
-          <NavLink to="/contabilidad/cambio-almacen">
 
-            Cambio de almacén
-          </NavLink>
+
         </nav>
 
         <div className="menu-footer">
