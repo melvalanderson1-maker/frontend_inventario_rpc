@@ -77,6 +77,10 @@ const aliasCategorias = {
   trapeador: [9],
   mopa: [9],
 
+    // 🧽 TRAPEADORES
+  toalla: [26],
+  toallas: [26],
+
   // 🚿 DISPENSADORES
   dispensador: [18],
   dispensadores: [18],
