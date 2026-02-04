@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
-import { Link } from "react-router-dom";
+
+import { Link, useSearchParams } from "react-router-dom";
+
+
+
+
+
 
 import "./ProductosCompras.css";
 
@@ -229,14 +235,20 @@ function coincideCodigo(p, textoBusqueda) {
 
 
 export default function ProductosCompras() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [tipoProducto, setTipoProducto] = useState(searchParams.get("tipo") || "todos");
+  const [stock, setStock] = useState(searchParams.get("stock") || "todos");
+  const [categoria, setCategoria] = useState(searchParams.get("categoria") || "todas");
   const [productos, setProductos] = useState([]);
 
-  const [search, setSearch] = useState("");
-  const [tipoProducto, setTipoProducto] = useState("todos");
-  const [stock, setStock] = useState("todos");
+
+
 
   const [categorias, setCategorias] = useState([]);
-  const [categoria, setCategoria] = useState("todas");
+  
 
   const [mensajeResultados, setMensajeResultados] = useState("");
 
@@ -261,7 +273,16 @@ export default function ProductosCompras() {
   recognition.onresult = event => {
     const texto = event.results[0][0].transcript;
     setSearch(texto);
+
+    // Actualizar searchParams para que quede guardado en la URL
+    setSearchParams({
+      search: texto,
+      tipo: tipoProducto,
+      stock: stock,
+      categoria: categoria,
+    });
   };
+
 
   recognition.onerror = e => {
     console.error("Error reconocimiento voz:", e);
@@ -498,37 +519,55 @@ export default function ProductosCompras() {
       </div>
 
       <div className="productos-filtros">
-        <div style={{ display: "flex", gap: "6px" }}>
-          <input
-            type="text"
-            placeholder="Buscar por texto o voz…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="input"
-          />
 
-          <button
-            type="button"
-            onClick={activarVoz}
-            title="Buscar por voz"
-            style={{
-              padding: "0 12px",
-              borderRadius: "6px",
-              border: "none",
-              background: "#0ea5e9",
-              color: "white",
-              fontSize: "16px",
-              cursor: "pointer"
-            }}
-          >
-            🎤
-          </button>
-        </div>
+      
+       
+
+      {/* 🔍 BUSCADOR */}
+      <div className="filtro-busqueda">
+        <span className="icono-buscar">🔍</span>
+
+        <input
+          type="text"
+          placeholder="Buscar por texto o voz…"
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value);
+            setSearchParams({
+              search: e.target.value,
+              tipo: tipoProducto,
+              stock: stock,
+              categoria: categoria,
+            });
+          }}
+          className="input-busqueda"
+        />
+
+        <button
+          type="button"
+          onClick={activarVoz}
+          title="Buscar por voz"
+          className="btn-voz"
+        >
+          🎤
+        </button>
+      </div>
 
 
+
+
+        {/* SELECT tipoProducto */}
         <select
           value={tipoProducto}
-          onChange={e => setTipoProducto(e.target.value)}
+          onChange={e => {
+            setTipoProducto(e.target.value);
+            setSearchParams({
+              search: search,
+              tipo: e.target.value,
+              stock: stock,
+              categoria: categoria,
+            });
+          }}
           className="select"
         >
           <option value="todos">Todos</option>
@@ -536,9 +575,18 @@ export default function ProductosCompras() {
           <option value="variantes">Con variantes</option>
         </select>
 
+        {/* SELECT categoría */}
         <select
           value={categoria}
-          onChange={e => setCategoria(e.target.value)}
+          onChange={e => {
+            setCategoria(e.target.value);
+            setSearchParams({
+              search: search,
+              tipo: tipoProducto,
+              stock: stock,
+              categoria: e.target.value,
+            });
+          }}
           className="select"
         >
           <option value="todas">Todas las categorías</option>
@@ -547,15 +595,26 @@ export default function ProductosCompras() {
           ))}
         </select>
 
+        {/* SELECT stock */}
         <select
           value={stock}
-          onChange={e => setStock(e.target.value)}
+          onChange={e => {
+            setStock(e.target.value);
+            setSearchParams({
+              search: search,
+              tipo: tipoProducto,
+              stock: e.target.value,
+              categoria: categoria,
+            });
+          }}
           className="select"
         >
           <option value="todos">Stock (todos)</option>
           <option value="con">Con stock</option>
           <option value="sin">Sin stock</option>
         </select>
+
+        
       </div>
 
 
@@ -626,9 +685,13 @@ export default function ProductosCompras() {
               </div>
             )}
 
-            <Link to={`../producto/${p.id}`} className="producto-link">
+            <Link
+              to={`../producto/${p.id}?search=${search}&tipo=${tipoProducto}&stock=${stock}&categoria=${categoria}`}
+              className="producto-link"
+            >
               Ver detalle →
             </Link>
+
 
           </div>
         ))}

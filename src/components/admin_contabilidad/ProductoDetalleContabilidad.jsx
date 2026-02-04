@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
@@ -15,6 +15,14 @@ import TablaCambiosAlmacenPendientesContabilidad from "./tablas/TablaCambiosAlma
 import "./ProductoDetalleContabilidad.css";
 
 export default function ProductoDetalleContabilidad() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [tipo, setTipo] = useState(searchParams.get("tipo") || "todos");
+  const [stock, setStock] = useState(searchParams.get("stock") || "todos");
+  const [categoria, setCategoria] = useState(searchParams.get("categoria") || "todas");
+  
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -45,12 +53,23 @@ export default function ProductoDetalleContabilidad() {
   return (
     <div className="detalle-contabilidad-container">
       <div className="detalle-header">
-        <button
-          onClick={() => navigate("/contabilidad/productos")}
-          className="btn-back"
-        >
-          ← Volver
-        </button>
+      <button
+        onClick={() =>
+          navigate({
+            pathname: "/contabilidad/productos",
+            search: new URLSearchParams({
+              search,
+              tipo,
+              stock,
+              categoria,
+            }).toString(),
+          })
+        }
+        className="btn-back"
+      >
+        ← Volver
+      </button>
+
       </div>
 
       <div className="detalle-top">

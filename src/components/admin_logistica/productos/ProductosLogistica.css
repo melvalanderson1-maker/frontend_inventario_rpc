@@ -1,0 +1,348 @@
+.productos-container {
+  padding: 24px;
+  background: #f6f8fb;
+  min-height: 100vh;
+}
+
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.productos-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.btn-nuevo {
+  background: #2563eb;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-nuevo:hover {
+  background: #1d4ed8;
+}
+
+/* ===============================
+   🔎 FILTROS – UX PRO
+================================ */
+.productos-filtros {
+  display: grid;
+  grid-template-columns: 4fr 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 26px;
+
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+
+
+.input-busqueda {
+  flex: 1;          /* 🔥 OCUPA TODO */
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  padding: 6px;
+}
+
+
+/* ===============================
+   🔍 BUSCADOR COMPLETO
+================================ */
+.filtro-busqueda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 8px 12px;
+  width: 100%;
+}
+
+
+.filtro-busqueda:hover {
+  border-color: #2563eb;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.15);
+}
+
+.filtro-busqueda:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+.icono-buscar {
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+/* ===============================
+   ✏️ INPUT BUSCAR
+================================ */
+
+.input-busqueda::placeholder {
+  color: #94a3b8;
+}
+
+/* ===============================
+   🎤 BOTÓN VOZ
+================================ */
+.btn-voz {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 14px rgba(14,165,233,0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-voz:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(14,165,233,0.6);
+}
+
+/* ===============================
+   🔽 SELECTS PRO
+================================ */
+.select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select:hover {
+  border-color: #2563eb;
+  box-shadow: 0 6px 16px rgba(37,99,235,0.15);
+}
+
+.select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+.input,
+.select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 14px;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.producto-card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.badge-variantes {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #0ea5e9;
+  color: white;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.producto-imagen {
+  width: 100%;
+  height: 228px;              /* ⬅ ALTURA FIJA */
+  background: #f8fafc;       /* Fondo neutro */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.producto-imagen img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;       /* ⬅ CLAVE: NO CORTA */
+  object-position: center;
+}
+
+.producto-imagen span {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+
+.producto-codigo {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 2px;
+  color: #111827;
+}
+
+.producto-modelo-marca {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.producto-descripcion {
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  text-align: justify; /* ⬅ Justificado */
+  max-height: none;    /* ⬅ Sin límite de altura */
+  overflow: visible;   /* ⬅ Mostrar todo */
+  display: block;      /* ⬅ No usar -webkit-box */
+  white-space: normal; /* ⬅ Permite saltos de línea normales */
+  word-break: break-word; /* ⬅ Para que las palabras largas se rompan */
+}
+
+
+
+.producto-stock-total {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.producto-variantes {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 6px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 72px;
+  overflow-y: auto;
+}
+
+
+.variante-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.variante-codigo {
+  color: #334155;
+}
+
+.variante-stock {
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.variante-stock.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.variante-stock.zero {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.producto-link {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  padding-top: 6px;
+}
+
+.producto-link:hover {
+  text-decoration: underline;
+}
+
+
+.modal-resultados {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #0ea5e9;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  z-index: 9999;
+  animation: fadeInOut 2.5s ease;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+.input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+.btn-voz {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #0ea5e9;
+  color: white;
+  cursor: pointer;
+}

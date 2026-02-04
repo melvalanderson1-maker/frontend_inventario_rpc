@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+
 import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
@@ -9,9 +9,25 @@ import TablaAprobados from "./tablas/TablaAprobados";
 import TablaPendientes from "./tablas/TablaPendientes";
 import TablaRechazados from "./tablas/TablaRechazados";
 
+
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+
+
 import "./ProductoDetalle.css";
 
 export default function ProductoDetalle() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [tipo, setTipo] = useState(searchParams.get("tipo") || "todos");
+  const [stock, setStock] = useState(searchParams.get("stock") || "todos");
+  const [categoria, setCategoria] = useState(searchParams.get("categoria") || "todas");
+
+
+
+
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -44,11 +60,24 @@ export default function ProductoDetalle() {
       {/* HEADER */}
       <div className="detalle-header">
         <button
-          onClick={() => navigate("/compras/productos")}
+          onClick={() =>
+            navigate({
+              pathname: "/compras/productos",
+              search: new URLSearchParams({
+                search: search,
+                tipo: tipo,
+                stock: stock,
+                categoria: categoria,
+              }).toString(),
+            })
+          }
           className="btn-back"
         >
           ← Volver
         </button>
+
+
+
 
         <div className="detalle-actions">
           <Link
