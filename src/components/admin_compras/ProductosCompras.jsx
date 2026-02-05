@@ -4,10 +4,12 @@ import { resolveImageUrl } from "../../utils/imageUrl";
 
 import { Link, useSearchParams } from "react-router-dom";
 
+import EditAndDelete from "./productos/EditAndDelete";
 
 
 
 
+import { useRef } from "react";
 
 import "./ProductosCompras.css";
 
@@ -67,7 +69,7 @@ const aliasCategorias = {
   // 🧻 PAPEL
   papel: [10, 11, 25],
   higienico: [10],
-  toalla: [11],
+  toall: [11],
   sabanilla: [25],
 
   // 🧼 ESPONJAS
@@ -85,7 +87,7 @@ const aliasCategorias = {
 
     // 🧽 TRAPEADORES
   toalla: [26],
-  toallas: [26],
+  
 
   // 🚿 DISPENSADORES
   dispensador: [18],
@@ -246,11 +248,19 @@ export default function ProductosCompras() {
 
 
 
+  const [productoEditar, setProductoEditar] = useState(null);
+
+
+
 
   const [categorias, setCategorias] = useState([]);
   
 
   const [mensajeResultados, setMensajeResultados] = useState("");
+
+
+  const ultimoTotalHablado = useRef(null);
+
 
 
 
@@ -487,20 +497,32 @@ export default function ProductosCompras() {
 
 
   useEffect(() => {
-  if (!search.trim()) return;
+    // 🛑 Si el buscador está vacío → borrar mensaje y callar
+    if (!search.trim()) {
+      setMensajeResultados("");
+      ultimoTotalHablado.current = null;
 
-  const total = productosFiltrados.length;
-  const mensaje = `Se encontraron ${total} resultado${total !== 1 ? "s" : ""}`;
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      return;
+    }
 
-  setMensajeResultados(mensaje);
-  hablar(mensaje);
+    const handler = setTimeout(() => {
+      const total = productosFiltrados.length;
 
-  const timer = setTimeout(() => {
-    setMensajeResultados("");
-  }, 2500);
+      // 🔁 Evitar repetir el mismo mensaje
+      if (ultimoTotalHablado.current === total) return;
+      ultimoTotalHablado.current = total;
 
-  return () => clearTimeout(timer);
-}, [productosFiltrados, search]);
+      const mensaje = `Se encontraron ${total} resultado${total !== 1 ? "s" : ""}`;
+      setMensajeResultados(mensaje);
+      hablar(mensaje);
+    }, 600);
+
+    return () => clearTimeout(handler);
+  }, [productosFiltrados.length, search]);
+
 
 
 
@@ -624,9 +646,18 @@ export default function ProductosCompras() {
         </div>
       )}
 
+
+
+
       <div className="productos-grid">
         {productosFiltrados.map(p => (
+          
           <div key={p.id} className="producto-card">
+
+            <div className="acciones-card">
+              <button onClick={() => setProductoEditar(p)}>✏️</button>
+            </div>
+
 
             {p.es_catalogo === 1 && (
               <div className="badge-variantes">
@@ -696,6 +727,17 @@ export default function ProductosCompras() {
           </div>
         ))}
       </div>
+      <EditAndDelete
+        producto={productoEditar}
+        categorias={categorias}
+        abierto={!!productoEditar}
+        onCerrar={() => setProductoEditar(null)}
+        onActualizado={() => {
+          api.get("/api/compras/productos")
+            .then(res => setProductos(res.data.productos || []));
+        }}
+      />
+
     </div>
   );
 }

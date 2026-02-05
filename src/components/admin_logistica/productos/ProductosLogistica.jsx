@@ -3,6 +3,9 @@ import api from "../../../api/api";
 import { resolveImageUrl } from "../../../utils/imageUrl";
 import { Link, useSearchParams } from "react-router-dom";
 
+import { useRef } from "react";
+
+
 import "./ProductosLogistica.css";
 
 /* ======================================================
@@ -118,6 +121,11 @@ export default function ProductosLogistica() {
   const [categorias, setCategorias] = useState([]);
   const [mensajeResultados, setMensajeResultados] = useState("");
 
+
+
+  const ultimoTotalHablado = useRef(null);
+
+
   /* ================= VOZ ================= */
   function activarVoz() {
     const SpeechRecognition =
@@ -209,15 +217,34 @@ export default function ProductosLogistica() {
     .sort((a, b) => b.score - a.score);
 
   /* ================= HABLAR RESULTADOS ================= */
-  useEffect(() => {
-    if (!search.trim()) return;
+useEffect(() => {
+  // 🛑 Si el buscador está vacío → borrar mensaje y callar
+  if (!search.trim()) {
+    setMensajeResultados("");
+    ultimoTotalHablado.current = null;
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    return;
+  }
+
+  const handler = setTimeout(() => {
     const total = productosFiltrados.length;
-    const msg = `Se encontraron ${total} resultado${total !== 1 ? "s" : ""}`;
-    setMensajeResultados(msg);
-    hablar(msg);
-    const t = setTimeout(() => setMensajeResultados(""), 2500);
-    return () => clearTimeout(t);
-  }, [productosFiltrados, search]);
+
+    // 🔁 Evitar repetir el mismo mensaje
+    if (ultimoTotalHablado.current === total) return;
+    ultimoTotalHablado.current = total;
+
+    const mensaje = `Se encontraron ${total} resultado${total !== 1 ? "s" : ""}`;
+    setMensajeResultados(mensaje);
+    hablar(mensaje);
+  }, 600);
+
+  return () => clearTimeout(handler);
+}, [productosFiltrados.length, search]);
+
+
 
   /* ================= RENDER ================= */
   return (

@@ -3,6 +3,10 @@ import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import { Link, useSearchParams } from "react-router-dom";
 
+
+import { useRef } from "react";
+
+
 import "./ProductosContabilidad.css";
 
 /* =========================
@@ -34,11 +38,11 @@ const aliasCategorias = {
   recogedor: [14], recogedores: [14],
   tacho: [15], tachos: [15], buzon: [15], buzones: [15],
   bolsa: [23], bolsas: [23],
-  papel: [10, 11, 25], higienico: [10], toalla: [11], sabanilla: [25],
+  papel: [10, 11, 25], higienico: [10], toall: [11], sabanilla: [25],
   esponja: [7], esponjas: [7], fibra: [7],
   escoba: [5], escobas: [5],
   trapeador: [9], mopa: [9],
-  toalla: [26], toallas: [26],
+  toalla: [26], 
   dispensador: [18], dispensadores: [18],
   batea: [16], tina: [16],
 };
@@ -121,6 +125,12 @@ export default function ProductosContabilidad() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [mensajeResultados, setMensajeResultados] = useState("");
+
+
+
+
+  const ultimoTotalHablado = useRef(null);
+
 
   /* 🎤 VOZ */
   function activarVoz() {
@@ -224,13 +234,33 @@ export default function ProductosContabilidad() {
     .sort((a, b) => b.score - a.score);
 
   useEffect(() => {
-    if (!search.trim()) return;
-    const t = productosFiltrados.length;
-    const msg = `Se encontraron ${t} resultado${t !== 1 ? "s" : ""}`;
-    setMensajeResultados(msg);
-    hablar(msg);
-    setTimeout(() => setMensajeResultados(""), 2500);
-  }, [productosFiltrados, search]);
+    // 🛑 Si el buscador está vacío → borrar mensaje y callar
+    if (!search.trim()) {
+      setMensajeResultados("");
+      ultimoTotalHablado.current = null;
+
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      const total = productosFiltrados.length;
+
+      // 🔁 Evitar repetir el mismo mensaje
+      if (ultimoTotalHablado.current === total) return;
+      ultimoTotalHablado.current = total;
+
+      const mensaje = `Se encontraron ${total} resultado${total !== 1 ? "s" : ""}`;
+      setMensajeResultados(mensaje);
+      hablar(mensaje);
+    }, 600);
+
+    return () => clearTimeout(handler);
+  }, [productosFiltrados.length, search]);
+
+
 
   /* ========================= UI ========================= */
   return (
