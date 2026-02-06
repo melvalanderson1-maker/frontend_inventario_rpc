@@ -22,7 +22,8 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
 
   const [nuevaImagen, setNuevaImagen] = useState(null);
   const inputFileRef = useRef(null); // ref para el input
-
+  const [guardando, setGuardando] = useState(false);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     if (!producto) return;
@@ -78,41 +79,60 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
     return () => clearTimeout(timer);
   }, [form.codigo, producto]);
 
+
+
+
+  useEffect(() => {
+    if (!abierto) return;
+
+    // 🔥 reset visual de imagen
+    setNuevaImagen(null);
+
+    if (inputFileRef.current) {
+      inputFileRef.current.value = "";
+    }
+  }, [abierto, producto]);
+
+
   if (!abierto || !producto) return null;
 
+
 const guardarCambios = async () => {
-  if (!codigoValido) { alert("El código ya existe."); return; }
-  if (form.descripcion && form.descripcion.length > 1000) {
-    alert("La descripción no puede superar 1000 caracteres"); return;
-  }
+  if (!codigoValido || guardando) return;
+
+  setGuardando(true);
+  setToast("");
 
   try {
     const formData = new FormData();
-
-    // Campos básicos
     formData.append("codigo", form.codigo.trim());
     formData.append("modelo", form.modelo.trim());
     formData.append("marca", form.marca.trim());
     formData.append("descripcion", form.descripcion.trim());
-    formData.append("categoria_id", form.categoria_id);
-
-    // ✅ Enviar atributos como JSON
     formData.append("atributos", JSON.stringify(form.atributos));
 
-    // ✅ Enviar imagen solo si hay nueva
     if (nuevaImagen) {
-      formData.append("imagen_producto", nuevaImagen); 
-      // ⚠️ Asegúrate de que multer use `upload.single('imagen_producto')`
+      formData.append("imagen_producto", nuevaImagen);
     }
 
     await api.put(`/api/compras/productos/${producto.id}`, formData);
 
-    alert("Producto actualizado correctamente");
-    onCerrar();
+    setToast("✅ Producto actualizado correctamente");
     onActualizado();
-  } catch (error) {
-    console.error("❌ Error actualizar producto:", error);
-    alert("Error al actualizar");
+
+    setTimeout(() => {
+      setNuevaImagen(null);
+      if (inputFileRef.current) {
+        inputFileRef.current.value = "";
+      }
+      onCerrar();
+      setToast("");
+    }, 1500);
+
+  } catch (err) {
+    setToast("❌ Error al actualizar producto");
+  } finally {
+    setGuardando(false);
   }
 };
 
@@ -132,22 +152,40 @@ const guardarCambios = async () => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal">
+        {/* 🔔 TOAST DE ÉXITO / ERROR */}
+        {toast && (
+          <div className="toast-exito">
+            {toast}
+          </div>
+        )}
+
+        {guardando && (
+          <div className="modal-loading">
+            <div className="spinner-grande"></div>
+            <p>Guardando cambios...</p>
+          </div>
+        )}
+      <div className={`modal ${guardando ? "modal-guardando" : ""}`}>
         <h3>Editar producto</h3>
 
         {/* IMAGEN + STOCK + CODIGO */}
         <div className="imagen-detalle-grid">
         <div className="producto-imagen-modal">
-          {/* Imagen o preview */}
           {nuevaImagen ? (
-            <img src={URL.createObjectURL(nuevaImagen)} alt="Preview" style={{ maxWidth: "150px" }} />
+            <img
+              src={URL.createObjectURL(nuevaImagen)}
+              alt="Preview"
+              className="imagen-producto"
+            />
           ) : producto.imagen ? (
-            <img src={resolveImageUrl(producto.imagen)} alt={producto?.codigo || "producto"} />
+            <img
+              src={resolveImageUrl(producto.imagen)}
+              alt={producto?.codigo || "producto"}
+              className="imagen-producto"
+            />
           ) : (
             <div className="sin-imagen">Sin imagen</div>
           )}
-
-
         </div>
 
 
@@ -184,7 +222,7 @@ const guardarCambios = async () => {
             {/* Solo mostrar botón si hay nuevaImagen */}
             {nuevaImagen && (
               <button type="button" onClick={anularCambioImagen}>
-                ❌ Anular cambio
+                  X Anular cambio de imagen
               </button>
             )}
           </div>
@@ -241,10 +279,27 @@ const guardarCambios = async () => {
 
         {/* BOTONES */}
         <div className="modal-acciones">
-          <button className="btn-guardar" onClick={guardarCambios} disabled={!codigoValido}>
-            💾 Guardar
+          <button
+            className="btn-guardar"
+            onClick={guardarCambios}
+            disabled={!codigoValido || guardando}
+          >
+            {guardando ? (
+              <span className="spinner"></span>
+            ) : (
+              "💾 Guardar"
+            )}
           </button>
-          <button className="btn-cancelar" onClick={onCerrar}>
+          <button
+            className="btn-cancelar"
+            onClick={() => {
+              setNuevaImagen(null);
+              if (inputFileRef.current) {
+                inputFileRef.current.value = "";
+              }
+              onCerrar();
+            }}
+          >
             ❌ Cancelar
           </button>
         </div>

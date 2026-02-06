@@ -12,6 +12,7 @@
   background: #fff;
   width: 1000px;
   max-width: 95%;
+  position: relative;
   border-radius: 12px;
   padding: 24px 28px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.25);
@@ -36,10 +37,13 @@
 }
 
 .producto-imagen-modal {
+  width: 100%;
+  height: 220px;          /* 🔥 MISMO alto siempre */
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 
 .producto-imagen-modal img {
   max-width: 100%;
@@ -150,7 +154,7 @@
 }
 
 .btn-guardar {
-  background: #2563eb;
+  background: #0051ff;
   color: #fff;
   border: none;
   padding: 10px 18px;
@@ -159,11 +163,11 @@
   cursor: pointer;
 }
 
-.btn-guardar:hover { background: #1d4ed8; }
+.btn-guardar:hover { background: #0c2b83; }
 
 .btn-cancelar {
-  background: #e5e7eb;
-  color: #374151;
+  background: #000000;
+  color: #ffffff;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -171,7 +175,7 @@
   cursor: pointer;
 }
 
-.btn-cancelar:hover { background: #d1d5db; }
+.btn-cancelar:hover { background: #747474; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-8px); }
@@ -194,18 +198,88 @@
 .imagen-botones-grid input[type="file"] {
   padding: 6px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+
+
 }
 
 .imagen-botones-grid button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  background: #ef4444;
+  padding: 4px 8px;        /* 🔥 clave: poco padding */
+  font-size: 17px;         /* opcional, más compacto */
+  line-height: 0.2;          /* 🔥 pega el texto */
+  border-radius: 4px;      /* menos redondeado */
+  background: #ff2b2b;
   color: #fff;
   border: none;
   cursor: pointer;
+  white-space: nowrap;     /* evita que se parta el texto */
 }
 
 .imagen-botones-grid button:hover {
   background: #dc2626;
+}
+
+.toast-exito {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #2ecc71;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,.2);
+  z-index: 9999;
+  animation: fadeInOut 2s ease forwards;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #fff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.modal-guardando {
+  pointer-events: none; /* bloquea clicks */
+  opacity: 0.65;
+  filter: blur(1px);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.modal-loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  border-radius: 12px;
+}
+
+.spinner-grande {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #2563eb;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.modal-loading p {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+.btn-guardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
