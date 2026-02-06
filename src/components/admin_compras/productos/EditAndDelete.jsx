@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react"; // ✅ correcto
 import api from "../../../api/api";
 import { resolveImageUrl } from "../../../utils/imageUrl";
+
 import "./EditAndDelete.css";
 
 export default function EditAndDelete({ producto, categorias, abierto, onCerrar, onActualizado }) {
@@ -17,6 +18,11 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
   const [verificandoCodigo, setVerificandoCodigo] = useState(false);
 
   const categoriaActual = categorias?.find(cat => cat.id === form.categoria_id)?.nombre || "";
+
+
+  const [nuevaImagen, setNuevaImagen] = useState(null);
+  const inputFileRef = useRef(null); // ref para el input
+
 
   useEffect(() => {
     if (!producto) return;
@@ -74,31 +80,53 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
 
   if (!abierto || !producto) return null;
 
-  const guardarCambios = async () => {
-    if (!codigoValido) { alert("El código ya existe."); return; }
-    if (form.descripcion && form.descripcion.length > 1000) {
-      alert("La descripción no puede superar 1000 caracteres"); return;
+const guardarCambios = async () => {
+  if (!codigoValido) { alert("El código ya existe."); return; }
+  if (form.descripcion && form.descripcion.length > 1000) {
+    alert("La descripción no puede superar 1000 caracteres"); return;
+  }
+
+  try {
+    const formData = new FormData();
+
+    // Campos básicos
+    formData.append("codigo", form.codigo.trim());
+    formData.append("modelo", form.modelo.trim());
+    formData.append("marca", form.marca.trim());
+    formData.append("descripcion", form.descripcion.trim());
+    formData.append("categoria_id", form.categoria_id);
+
+    // ✅ Enviar atributos como JSON
+    formData.append("atributos", JSON.stringify(form.atributos));
+
+    // ✅ Enviar imagen solo si hay nueva
+    if (nuevaImagen) {
+      formData.append("imagen_producto", nuevaImagen); 
+      // ⚠️ Asegúrate de que multer use `upload.single('imagen_producto')`
     }
-    try {
-      const formData = new FormData();
-      formData.append("codigo", form.codigo.trim());
-      formData.append("modelo", form.modelo.trim());
-      formData.append("marca", form.marca.trim());
-      formData.append("descripcion", form.descripcion.trim());
-      formData.append("categoria_id", form.categoria_id);
-      Object.keys(form.atributos).forEach(attrId => {
-        const valor = form.atributos[attrId]?.trim().slice(0,255) || "";
-        formData.append(`atributos[${attrId}]`, valor);
-      });
-      await api.put(`/api/compras/productos/${producto.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      alert("Producto actualizado correctamente");
-      onCerrar();
-      onActualizado();
-    } catch (error) {
-      console.error("❌ Error actualizar producto:", error);
-      alert("Error al actualizar");
+
+    await api.put(`/api/compras/productos/${producto.id}`, formData);
+
+    alert("Producto actualizado correctamente");
+    onCerrar();
+    onActualizado();
+  } catch (error) {
+    console.error("❌ Error actualizar producto:", error);
+    alert("Error al actualizar");
+  }
+};
+
+
+  const onChangeImagen = e => {
+    if (e.target.files && e.target.files[0]) {
+      setNuevaImagen(e.target.files[0]);
+    }
+  };
+
+  const anularCambioImagen = () => {
+    setNuevaImagen(null); // limpia la imagen nueva
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ""; // borra el nombre del archivo en el input
     }
   };
 
@@ -109,33 +137,58 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
 
         {/* IMAGEN + STOCK + CODIGO */}
         <div className="imagen-detalle-grid">
-          <div className="producto-imagen-modal">
-            {producto.imagen ? (
-              <img src={resolveImageUrl(producto.imagen)} alt={producto?.codigo || "producto"} />
-            ) : (
-              <div className="sin-imagen">Sin imagen</div>
+        <div className="producto-imagen-modal">
+          {/* Imagen o preview */}
+          {nuevaImagen ? (
+            <img src={URL.createObjectURL(nuevaImagen)} alt="Preview" style={{ maxWidth: "150px" }} />
+          ) : producto.imagen ? (
+            <img src={resolveImageUrl(producto.imagen)} alt={producto?.codigo || "producto"} />
+          ) : (
+            <div className="sin-imagen">Sin imagen</div>
+          )}
+
+
+        </div>
+
+
+
+        <div className="producto-detalle-lado">
+          <div className="producto-stock-modal">
+            Stock total: <strong>{producto.stock_total}</strong>
+          </div>
+          
+          <div className="campo-input">
+            <label>Código</label>
+            <input
+              placeholder="Código"
+              value={form.codigo}
+              onChange={e => setForm({ ...form, codigo: e.target.value })}
+              style={{ borderColor: codigoValido ? "" : "red" }}
+            />
+            {!codigoValido && <small style={{ color: "red" }}>¡Código ya existe!</small>}
+            {verificandoCodigo && <small>Verificando código...</small>}
+            {codigoValido && !verificandoCodigo && form.codigo.trim() && (
+              <small style={{ color: "green" }}>✅ Código correcto</small>
             )}
           </div>
 
-          <div className="producto-detalle-lado">
-            <div className="producto-stock-modal">
-              Stock total: <strong>{producto.stock_total}</strong>
-            </div>
-            <div className="campo-input">
-              <label>Código</label>
-              <input
-                placeholder="Código"
-                value={form.codigo}
-                onChange={e => setForm({ ...form, codigo: e.target.value })}
-                style={{ borderColor: codigoValido ? "" : "red" }}
-              />
-              {!codigoValido && <small style={{ color: "red" }}>¡Código ya existe!</small>}
-              {verificandoCodigo && <small>Verificando código...</small>}
-              {codigoValido && !verificandoCodigo && form.codigo.trim() && (
-                <small style={{ color: "green" }}>✅ Código correcto</small>
-              )}
-            </div>
+          {/* NUEVO: input file + botón debajo del código */}
+          <div className="imagen-botones-grid">
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={onChangeImagen} 
+              ref={inputFileRef} 
+            />
+
+            {/* Solo mostrar botón si hay nuevaImagen */}
+            {nuevaImagen && (
+              <button type="button" onClick={anularCambioImagen}>
+                ❌ Anular cambio
+              </button>
+            )}
           </div>
+        </div>
         </div>
 
         {/* FILA 1x3: Categoria | Modelo | Marca */}

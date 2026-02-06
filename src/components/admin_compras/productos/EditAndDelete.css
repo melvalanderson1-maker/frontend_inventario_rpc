@@ -183,3 +183,29 @@
   .fila-1x3-grid { grid-template-columns: 1fr; }
   .atributos-grid { grid-template-columns: 1fr; }
 }
+
+.imagen-botones-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+  gap: 8px; /* Espacio entre input y botón */
+  margin-top: 8px; /* Separación con el input Código */
+}
+
+.imagen-botones-grid input[type="file"] {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.imagen-botones-grid button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.imagen-botones-grid button:hover {
+  background: #dc2626;
+}
