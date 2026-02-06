@@ -19,6 +19,39 @@ export default function DeleteProducto({
   const [segundosReenvio, setSegundosReenvio] = useState(0);
   const [exitoMsg, setExitoMsg] = useState(""); // Mensaje de éxito para toast
 
+
+    // 🔹 Reiniciar estados cuando se abre un nuevo producto
+    useEffect(() => {
+    if (!producto) return;
+
+    setTipo("inactivar");
+    setOtp("");
+    setPaso(1);
+    setCargando(false);
+    setError("");
+    setExpiraEn(null);
+    setReenviarEn(null);
+    setSegundosOTP(0);
+    setSegundosReenvio(0);
+    setExitoMsg("");
+    }, [producto]);
+
+    // 🔹 Reiniciar estados al cerrar el modal
+    useEffect(() => {
+    if (!abierto) {
+        setTipo("inactivar");
+        setOtp("");
+        setPaso(1);
+        setCargando(false);
+        setError("");
+        setExpiraEn(null);
+        setReenviarEn(null);
+        setSegundosOTP(0);
+        setSegundosReenvio(0);
+        setExitoMsg("");
+    }
+    }, [abierto]);
+
   // 1️⃣ pedir OTP
   const solicitarOTP = async () => {
     setError("");

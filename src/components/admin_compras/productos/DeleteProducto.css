@@ -1,161 +1,186 @@
-/* Fondo oscuro semi-transparente */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  backdrop-filter: blur(3px); /* efecto elegante */
-}
 
-/* Modal principal */
-.modal {
-  background: #f9f9f9;
-  padding: 25px 30px;
-  border-radius: 12px;
-  width: 420px;
-  max-width: 90%;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  position: relative;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-/* Título */
 .modal h3 {
-  margin-top: 0;
-  color: #003366; /* azul corporativo BCP */
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 20px;
+  color: #1f2937;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
 }
 
-/* Acciones del modal */
+.modal p {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* ==========================================
+   SELECT ACCIONES
+========================================== */
+.modal select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.texto-rojo {
+  color: #b91c1c;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* ==========================================
+   ERRORES
+========================================== */
+.error {
+  margin-top: 10px;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ==========================================
+   BOTONES
+========================================== */
 .modal-acciones {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* Botón eliminar/confirmar */
 .btn-eliminar {
-  background: linear-gradient(135deg, #003366, #0055a5);
+  background: #d9534f;
   color: #fff;
   border: none;
-  padding: 10px 18px;
-  cursor: pointer;
+  padding: 10px 16px;
   border-radius: 8px;
+  cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .btn-eliminar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #c53030;
+  transform: translateY(-1px);
 }
 
-/* Botón cancelar */
 .btn-cancelar {
-  background: #e0e0e0;
-  color: #333;
+  background: #6c757d;
+  color: #fff;
   border: none;
-  padding: 10px 18px;
-  cursor: pointer;
+  padding: 10px 16px;
   border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .btn-cancelar:hover {
-  background: #d5d5d5;
+  background: #4b5157;
   transform: translateY(-1px);
 }
 
-/* Botón reenvío */
 .btn-reenviar {
-  margin-top: 12px;
-  background: #0055a5;
-  color: #fff;
+  margin-top: 10px;
+  background: #2563eb;
+  color: white;
   border: none;
-  padding: 8px 15px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: background 0.2s;
 }
 
 .btn-reenviar:hover {
-  background: #0070d1;
-  transform: translateY(-1px);
+  background: #1d4ed8;
 }
 
-/* Input OTP */
-input {
+/* ==========================================
+   INPUT OTP
+========================================== */
+.modal input {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  font-size: 1rem;
-  transition: border 0.3s ease;
-}
-
-input:focus {
-  border-color: #0055a5;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
   outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Mensaje de error */
-.error {
-  color: #d9534f;
-  margin-top: 10px;
-  font-weight: 500;
+.modal input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-/* Spinner elegante */
+/* ==========================================
+   SPINNER CSS
+========================================== */
 .spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #0055a5;
+  width: 16px;
+  height: 16px;
+  border: 3px solid #fff;
+  border-top: 3px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
   animation: spin 1s linear infinite;
   display: inline-block;
-  vertical-align: middle;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* Toast de éxito */
+/* ==========================================
+   TOAST DE ÉXITO
+========================================== */
 .toast-exito {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #28a745;
+  background: #2ecc71;
   color: #fff;
   padding: 12px 18px;
-  border-radius: 10px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
-  animation: fadeInOut 3s forwards;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 10000;
+  animation: fadeInOut 2.5s ease forwards;
 }
 
-/* Animación toast */
+/* ==========================================
+   ANIMACIONES
+========================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translateY(-10px); }
   10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
   100% { opacity: 0; transform: translateY(-10px); }
 }
 
-/* Texto rojo alerta */
-.texto-rojo {
-  color: #d9534f;
-  font-weight: 500;
-  margin-top: 8px;
+/* ==========================================
+   ESTADO DESHABILITADO
+========================================== */
+.btn-eliminar:disabled,
+.btn-cancelar:disabled,
+.btn-reenviar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
