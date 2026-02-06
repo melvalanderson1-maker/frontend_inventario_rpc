@@ -346,3 +346,63 @@
   color: white;
   cursor: pointer;
 }
+
+
+/* Contenedor de acciones en la tarjeta */
+.acciones-card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Botones de acciones */
+.acciones-card button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Botón editar */
+.acciones-card button:first-child {
+  background: #2563eb;
+  color: white;
+}
+
+.acciones-card button:first-child:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+
+/* Botón eliminar */
+.acciones-card .btn-eliminar {
+  background: #dc2626;
+  color: white;
+}
+
+.acciones-card .btn-eliminar:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+}
+
+/* Iconos dentro de botones (opcional si cambias a SVG) */
+.acciones-card button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Efecto elegante al pasar tarjeta */
+.producto-card:hover .acciones-card button {
+  transform: scale(1.05);
+}

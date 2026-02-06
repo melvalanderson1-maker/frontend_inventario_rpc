@@ -5,6 +5,7 @@ import { resolveImageUrl } from "../../utils/imageUrl";
 import { Link, useSearchParams } from "react-router-dom";
 
 import EditAndDelete from "./productos/EditAndDelete";
+import DeleteProducto from "./productos/DeleteProducto";
 
 
 
@@ -260,6 +261,8 @@ export default function ProductosCompras() {
 
 
   const ultimoTotalHablado = useRef(null);
+
+  const [productoEliminar, setProductoEliminar] = useState(null);
 
 
 
@@ -654,9 +657,15 @@ export default function ProductosCompras() {
           
           <div key={p.id} className="producto-card">
 
-            <div className="acciones-card">
-              <button onClick={() => setProductoEditar(p)}>✏️</button>
-            </div>
+          <div className="acciones-card">
+            <button onClick={() => setProductoEditar(p)}>✏️</button>
+            <button
+              className="btn-eliminar"
+              onClick={() => setProductoEliminar(p)}
+            >
+              🗑️
+            </button>
+          </div>
 
 
             {p.es_catalogo === 1 && (
@@ -733,6 +742,16 @@ export default function ProductosCompras() {
         abierto={!!productoEditar}
         onCerrar={() => setProductoEditar(null)}
         onActualizado={() => {
+          api.get("/api/compras/productos")
+            .then(res => setProductos(res.data.productos || []));
+        }}
+      />
+
+      <DeleteProducto
+        producto={productoEliminar}
+        abierto={!!productoEliminar}
+        onCerrar={() => setProductoEliminar(null)}
+        onEliminado={() => {
           api.get("/api/compras/productos")
             .then(res => setProductos(res.data.productos || []));
         }}
