@@ -9,10 +9,10 @@ import DeleteProducto from "./productos/DeleteProducto";
 
 
 
-
+import "./ProductosCompras.css";
 import { useRef } from "react";
 
-import "./ProductosCompras.css";
+
 
 
 // =========================
@@ -318,6 +318,7 @@ export default function ProductosCompras() {
 
   const productosFiltrados = productos
     .map(p => {
+ 
       const sinBusqueda = !search.trim();
 
       // 👉 Si NO hay búsqueda, aplicar SOLO filtros clásicos
@@ -337,9 +338,16 @@ export default function ProductosCompras() {
           (stock === "sin" && p.stock_total <= 0);
 
         if (!coincideTipo || !coincideCategoria || !coincideStock) {
+
+            
+
           return null;
         }
 
+        
+
+        // 🔹 FILTRO SOLO PRODUCTOS ACTIVOS
+       
         return { ...p, score: 1 };
       }
 

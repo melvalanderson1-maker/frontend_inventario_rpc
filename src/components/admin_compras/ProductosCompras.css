@@ -197,7 +197,7 @@
 .producto-imagen {
   width: 100%;
   height: 228px;              /* ⬅ ALTURA FIJA */
-  background: #f8fafc;       /* Fondo neutro */
+  background: #ffffff;       /* Fondo neutro */
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -329,6 +329,24 @@
   90% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+
+.input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+.btn-voz {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #0ea5e9;
+  color: white;
+  cursor: pointer;
+}
+
 
 
 .input {

@@ -36,7 +36,7 @@ const aliasCategorias = {
   recogedor: [14], recogedores: [14],
   tacho: [15], tachos: [15], buzon: [15], buzones: [15],
   bolsa: [23], bolsas: [23],
-  papel: [10, 11, 25], higienico: [10], toalla: [11], sabanilla: [25],
+  papel: [10, 11, 25], higienico: [10], toal: [11], sabanilla: [25],
   esponja: [7], esponjas: [7], fibra: [7],
   escoba: [5], escobas: [5],
   trapeador: [9], mopa: [9],
