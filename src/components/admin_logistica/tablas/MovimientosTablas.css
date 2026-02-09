@@ -277,3 +277,11 @@ td:nth-child(10) {
 .row-empresa:hover {
   filter: brightness(0.97);
 }
+
+
+
+/* MovimientosTablas.css */
+.zoom-overlay {
+  background-color: rgba(0,0,0,0.85) !important;
+  z-index: 2000 !important;
+}

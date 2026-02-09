@@ -215,7 +215,7 @@ CARD PRODUCTO (IMAGEN PEQUEÑA Y ELEGANTE)
   height: 300px;
   object-fit: contain;  /* 👈 no se deforma */
   border-radius: 10px;
-  background: #f9fafb;
+  background: #ffffff;
   padding: 6px;
   flex-shrink: 0;
   border: 1px solid #e5e7eb;

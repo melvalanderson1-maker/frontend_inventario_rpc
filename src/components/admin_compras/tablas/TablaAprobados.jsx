@@ -10,6 +10,12 @@ export default function TablaAprobados({
   const [rows, setRows] = useState([]);
   const [modalTexto, setModalTexto] = useState(null);
 
+  const [modalImagen, setModalImagen] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState(null);
+
   useEffect(() => {
     api
       .get("/api/compras/movimientos", {
@@ -90,10 +96,133 @@ export default function TablaAprobados({
     setModalTexto(texto);
   };
 
+
+
+    const abrirModalEvidencia = (url) => {
+    setModalImagen(url);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setModalAbierto(true);
+  };
+
+  const cerrarModalEvidencia = () => {
+    setModalImagen(null);
+    setModalAbierto(false);
+  };
+
+  // Zoom centrado en cursor
+  const manejarZoom = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cursorX = e.clientX - rect.left;
+    const cursorY = e.clientY - rect.top;
+
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    setZoom((prevZoom) => {
+      const newZoom = Math.min(Math.max(prevZoom + delta, 1), 5);
+
+      // Ajustar offset para que el zoom sea relativo al cursor
+      setOffset((prev) => ({
+        x: prev.x - (cursorX - rect.width / 2) * (newZoom / prevZoom - 1),
+        y: prev.y - (cursorY - rect.height / 2) * (newZoom / prevZoom - 1),
+      }));
+
+      return newZoom;
+    });
+  };
+
+  // Drag para mover la imagen
+  const iniciarDrag = (e) => {
+    e.preventDefault();
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+
+  const moverDrag = (e) => {
+    if (!dragStart) return;
+    setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const terminarDrag = () => setDragStart(null);
+
+
   return (
     <>
       {/* SCROLL SOLO AQUÍ */}
       <div className="tabla-aprobados-scroll">
+
+      {modalAbierto && (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+          overflow: "hidden",
+          cursor: dragStart ? "grabbing" : "grab",
+        }}
+        onClick={cerrarModalEvidencia}
+        onMouseMove={moverDrag}
+        onMouseUp={terminarDrag}
+        onMouseLeave={terminarDrag}
+      >
+        <div
+          style={{
+            position: "relative",
+            maxWidth: "80%",
+            maxHeight: "80%",
+          }}
+          onClick={(e) => e.stopPropagation()} // prevenir cierre al clickear imagen
+          onWheel={manejarZoom} // zoom solo en la imagen
+        >
+          {/* Botón de cerrar dentro de la imagen */}
+          <button
+            onClick={cerrarModalEvidencia}
+            style={{
+              position: "absolute",
+              top: -10,
+              right: -10,
+              background: "rgba(255, 0, 0, 0.9)",
+              color: "#ffffffce",
+              border: "none",
+              borderRadius: "50%",
+              width: 35,
+              height: 35,
+              fontSize: 20,
+              fontWeight: "bold",
+              cursor: "pointer",
+              zIndex: 1010,
+              boxShadow: "0 0 5px rgba(212, 16, 16, 0.5)",
+            }}
+          >
+            ×
+          </button>
+
+          <img
+            src={modalImagen}
+            alt="Evidencia"
+            onMouseDown={iniciarDrag}
+            style={{
+              width: "100%",
+              height: "520px",
+              objectFit: "contain",
+              borderRadius: 10,
+              boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
+              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+              transition: dragStart ? "none" : "transform 0.1s",
+              cursor: dragStart ? "grabbing" : "grab",
+              display: "block",
+            }}
+          />
+        </div>
+      </div>
+    )}
         <table className="tabla-aprobados">
           <colgroup>
             <col style={{ width: "90px" }} />
@@ -120,6 +249,7 @@ export default function TablaAprobados({
               <th>Empresa</th>
               <th>F Registro</th>
               <th>Almacén</th>
+              <th>Imagen Evidencia</th>
               <th>F Validación</th>
               <th>Obs Compras</th>
               <th>Obs Logística</th>
@@ -172,6 +302,25 @@ export default function TablaAprobados({
                     {cortar(r.almacen)}
                   </td>
 
+
+                  <td>
+                    {r.evidencia_url ? (
+                      <img
+                        src={r.evidencia_url}
+                        alt="Evidencia"
+                        style={{
+                          width: 40,
+                          height: 40,
+                          objectFit: "cover",
+                          cursor: "pointer",
+                          borderRadius: 6,
+                        }}
+                        onClick={() => abrirModalEvidencia(r.evidencia_url)}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td>{formatFecha(r.fecha_validacion_logistica)}</td>
 
                   <td

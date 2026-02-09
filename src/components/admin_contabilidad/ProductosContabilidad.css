@@ -346,3 +346,64 @@
   color: white;
   cursor: pointer;
 }
+
+
+.excel-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+
+  width: 100%;
+  max-width: 700px;
+  margin: 14px 0 24px 0;
+
+  align-items: stretch;   /* 🔥 CLAVE */
+}
+
+.btn-excel {
+  min-height: 42px;        /* 👈 en vez de height */
+  width: 100%;
+  box-sizing: border-box;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;          /* 🔥 CRÍTICO */
+  white-space: nowrap;     /* evita salto raro */
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-excel.primary {
+  background: linear-gradient(135deg, #1d6f42, #2aa866);
+  color: #fff;
+}
+
+.btn-excel.secondary {
+  background: linear-gradient(135deg, #1f4fd8, #3f6cf2);
+  color: #fff;
+}
+
+.btn-excel.success {
+  background: linear-gradient(135deg, #0f9d58, #2ecc71);
+  color: #fff;
+}
+
+.btn-excel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+.btn-excel:active {
+  transform: scale(0.97);
+}

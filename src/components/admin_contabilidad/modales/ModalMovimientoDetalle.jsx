@@ -207,13 +207,16 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
                 <td>Cantidad Compras</td>
                 <td>{movimiento.cantidad_solicitada}</td>
               </tr>
-              <tr>
+
+              <tr className="fila-logistica">
                 <td>Cantidad Logística</td>
                 <td>{movimiento.cantidad}</td>
               </tr>
+              
+
 
               {/* 👇 EDITABLE + GUARDAR */}
-              <tr>
+              <tr  className="fila-conta">
                 <td>Cantidad Real</td>
                 <td className="cantidad-real-cell">
                   <input
@@ -279,7 +282,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
                 <td>Observaciones Compras</td>
                 <td>{movimiento.observaciones || "-"}</td>
               </tr>
-              <tr>
+              <tr className="fila-logistica">
                 <td>Observaciones Logística</td>
                 <td>{movimiento.observacion_logistica || "-"}</td>
               </tr>

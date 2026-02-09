@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import api from "../../../api/api";
 import { resolveImageUrl } from "../../../utils/imageUrl";
 import SelectOrInput from "../../admin_compras/SelectOrInput";
@@ -30,6 +30,11 @@ export default function ModalValidarMovimiento({
   const [opVinculada, setOpVinculada] = useState(movimiento.op_vinculada || "");
   const [observaciones, setObservaciones] = useState("");
   const [imagen, setImagen] = useState(null);
+
+
+
+  const [evidenciaImagen, setEvidenciaImagen] = useState(null); // 🖼️ para la evidencia
+  const evidenciaInputRef = useRef(null); // ref para limpiar input
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -160,7 +165,7 @@ export default function ModalValidarMovimiento({
       if (numeroOrden) formData.append("numero_orden", numeroOrden);
       if (opVinculada) formData.append("op_vinculada", opVinculada);
       if (observaciones) formData.append("observaciones", observaciones);
-      if (imagen) formData.append("imagen", imagen);
+      if (evidenciaImagen) formData.append("imagen", evidenciaImagen);
 
       await api.post(
         `/api/logistica/movimientos/${movimiento.id}/validar`,
@@ -195,6 +200,20 @@ export default function ModalValidarMovimiento({
     if (!esSalida && !almacenId && !almacenNuevo) return false;
     if (esSalida && (!almacenId || error)) return false; // bloquear si hay error
     return true;
+  };
+
+
+  // cuando seleccionan una nueva imagen de evidencia
+  const handleEvidenciaChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setEvidenciaImagen(e.target.files[0]);
+    }
+  };
+
+  // anular imagen de evidencia
+  const anularEvidencia = () => {
+    setEvidenciaImagen(null);
+    if (evidenciaInputRef.current) evidenciaInputRef.current.value = "";
   };
 
 
@@ -323,10 +342,28 @@ export default function ModalValidarMovimiento({
 
             <div className="full">
               <label>Imagen evidencia</label>
+
+              {/* PREVIEW DE LA IMAGEN */}
+              {evidenciaImagen && (
+                <div className="preview-evidencia">
+                  <img 
+                    src={URL.createObjectURL(evidenciaImagen)} 
+                    alt="Evidencia" 
+                    style={{ maxWidth: "150px", maxHeight: "150px", marginBottom: "8px" }}
+                  />
+                  <br />
+                  <button type="button" onClick={anularEvidencia}>
+                    X Anular imagen de evidencia
+                  </button>
+                </div>
+              )}
+
+              {/* INPUT DE ARCHIVO */}
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setImagen(e.target.files[0])}
+                onChange={handleEvidenciaChange}
+                ref={evidenciaInputRef}
               />
             </div>
           </div>

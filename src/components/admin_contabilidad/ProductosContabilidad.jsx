@@ -6,6 +6,9 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { useRef } from "react";
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 import "./ProductosContabilidad.css";
 
@@ -111,6 +114,40 @@ function coincideCodigo(p, texto) {
   return false;
 }
 
+
+
+function exportarExcel(productos, nombre = "productos") {
+  if (!productos.length) {
+    alert("No hay productos para exportar");
+    return;
+  }
+
+  const data = productos.map(p => ({
+    ID: p.id,
+    Código: p.codigo_modelo || p.codigo,
+    Descripción: p.descripcion,
+    Categoría: p.categoria_nombre || p.categoria_id,
+    Stock: p.stock_total,
+    Tipo: p.es_catalogo ? "Con variantes" : "Simple",
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Productos");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, `${nombre}.xlsx`);
+}
 /* =========================
    COMPONENTE
 ========================= */
@@ -130,6 +167,10 @@ export default function ProductosContabilidad() {
 
 
   const ultimoTotalHablado = useRef(null);
+
+
+
+  const [seleccionados, setSeleccionados] = useState([]);
 
 
   /* 🎤 VOZ */
@@ -270,11 +311,44 @@ export default function ProductosContabilidad() {
         <Link to="nuevo" className="btn-nuevo">+ Nuevo Producto</Link>
       </div>
 
+
+
+      <div className="excel-actions">
+
+
+        <button
+          onClick={() => exportarExcel(productosFiltrados, "productos_filtrados")}
+          className="btn-excel secondary"
+        >
+          📊 Exportar filtrados
+        </button>
+
+        <button
+          onClick={() => {
+            const seleccionadosData = productos.filter(p =>
+              seleccionados.includes(p.id)
+            );
+            exportarExcel(seleccionadosData, "productos_seleccionados");
+          }}
+          className="btn-excel success"
+        >
+          ✅ Exportar seleccionados
+        </button>
+
+                <button
+          onClick={() => exportarExcel(productos, "productos_todos")}
+          className="btn-excel primary"
+        >
+          📥 Exportar todo
+        </button>
+      </div>
+
+
+
+
+
+
       <div className="productos-filtros">
-
-      
-       
-
       {/* 🔍 BUSCADOR */}
       <div className="filtro-busqueda">
         <span className="icono-buscar">🔍</span>
@@ -380,6 +454,18 @@ export default function ProductosContabilidad() {
             <div className="producto-imagen">
               {p.imagen ? <img src={resolveImageUrl(p.imagen)} /> : <span>Sin imagen</span>}
             </div>
+
+            <input
+              type="checkbox"
+              checked={seleccionados.includes(p.id)}
+              onChange={e => {
+                setSeleccionados(prev =>
+                  e.target.checked
+                    ? [...prev, p.id]
+                    : prev.filter(id => id !== p.id)
+                );
+              }}
+            />
 
             <div className="producto-codigo">{p.codigo_modelo || p.codigo}</div>
             <div className="producto-descripcion">{p.descripcion}</div>
