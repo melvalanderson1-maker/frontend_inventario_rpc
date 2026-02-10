@@ -1,0 +1,22 @@
+.tabla-stock {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-stock th,
+.tabla-stock td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.tabla-stock th {
+  background: #0e44b1;
+  color: white;
+}
+
+.total-grupo {
+  font-weight: bold;
+  background: #f2f6ff;
+}

@@ -4,6 +4,7 @@ import TablaRechazadosContabilidad from "./tablaAllConta/TablaRechazadosContabil
 import TablaAprobadosContabilidad from "./tablaAllConta/TablaAprobadosContabilidad";
 import TablaHistorialContabilidad from "./tablaAllConta/TablaHistorialContabilidad";
 import TablaCambiosAlmacenPendientesContabilidad from "./tablaAllConta/TablaCambiosAlmacenPendientesContabilidad";
+import TablaStockCompleto from "./tablaAllConta/TablaStockCompleto";
 //import "./MovimientosLogistica.css";
 
 
@@ -34,6 +35,10 @@ export default function MovimientosLogistica() {
         <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
           HISTORIAL
         </button>
+
+        <button onClick={() => setTab("stock")}>
+          STOCK GENERAL
+        </button>
       </div>
 
       <div className="tab-content">
@@ -42,6 +47,7 @@ export default function MovimientosLogistica() {
         {tab === "aprobados" && <TablaAprobadosContabilidad />}
         {tab === "cambios_almacen" && <TablaCambiosAlmacenPendientesContabilidad />}
         {tab === "historial" && <TablaHistorialContabilidad />}
+        {tab === "stock" && <TablaStockCompleto />}
       </div>
     </div>
   );
