@@ -12,6 +12,13 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   const [formato, setFormato] = useState("pdf"); // pdf | imagen
   const contentRef = useRef();
 
+
+  const [modalImagen, setModalImagen] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState(null);
+
   useEffect(() => {
     if (!movimientoId) return;
 
@@ -140,8 +147,150 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
     }
   };
 
+
+
+
+
+
+  
+  const handleValidar = async (id) => {
+    await api.post(`/api/contabilidad/movimientos/${id}/validar`, {});
+    fetchMovimientos();
+  };
+
+
+  const handleRechazar = async (id) => {
+    const observaciones = prompt("Ingrese el motivo del rechazo:");
+    if (!observaciones) return;
+    await api.post(`/api/contabilidad/movimientos/${id}/rechazar`, { observaciones });
+    fetchMovimientos();
+  };
+
+
+
+
+
+   const abrirModal = (url) => {
+    setModalImagen(url);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setModalAbierto(true);
+  };
+
+  const cerrarModal = () => {
+    setModalImagen(null);
+    setModalAbierto(false);
+  };
+
+  // Zoom centrado en cursor
+  const manejarZoom = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cursorX = e.clientX - rect.left;
+    const cursorY = e.clientY - rect.top;
+
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    setZoom((prevZoom) => {
+      const newZoom = Math.min(Math.max(prevZoom + delta, 1), 5);
+
+      // Ajustar offset para que el zoom sea relativo al cursor
+      setOffset((prev) => ({
+        x: prev.x - (cursorX - rect.width / 2) * (newZoom / prevZoom - 1),
+        y: prev.y - (cursorY - rect.height / 2) * (newZoom / prevZoom - 1),
+      }));
+
+      return newZoom;
+    });
+  };
+
+  // Drag para mover la imagen
+  const iniciarDrag = (e) => {
+    e.preventDefault();
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+
+  const moverDrag = (e) => {
+    if (!dragStart) return;
+    setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const terminarDrag = () => setDragStart(null);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
+                {modalAbierto && (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "rgba(0, 0, 0, 0.000001)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+          overflow: "hidden",
+          cursor: dragStart ? "grabbing" : "grab",
+        }}
+        onClick={cerrarModal}
+        onMouseMove={moverDrag}
+        onMouseUp={terminarDrag}
+        onMouseLeave={terminarDrag}
+      >
+        <div
+          style={{
+            position: "relative",
+            maxWidth: "80%",
+            maxHeight: "80%",
+          }}
+          onClick={(e) => e.stopPropagation()} // prevenir cierre al clickear imagen
+          onWheel={manejarZoom} // zoom solo en la imagen
+        >
+          {/* Botón de cerrar dentro de la imagen */}
+          <button
+            onClick={cerrarModal}
+            style={{
+              position: "absolute",
+              top: -10,
+              right: -10,
+              background: "rgba(255, 0, 0, 0.9)",
+              color: "#ffffffce",
+              border: "none",
+              borderRadius: "50%",
+              width: 35,
+              height: 35,
+              fontSize: 20,
+              fontWeight: "bold",
+              cursor: "pointer",
+              zIndex: 1010,
+              boxShadow: "0 0 5px rgba(212, 16, 16, 0.5)",
+            }}
+          >
+            ×
+          </button>
+
+          <img
+            src={modalImagen}
+            alt="Evidencia"
+            onMouseDown={iniciarDrag}
+            style={{
+              width: "100%",
+              height: "520px",
+              objectFit: "contain",
+              borderRadius: 10,
+              boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
+              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+              transition: dragStart ? "none" : "transform 0.1s",
+              cursor: dragStart ? "grabbing" : "grab",
+              display: "block",
+            }}
+          />
+        </div>
+      </div>
+    )}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {/* ================= HEADER ================= */}
         <div className="modal-header">
@@ -215,6 +364,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
               
 
 
+
               {/* 👇 EDITABLE + GUARDAR */}
               <tr  className="fila-conta">
                 <td>Cantidad Real</td>
@@ -245,6 +395,27 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
                 <td>{movimiento.almacen || "-"}</td>
               </tr>
               <tr>
+              <td>Evidencia</td>
+              <td>
+                {movimiento.evidencia_url ? (
+                  <img
+                    src={movimiento.evidencia_url}
+                    alt="Evidencia"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      objectFit: "cover",
+                      cursor: "pointer",
+                      borderRadius: 6,
+                    }}
+                    onClick={() => abrirModal(movimiento.evidencia_url)}
+                  />
+                ) : (
+                  "-"
+                )}
+              </td>
+            </tr>
+              <tr> 
                 <td>Fecha Registro</td>
                 <td>{formatFecha(movimiento.fecha_creacion)}</td>
               </tr>
