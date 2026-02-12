@@ -6,6 +6,7 @@ import TablaHistorial from "./tablaAll/TablaHistorial";
 import TablaCambiosAlmacenPendientes from "./tablaAll/TablaCambiosAlmacenPendientes";
 import "./MovimientosLogistica.css";
 import TablaFinalizadosLogistica from "./tablaAll/TablaFinalizadosLogistica";
+import TablaStockCompleto from "./tablaAll/TablaStockCompleto";
 
 export default function MovimientosLogistica() {
   const [tab, setTab] = useState("pendientes");
@@ -36,6 +37,13 @@ export default function MovimientosLogistica() {
         <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
           Historial
         </button>
+
+        <button
+          className={tab === "stock" ? "active" : ""}
+          onClick={() => setTab("stock")}
+        >
+          STOCK GENERAL
+        </button>
       </div>
 
       <div className="tab-content">
@@ -45,6 +53,7 @@ export default function MovimientosLogistica() {
         {tab === "aprobados" && <TablaAprobadosLogistica />}
         {tab === "cambios_almacen" && <TablaCambiosAlmacenPendientes />}
         {tab === "historial" && <TablaHistorial />}
+        {tab === "stock" && <TablaStockCompleto />}
       </div>
     </div>
   );

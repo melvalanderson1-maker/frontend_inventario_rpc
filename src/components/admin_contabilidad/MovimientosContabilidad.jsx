@@ -35,8 +35,10 @@ export default function MovimientosLogistica() {
         <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
           HISTORIAL
         </button>
-
-        <button onClick={() => setTab("stock")}>
+        <button
+          className={tab === "stock" ? "active" : ""}
+          onClick={() => setTab("stock")}
+        >
           STOCK GENERAL
         </button>
       </div>

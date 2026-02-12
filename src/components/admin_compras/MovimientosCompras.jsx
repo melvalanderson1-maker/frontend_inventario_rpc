@@ -4,6 +4,7 @@ import TablaRechazadosCompras from "./tablaAllCompra/TablaRechazadosCompras";
 import TablaAprobadosCompras from "./tablaAllCompra/TablaAprobadosCompras";
 import TablaHistorialCompras from "./tablaAllCompra/TablaHistorialCompras";
 import TablaCambiosAlmacenPendientesCompras from "./tablaAllCompra/TablaCambiosAlmacenPendientesCompras";
+import TablaStockCompleto from "./tablaAllCompra/TablaStockCompleto";
 
 export default function MovimientosCompras() {
   const [tab, setTab] = useState("pendientes");
@@ -31,6 +32,13 @@ export default function MovimientosCompras() {
         <button className={tab === "historial" ? "active" : ""} onClick={() => setTab("historial")}>
           HISTORIAL
         </button>
+
+        <button
+          className={tab === "stock" ? "active" : ""}
+          onClick={() => setTab("stock")}
+        >
+          STOCK GENERAL
+        </button>
       </div>
 
       <div className="tab-content">
@@ -39,6 +47,7 @@ export default function MovimientosCompras() {
         {tab === "aprobados" && <TablaAprobadosCompras />}
         {tab === "cambios_almacen" && <TablaCambiosAlmacenPendientesCompras />}
         {tab === "historial" && <TablaHistorialCompras />}
+        {tab === "stock" && <TablaStockCompleto />}
       </div>
     </div>
   );

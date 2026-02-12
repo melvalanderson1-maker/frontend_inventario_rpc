@@ -24,7 +24,7 @@
 
 
     useEffect(() => {
-      api.get("/api/contabilidad/stock/completo")
+      api.get("/api/logistica/stock/completo")
         .then(res => setData(res.data || []))
         .catch(err => console.error(err))
         .finally(() => setLoading(false));
