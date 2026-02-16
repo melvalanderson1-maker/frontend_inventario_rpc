@@ -86,6 +86,7 @@ export default function TablaFinalizadosContabilidad({
             <th>F Registro</th>
             <th>Lug Almac</th>
             <th>F Validación</th>
+            <th>Motivo Cont.</th>   {/* 🔥 NUEVA */}
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -109,6 +110,13 @@ export default function TablaFinalizadosContabilidad({
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>{r.almacen}</td>
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
+                <td>
+                  {r.motivo_contabilidad ? (
+                    <span className="motivo-contabilidad">
+                      {r.motivo_contabilidad}
+                    </span>
+                  ) : "-"}
+                </td>
                 <td>
                   <span className={`estado estado-${r.estado}`}>
                     {r.estado.replaceAll("_", " ")}

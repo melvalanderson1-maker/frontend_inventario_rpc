@@ -11,56 +11,104 @@ html, body {
   padding: 0;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;   /* 🔥 asegura alto total */
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(6px);
-
-  display: flex;
-  justify-content: flex-end;
-  padding: 20%;  /* centra horizontal */
-  align-items: center;      /* centra vertical */
-
-  z-index: 999;
+body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 14px;   /* 🔥 ESTE ES EL CORRECTO */
+  color: #1e293b;
+}
+.modal-content {
+  overflow-x: hidden;
 }
 
+/* ===============================
+   LOADING OVERLAY
+================================= */
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  z-index: 1000;
+}
+
+/* Spinner moderno */
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 2000;   /* más alto que sidebar */
+  display: flex;
+  justify-content: center;   /* 🔥 CAMBIO CLAVE */
+  align-items: center;
+
+  padding: 20px;             /* espacio uniforme */
+  z-index: 999;
+}
+.preview-wrapper {
+  position: relative;
+  display: inline-block;
+}
 /* ===============================
    MODAL PRINCIPAL
 ================================= */
 .modal-content {
   background: #ffffff;
+  width: 100%;
   max-width: 1200px;
-  width: 90%;  /* 🔥 */
-  min-width: 900px;     /* opcional */
-  max-height: 90vh;
-  padding: 12px;
+  margin: 0 auto;   /* 🔥 garantiza centrado real */
+
   border-radius: 16px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 
   display: flex;
   flex-direction: column;
+
+  overflow: hidden; /* 🔥 importante */
 }
+
+
 /* ===============================
    HEADER
 ================================= */
 .modal-header h2 {
-  font-size: 18px;
+  font-size: 22px;      /* 🔥 más grande */
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   color: #0f172a;
+  letter-spacing: 0.5px;
 }
 
 /* ===============================
    BODY FLEXIBLE
 ================================= */
 .modal-body {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;   /* controla separación real */
+  gap: 20px;
+
+  flex: 1; /* 🔥 esto hace que crezca correctamente */
 }
 
 /* ===============================
@@ -68,10 +116,10 @@ html, body {
 ================================= */
 .matrix-2x3 {
   display: grid;
-  grid-template-columns: repeat(4, 3fr);
-  gap: 10px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
+
 
 .matrix-2x3 div {
   background: #f8fafc;
@@ -81,9 +129,20 @@ html, body {
   font-size: 12px;
 }
 
-.matrix-2x3 label {
-  font-size: 10px;
-  color: #64748b;
+.matrix-2x3 div {
+  background: #f8fafc;
+  padding: 14px 16px;          /* 🔥 más espacio */
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;             /* 🔥 más grande */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.matrix-2x3 div:hover {
+  background: #f1f5f9;
 }
 
 .matrix-2x3 span {
@@ -92,6 +151,19 @@ html, body {
   color: #0f172a;
 }
 
+.matrix-2x3 label {
+  font-size: 12px;            /* 🔥 más grande */
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.matrix-2x3 span {
+  font-weight: 600;
+  font-size: 15px;            /* 🔥 más grande */
+  color: #0f172a;
+}
 .estado-box {
   grid-column: span 3;
   background: #eef2ff;
@@ -102,10 +174,9 @@ html, body {
 ================================= */
 .matrix-3cols {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
 }
-
 .col {
   padding: 6px;        /* antes 10px */
   border-radius: 8px;
@@ -118,11 +189,21 @@ html, body {
 }
 
 .col h4 {
-  font-size: 13px;
+  font-size: 18px;       /* 🔥 más grande */
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  letter-spacing: 0.4px;
 }
 
+.col p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.col strong {
+  font-weight: 600;
+  color: #334155;
+}
 .col:nth-child(1) { border-top: 3px solid #2563eb; }
 .col:nth-child(2) { border-top: 3px solid #f59e0b; }
 .col:nth-child(3) { border-top: 3px solid #16a34a; }
@@ -135,7 +216,7 @@ textarea {
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #d1d5db;
-  font-size: 12px;
+  font-size: 18px;
   min-height: 50px;     /* 🔥 más pequeño */
 }
 
@@ -188,13 +269,25 @@ textarea {
   align-items: center;
 }
 
+
 .conta-actions input {
-  width: 60px;
-  padding: 4px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 12px;
+  width: 120px;               /* 🔥 más ancho */
+  padding: 10px 14px;         /* 🔥 más espacio interno */
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 22px;            /* 🔥 NÚMERO GRANDE */
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: 0.2s ease;
 }
+
+.conta-actions input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+
 
 .conta-actions button {
   padding: 5px 10px;
@@ -203,7 +296,7 @@ textarea {
   cursor: pointer;
   font-weight: 600;
 
-  font-size: 12px;
+  font-size: 18px;
 }
 
 /* 🔵 BOTÓN NORMAL (AZUL) */
@@ -222,14 +315,14 @@ textarea {
    BOTÓN CERRAR
 ================================= */
 .modal-close-btn {
-  margin-top: 10px;
-  padding: 6px 12px;
+  padding: 12px;
   background: #0f172a;
   color: white;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+
+  width: 100%;
 }
 
 /* ===============================
@@ -246,4 +339,12 @@ textarea {
   font-weight: 600;
   font-size: 12px;
   z-index: 9999;
+}
+
+.motivo-contabilidad {
+ 
+  color: #b91c1c;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
 }

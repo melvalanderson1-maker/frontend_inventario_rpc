@@ -26,6 +26,8 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
   const [imagenesGuardadas, setImagenesGuardadas] = useState([]);
   const [imagenesNuevas, setImagenesNuevas] = useState([]);
 
+  const [loadingGuardar, setLoadingGuardar] = useState(false);
+
 
   useEffect(() => {
     if (!movimientoId) return;
@@ -75,51 +77,51 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
 
   const cerrarModal = () => setModalAbierto(false);
 
-  const handleGuardarGeneral = async () => {
-    if (!cantidadReal) return setToast("Ingrese cantidad real");
-    if (!observacionesConta.trim())
-      return setToast("Ingrese observaciones");
+const handleGuardarGeneral = async () => {
+  if (loadingGuardar) return; // 🔥 BLOQUEA DOBLE CLICK
 
-    try {
-      const formData = new FormData();
-      formData.append("cantidad_real", cantidadReal);
-      formData.append("observaciones_contabilidad", observacionesConta);
+  if (!cantidadReal) return setToast("Ingrese cantidad real");
+  if (!observacionesConta.trim())
+    return setToast("Ingrese observaciones");
 
-      imagenesNuevas.forEach((img) =>
-        formData.append("imagenes", img.file)
-      );
+  try {
+    setLoadingGuardar(true); // 🔥 ACTIVA LOADING
 
+    const formData = new FormData();
+    formData.append("cantidad_real", cantidadReal);
+    formData.append("observaciones_contabilidad", observacionesConta);
 
-      const res = await api.post(
-        `/api/contabilidad/movimientos/${movimiento.id}/guardar-general`,
-        formData
-      );
+    imagenesNuevas.forEach((img) =>
+      formData.append("imagenes", img.file)
+    );
 
-      // 🔥 ACTUALIZAR LAS GUARDADAS CON LO QUE DEVUELVE EL BACKEND
-      setImagenesGuardadas(res.data.imagenes || []);
+    const res = await api.post(
+      `/api/contabilidad/movimientos/${movimiento.id}/guardar-general`,
+      formData
+    );
 
-      // 🔥 ACTUALIZAR MOVIMIENTO SIN RECARGAR
-      setMovimiento(prev => ({
-        ...prev,
-        usuario_contabilidad: res.data.usuario_contabilidad,
-        fecha_validacion_contabilidad: res.data.fecha_validacion_contabilidad,
-        cantidad_real: cantidadReal,
-        observaciones_contabilidad: observacionesConta
-      }));
+    setImagenesGuardadas(res.data.imagenes || []);
 
+    setMovimiento(prev => ({
+      ...prev,
+      usuario_contabilidad: res.data.usuario_contabilidad,
+      fecha_validacion_contabilidad: res.data.fecha_validacion_contabilidad,
+      cantidad_real: cantidadReal,
+      observaciones_contabilidad: observacionesConta
+    }));
 
+    setImagenesNuevas([]);
+    setGuardadoGeneral(true);
 
-          // 🔥 AQUI VA
-      setImagenesNuevas([]);
+    setToast("Guardado con éxito ✅");
+    setTimeout(() => setToast(null), 3000);
 
-
-      setGuardadoGeneral(true);
-      setToast("Guardado con éxito ✅");
-      setTimeout(() => setToast(null), 3000);
-    } catch {
-      setToast("Error guardando");
-    }
-  };
+  } catch {
+    setToast("Error guardando");
+  } finally {
+    setLoadingGuardar(false); // 🔥 DESACTIVA LOADING SIEMPRE
+  }
+};
 
   const renderEvidencias = (imagenes) => {
     if (!imagenes || imagenes.length === 0) return "-";
@@ -147,6 +149,8 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       {toast && <div className="toast-success">{toast}</div>}
 
+
+
       {modalAbierto && (
         <div className="modal-img-viewer" onClick={cerrarModal}>
           <img src={modalImagen} alt="zoom" />
@@ -154,6 +158,12 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
       )}
 
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+
+        {loadingGuardar && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+          </div>
+        )}
         <div className="modal-header">
           <h2>Detalle del Movimiento</h2>
         </div>
@@ -205,16 +215,16 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
             {/* COMPRAS */}
             <div className="col">
               <h4>Compras</h4>
-              <p><strong>Usuario:</strong> {movimiento.usuario_compras || "-"}</p>
+              <p><strong>Usuario:</strong> {movimiento.usuario_creador || "-"}</p>
               <p><strong>Fecha Registro:</strong> {formatFecha(movimiento.fecha_creacion)}</p>
               <p>
                 <strong>Cantidad Solicitada:</strong>{" "}
                 {movimiento.cantidad_solicitada ?? "-"}
               </p>
               <p><strong>Observaciones:</strong> {movimiento.observaciones || "-"}</p>
-
+              {/* LOGISTICA 
               <p><strong>Evidencias:</strong></p>
-              {renderEvidencias(imagenesCompras)}
+              {renderEvidencias(imagenesCompras)}*/}
             </div>
 
             {/* LOGISTICA */}
@@ -222,6 +232,7 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
               <h4>Logística</h4>
               <p><strong>Usuario:</strong> {movimiento.usuario_logistica || "-"}</p>
               <p><strong>Fecha Validación:</strong> {formatFecha(movimiento.fecha_validacion_logistica)}</p>
+
               <p>
                 <strong>Cantidad Validada:</strong>{" "}
                 {movimiento.cantidad ?? "-"}
@@ -237,11 +248,27 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
               <p><strong>Usuario:</strong> {movimiento.usuario_contabilidad || "-"}</p>
               <p><strong>Fecha Validación:</strong> {formatFecha(movimiento.fecha_validacion_contabilidad)}</p>
 
+              {movimiento.estado === "RECHAZADO_CONTABILIDAD" && (
+                <p>
+                  <strong>Motivo Rechazo:</strong>{" "}
+                  {movimiento.motivo_contabilidad ? (
+                    <span className="motivo-contabilidad">
+                      {movimiento.motivo_contabilidad}
+                    </span>
+                  ) : (
+                    "-"
+                  )}
+                </p>
+              )}
+
+              <p><strong>Observaciones:</strong></p>
               <textarea
                 value={observacionesConta}
                 onChange={(e) => setObservacionesConta(e.target.value)}
                 placeholder="Observaciones contabilidad..."
               />
+
+
 
               <p><strong>Evidencias:</strong></p>
               {renderEvidencias(imagenesGuardadas)}
@@ -291,15 +318,25 @@ export default function ModalMovimientoDetalle({ movimientoId, onClose }) {
 
               <div className="conta-actions">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={cantidadReal}
-                  onChange={(e) => setCantidadReal(e.target.value)}
+                  onChange={(e) => {
+                    const soloNumeros = e.target.value.replace(/\D/g, "");
+                    setCantidadReal(soloNumeros);
+                  }}
                 />
               <button
                 onClick={handleGuardarGeneral}
+                disabled={loadingGuardar}
                 className={guardadoGeneral ? "btn-guardado" : "btn-guardar"}
               >
-                {guardadoGeneral ? "✓ Guardado" : "Guardar"}
+                {loadingGuardar
+                  ? "Guardando..."
+                  : guardadoGeneral
+                    ? "✓ Guardado"
+                    : "Guardar"}
               </button>
               </div>
             </div>

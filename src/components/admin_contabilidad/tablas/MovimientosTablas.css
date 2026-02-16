@@ -1,10 +1,17 @@
+/* =====================================================
+   TABLAS MOVIMIENTOS – ERP CORPORATIVO PROFESIONAL
+===================================================== */
+
 /* ===============================
-   TABLAS DE MOVIMIENTOS – ERP PRO
+   CONTENEDOR SCROLL PROFESIONAL
 ================================ */
 
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
 }
 
 /* ===============================
@@ -13,179 +20,149 @@
 
 table {
   width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  font-size: 11.5px;
-  background: #ffffff;
+  min-width: 1200px; /* mantiene estructura mínima */
+  table-layout: fixed;  /* 🔥 CLAVE */
 }
+
+/* ===============================
+   HEADER PROFESIONAL
+================================ */
 
 thead {
   background: #f8fafc;
 }
 
 th {
+  padding: 10px 12px;
   text-align: left;
-  padding: 7px 8px;
   font-weight: 600;
-  color: #374151;
-  border-bottom: 1px solid #d1d5db;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
 }
 
-td {
-  padding: 6px 8px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #1f2937;
-  vertical-align: middle;
-
-  /* CLAVE: permitir leer textos largos */
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.35;
+/* Sticky header elegante */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #f8fafc;
 }
 
-/* Hover profesional */
+/* ===============================
+   CELDAS
+================================ */
+
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  background: transparent;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Hover elegante */
 tbody tr {
-  transition: background 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.15s ease;
 }
 
 tbody tr:hover {
-  box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.035);
+  background: rgba(15, 23, 42, 0.035);
 }
 
 /* ===============================
-   ANCHOS OPTIMIZADOS (LEGIBLES)
-================================ */
-
-/* Tipo */
-th:nth-child(1),
-td:nth-child(1) {
-  width: 70px;
-  text-align: center;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-/* OP */
-th:nth-child(2),
-td:nth-child(2) {
-  width: 95px;
-}
-
-/* Fabricante */
-th:nth-child(3),
-td:nth-child(3) {
-  width: 150px;
-}
-
-/* Precio */
-th:nth-child(4),
-td:nth-child(4) {
-  width: 75px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Cantidad */
-th:nth-child(5),
-td:nth-child(5) {
-  width: 80px;
-  text-align: right;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Empresa */
-th:nth-child(6),
-td:nth-child(6) {
-  width: 180px;
-}
-
-/* Fecha registro */
-th:nth-child(7),
-td:nth-child(7) {
-  width: 135px;
-  font-size: 11px;
-}
-
-/* Lugar almacén */
-th:nth-child(8),
-td:nth-child(8) {
-  width: 160px;
-}
-
-/* Fecha almacén */
-th:nth-child(9),
-td:nth-child(9) {
-  width: 135px;
-  font-size: 11px;
-}
-
-/* Estado */
-th:nth-child(10),
-td:nth-child(10) {
-  width: 150px;
-}
-
-/* ===============================
-   COLORES DE FILA COMPLETA
+   FILAS CON IDENTIDAD (TIPO)
 ================================ */
 
 .row-entrada {
   background: #f0fdf4;
 }
+.row-entrada td:first-child {
+  border-left: 4px solid #16a34a;
+}
 
 .row-salida {
   background: #fef2f2;
+}
+.row-salida td:first-child {
+  border-left: 4px solid #dc2626;
 }
 
 .row-ajuste {
   background: #fffbeb;
 }
-
-/* Borde izquierdo sutil ERP */
-.row-entrada td:first-child {
-  border-left: 4px solid #16a34a;
-}
-
-.row-salida td:first-child {
-  border-left: 4px solid #dc2626;
-}
-
 .row-ajuste td:first-child {
   border-left: 4px solid #ca8a04;
 }
 
 /* Hover mantiene identidad */
-.row-entrada:hover {
-  background: #dcfce7;
-}
-
-.row-salida:hover {
-  background: #fee2e2;
-}
-
-.row-ajuste:hover {
-  background: #fef3c7;
-}
+.row-entrada:hover { background: #dcfce7; }
+.row-salida:hover { background: #fee2e2; }
+.row-ajuste:hover { background: #fef3c7; }
 
 /* ===============================
-   BADGES DE ESTADO – ERP
+   COLUMNAS OPTIMIZADAS
+================================ */
+
+th:nth-child(1), td:nth-child(1) { width: 80px; text-align: center; font-weight: 600; }
+th:nth-child(2), td:nth-child(2) { width: 110px; }
+th:nth-child(3), td:nth-child(3) { width: 170px; }
+th:nth-child(4), td:nth-child(4) { width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
+th:nth-child(5), td:nth-child(5) { width: 90px; text-align: right; font-weight: 600; }
+th:nth-child(6), td:nth-child(6) { width: 200px; }
+/* F Registro */
+td:nth-child(7) {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* F Validación */
+td:nth-child(10) {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0f172a;
+}
+th:nth-child(8), td:nth-child(8) { width: 170px; }
+th:nth-child(9), td:nth-child(9) { width: 150px; font-size: 11px; }
+
+th:nth-child(11),
+td:nth-child(11) {
+  width: 170px;
+  min-width: 170px;
+}
+
+/* Acciones */
+th:nth-child(12),
+td:nth-child(12) {
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  text-align: center;
+  overflow: hidden;  /* 🔥 evita que se salga */
+}
+/* ===============================
+   BADGES ESTADO CORPORATIVO
 ================================ */
 
 .estado {
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
   display: inline-block;
-  letter-spacing: 0.25px;
-  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .estado-PENDIENTE_LOGISTICA {
-  background: #ffffff;
+  background: #f1f5f9;
   color: #475569;
   border-color: #e2e8f0;
 }
@@ -209,16 +186,229 @@ td:nth-child(10) {
 }
 
 /* ===============================
-   CELDAS NUMÉRICAS
+   ACCIONES – ULTRA LIMPIO
 ================================ */
 
-.td-num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+.acciones {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;  /* 🔥 si no entra, baja elegante */
+  background: transparent;
+}
+.btn-accion {
+  flex: 1 1 auto;
+  min-width: 70px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+
+  border-radius: 8px;
+  border: none;              /* 🔥 importante */
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+/* Detalle */
+.btn-detalle {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #e2e8f0;
+}
+.btn-detalle:hover {
+  background: #e2e8f0;
+}
+
+/* Validar */
+.btn-validar {
+  background: #16a34a;
+  color: #ffffff;
+}
+.btn-validar:hover {
+  background: #15803d;
+}
+
+/* Rechazar */
+.btn-rechazar {
+  background-color: #dc2626;  /* rojo sólido */
+  color: #ffffff;
+
+  
+}
+
+button.btn-rechazar {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.btn-rechazar:hover {
+  background-color: #b91c1c;
+}
+.btn-accion:active {
+  transform: scale(0.96);
 }
 
 /* ===============================
-   RESPONSIVE REAL
+   MODAL PROFESIONAL
+================================ */
+
+/* ===============================
+   MODAL RECHAZO – ENTERPRISE CLEAN
+================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.2s ease-out;
+}
+
+.modal-rechazo {
+  background: #ffffff;
+  width: 460px;
+  max-width: 92%;
+  padding: 28px 28px 24px 28px;
+  border-radius: 18px;
+  box-shadow: 
+    0 30px 80px rgba(15, 23, 42, 0.25),
+    0 10px 25px rgba(15, 23, 42, 0.08);
+  animation: scaleInModal 0.2s ease-out;
+}
+
+/* Título elegante */
+.modal-rechazo h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: 0.3px;
+}
+
+/* Sub línea decorativa corporativa */
+.modal-rechazo h3::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 3px;
+  background: #dc2626;
+}
+
+/* Textarea premium */
+.modal-rechazo textarea {
+  width: 100%;
+  height: 120px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+  resize: none;
+  transition: all 0.2s ease;
+}
+
+.modal-rechazo textarea:focus {
+  outline: none;
+  border-color: #dc2626;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Botonera */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* Botón cancelar */
+.btn-modal-cancelar {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-cancelar:hover {
+  background: #f1f5f9;
+}
+
+/* Botón confirmar rechazo */
+.btn-danger {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #dc2626;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-danger:active {
+  transform: scale(0.97);
+}
+
+/* Animaciones suaves */
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleInModal {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===============================
+   TOAST ELEGANTE
+================================ */
+
+.toast {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+  z-index: 10000;
+}
+
+.toast-success { background: #15803d; }
+.toast-error { background: #b91c1c; }
+
+/* ===============================
+   RESPONSIVE PROFESIONAL
 ================================ */
 
 @media (max-width: 900px) {
@@ -226,54 +416,18 @@ td:nth-child(10) {
     font-size: 11px;
   }
 
-  th,
-  td {
-    padding: 6px 6px;
+  th, td {
+    padding: 8px 10px;
   }
 }
 
-@media (max-width: 640px) {
-  thead {
-    display: none;
-  }
-
-  tbody tr {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    row-gap: 6px;
-    padding: 10px 8px;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  td {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 3px 0;
-    white-space: normal;
-  }
-
-  td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #6b7280;
-  }
+/* ===== FORZAR ROJO ABSOLUTO ===== */
+button.btn-accion.btn-rechazar {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
-
-/* ===============================
-   FILAS POR EMPRESA (STOCK)
-================================ */
-
-/* ===============================
-   FILAS POR EMPRESA – ERP REAL
-================================ */
-
-.row-empresa td:first-child {
-  border-left: 4px solid rgba(0, 0, 0, 0.15);
-  font-weight: 600;
-}
-
-.row-empresa:hover {
-  filter: brightness(0.97);
+button.btn-accion.btn-rechazar:hover {
+  background-color: #b91c1c !important;
 }

@@ -13,6 +13,12 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState(null);
 
+
+
+  const [modalRechazo, setModalRechazo] = useState(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [toast, setToast] = useState(null);
+
   const fetchMovimientos = () => {
     api
       .get("/api/contabilidad/movimientos", {
@@ -136,10 +142,43 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
   const terminarDrag = () => setDragStart(null);
 
 
+
+  const confirmarRechazo = async () => {
+    if (!motivoRechazo.trim()) {
+      setToast({ tipo: "error", mensaje: "Debe ingresar el motivo del rechazo" });
+      return;
+    }
+
+    try {
+      await api.post(
+        `/api/contabilidad/movimientos/${modalRechazo}/rechazar`,
+        { observaciones: motivoRechazo }
+      );
+
+      setToast({ tipo: "success", mensaje: "Movimiento rechazado correctamente" });
+      setModalRechazo(null);
+      setMotivoRechazo("");
+      fetchMovimientos();
+    } catch (err) {
+      setToast({
+        tipo: "error",
+        mensaje: err.response?.data?.error || "Error al rechazar",
+      });
+    }
+
+    setTimeout(() => setToast(null), 3000);
+  };
+
+
   return (
     <div className="table-wrapper">
+      {toast && (
+          <div className={`toast toast-${toast.tipo}`}>
+            {toast.mensaje}
+          </div>
+        )}
 
-          {modalAbierto && (
+    {modalAbierto && (
       <div
         style={{
           position: "fixed",
@@ -208,6 +247,39 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
               display: "block",
             }}
           />
+
+
+
+        </div>
+      </div>
+    )}
+
+    {modalRechazo && (
+      <div className="modal-overlay">
+        <div className="modal-rechazo">
+          <h3>Motivo del Rechazo</h3>
+
+          <textarea
+            value={motivoRechazo}
+            onChange={(e) => setMotivoRechazo(e.target.value)}
+            placeholder="Escriba el motivo..."
+          />
+
+          <div className="modal-buttons">
+            <button
+              className="btn-modal-cancelar"
+              onClick={() => setModalRechazo(null)}
+            >
+              Cancelar
+            </button>
+
+            <button
+              onClick={confirmarRechazo}
+              className="btn-danger"
+            >
+              Confirmar Rechazo
+            </button>
+          </div>
         </div>
       </div>
     )}
@@ -288,9 +360,30 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
                 <td><span className={`estado estado-${r.estado}`}>{r.estado.replaceAll("_", " ")}</span></td>
                 <td>
-                  <button onClick={() => setModalMovimiento(r.id)}>Detalles</button>
-                  <button onClick={() => handleValidar(r.id)}>Validar</button>
-                  <button onClick={() => handleRechazar(r.id)}>Rechazar</button>
+            
+                <div className="acciones">
+                  <button
+                    className="btn-accion btn-detalle"
+                    onClick={() => setModalMovimiento(r.id)}
+                  >
+                    🔍 Detalles
+                  </button>
+
+                  <button
+                    className="btn-accion btn-validar"
+                    onClick={() => handleValidar(r.id)}
+                  >
+                    ✔ Validar
+                  </button>
+
+                  <button
+                    className="btn-accion btn-rechazar"
+                    onClick={() => setModalRechazo(r.id)}
+                  >
+                    ✖ Rechazar
+                  </button>
+                </div>
+              
                 </td>
               </tr>
             ))
