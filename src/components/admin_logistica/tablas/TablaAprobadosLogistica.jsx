@@ -14,6 +14,9 @@ export default function TablaAprobadosLogistica({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState(null);
 
+  const [modalTexto, setModalTexto] = useState(null);
+
+
   useEffect(() => {
     api
       .get("/api/logistica/movimientos", {
@@ -44,6 +47,13 @@ export default function TablaAprobadosLogistica({
     return "";
   };
 
+
+  const cortar = (text, n = 36) => {
+    if (!text) return "-";
+    return text.length > n ? text.slice(0, n) + "…" : text;
+  };
+
+
   const rowsFiltrados = useMemo(() => {
     if (!rows) return [];
     const texto = filtro.toLowerCase().trim();
@@ -58,7 +68,9 @@ export default function TablaAprobadosLogistica({
         r.empresa,
         r.almacen,
         r.estado,
+        r.observaciones_compras,
         r.fecha_creacion,
+        r.observaciones_logistica,
         r.fecha_validacion_logistica,
       ]
         .filter(Boolean)
@@ -197,9 +209,11 @@ export default function TablaAprobadosLogistica({
             <th>Precio</th>
             <th>Cantidad</th>
             <th>Empresa</th>
+            <th>Obs Compras</th>  
             <th>F Registro</th>
             <th>Lug Almac</th>
             <th>Imagen Evidencia</th>
+            <th>Obs Logística</th> 
             <th>F Validación</th>
             <th>Estado</th>
           </tr>
@@ -207,7 +221,7 @@ export default function TablaAprobadosLogistica({
         <tbody>
           {(!rowsFiltrados || rowsFiltrados.length === 0) && (
             <tr>
-              <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>
+              <td colSpan="13" style={{ textAlign: "center", padding: 16 }}>
                 No se encontraron resultados
               </td>
             </tr>
@@ -220,25 +234,61 @@ export default function TablaAprobadosLogistica({
               <td className="td-num">{formatPrecio(r.precio)}</td>
               <td>{r.cantidad}</td>
               <td>{r.empresa}</td>
+              <td
+                className="td-obs"
+                onClick={() => setModalTexto(r.observaciones_compras)}
+              >
+                {cortar(r.observaciones_compras)}
+              </td>
               <td>{formatFecha(r.fecha_creacion)}</td>
               <td>{r.almacen}</td>
               <td>
-                {r.evidencia_url ? (
-                  <img
-                    src={r.evidencia_url}
-                    alt="Evidencia"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      objectFit: "cover",
-                      cursor: "pointer",
-                      borderRadius: 6,
-                    }}
-                    onClick={() => abrirModal(r.evidencia_url)}
-                  />
+                {r.imagenes ? (
+                  (() => {
+                    let imagenes = [];
+
+                    try {
+                      imagenes =
+                        typeof r.imagenes === "string"
+                          ? JSON.parse(r.imagenes)
+                          : r.imagenes;
+                    } catch {
+                      imagenes = [];
+                    }
+
+                    if (!imagenes || imagenes.length === 0) return "-";
+
+                    return (
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {imagenes.map((img, index) => (
+                          <img
+                            key={index}
+                            src={img.url}
+                            alt="Evidencia"
+                            style={{
+                              width: 40,
+                              height: 40,
+                              objectFit: "cover",
+                              cursor: "pointer",
+                              borderRadius: 6,
+                            }}
+                            onClick={() => abrirModal(img.url)}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })()
                 ) : (
                   "-"
                 )}
+              </td>
+
+
+              <td
+                className="td-obs"
+                onClick={() => setModalTexto(r.observaciones_logistica)}
+              >
+                {cortar(r.observaciones_logistica)}
               </td>
               <td>{formatFecha(r.fecha_validacion_logistica)}</td>
               <td>
@@ -250,6 +300,24 @@ export default function TablaAprobadosLogistica({
           ))}
         </tbody>
       </table>
+
+      {modalTexto && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModalTexto(null)}
+        >
+          <div
+            className="modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">{modalTexto}</div>
+            <button onClick={() => setModalTexto(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

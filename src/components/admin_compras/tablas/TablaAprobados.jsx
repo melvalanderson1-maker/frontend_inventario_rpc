@@ -304,23 +304,46 @@ export default function TablaAprobados({
 
 
                   <td>
-                    {r.evidencia_url ? (
-                      <img
-                        src={r.evidencia_url}
-                        alt="Evidencia"
-                        style={{
-                          width: 40,
-                          height: 40,
-                          objectFit: "cover",
-                          cursor: "pointer",
-                          borderRadius: 6,
-                        }}
-                        onClick={() => abrirModalEvidencia(r.evidencia_url)}
-                      />
+                    {r.imagenes ? (
+                      (() => {
+                        let imagenes = [];
+
+                        try {
+                          imagenes =
+                            typeof r.imagenes === "string"
+                              ? JSON.parse(r.imagenes)
+                              : r.imagenes;
+                        } catch {
+                          imagenes = [];
+                        }
+
+                        if (!imagenes || imagenes.length === 0) return "-";
+
+                        return (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            {imagenes.map((img, index) => (
+                              <img
+                                key={index}
+                                src={img.url}
+                                alt="Evidencia"
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  objectFit: "cover",
+                                  cursor: "pointer",
+                                  borderRadius: 6,
+                                }}
+                                onClick={() => abrirModalEvidencia(img.url)}
+                              />
+                            ))}
+                          </div>
+                        );
+                      })()
                     ) : (
                       "-"
                     )}
                   </td>
+
                   <td>{formatFecha(r.fecha_validacion_logistica)}</td>
 
                   <td

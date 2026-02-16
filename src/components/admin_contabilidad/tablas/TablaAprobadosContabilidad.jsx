@@ -66,9 +66,15 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
   }, [rows, filtro]);
 
   const handleValidar = async (id) => {
-    await api.post(`/api/contabilidad/movimientos/${id}/validar`, {});
-    fetchMovimientos();
+    try {
+      await api.post(`/api/contabilidad/movimientos/${id}/validar`);
+      fetchMovimientos();
+    } catch (err) {
+      alert(err.response?.data?.error || "Error al validar");
+    }
   };
+
+
 
 
   const handleRechazar = async (id) => {
@@ -238,24 +244,47 @@ export default function TablaAprobadosContabilidad({ productoId, varianteId, fil
                 <td>{r.empresa}</td>
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>{r.almacen}</td>
-                              <td>
-                {r.evidencia_url ? (
-                  <img
-                    src={r.evidencia_url}
-                    alt="Evidencia"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      objectFit: "cover",
-                      cursor: "pointer",
-                      borderRadius: 6,
-                    }}
-                    onClick={() => abrirModal(r.evidencia_url)}
-                  />
-                ) : (
-                  "-"
-                )}
-              </td>
+                <td>
+                  {r.imagenes ? (
+                    (() => {
+                      let imagenes = [];
+
+                      try {
+                        imagenes =
+                          typeof r.imagenes === "string"
+                            ? JSON.parse(r.imagenes)
+                            : r.imagenes;
+                      } catch {
+                        imagenes = [];
+                      }
+
+                      if (!imagenes || imagenes.length === 0) return "-";
+
+                      return (
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {imagenes.map((img, index) => (
+                            <img
+                              key={index}
+                              src={img.url}
+                              alt="Evidencia"
+                              style={{
+                                width: 40,
+                                height: 40,
+                                objectFit: "cover",
+                                cursor: "pointer",
+                                borderRadius: 6,
+                              }}
+                              onClick={() => abrirModal(img.url)}
+                            />
+                          ))}
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    "-"
+                  )}
+                </td>
+
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
                 <td><span className={`estado estado-${r.estado}`}>{r.estado.replaceAll("_", " ")}</span></td>
                 <td>

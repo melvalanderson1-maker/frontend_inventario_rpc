@@ -1,67 +1,249 @@
+/* ===============================
+   RESET
+================================= */
+
+html, body {
+  height: 100%;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  width: 100vw;
+  height: 100vh;   /* 🔥 asegura alto total */
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end;
+  padding: 20%;  /* centra horizontal */
+  align-items: center;      /* centra vertical */
+
   z-index: 999;
 }
 
+/* ===============================
+   MODAL PRINCIPAL
+================================= */
 .modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 600px;
-  width: 90%;
+  background: #ffffff;
+  max-width: 1200px;
+  width: 90%;  /* 🔥 */
+  min-width: 900px;     /* opcional */
+  max-height: 90vh;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+}
+/* ===============================
+   HEADER
+================================= */
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #0f172a;
 }
 
-.modal-content table {
-  width: 100%;
-  border-collapse: collapse;
+/* ===============================
+   BODY FLEXIBLE
+================================= */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;   /* controla separación real */
 }
 
-.modal-content td {
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
+/* ===============================
+   MATRIZ SUPERIOR
+================================= */
+.matrix-2x3 {
+  display: grid;
+  grid-template-columns: repeat(4, 3fr);
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.modal-close-btn {
-  margin-top: 16px;
-  padding: 8px 12px;
+.matrix-2x3 div {
+  background: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.matrix-2x3 label {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.matrix-2x3 span {
+  font-weight: 600;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.estado-box {
+  grid-column: span 3;
+  background: #eef2ff;
+}
+
+/* ===============================
+   COLUMNAS
+================================= */
+.matrix-3cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.col {
+  padding: 6px;        /* antes 10px */
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;            /* antes 6px */
+  font-size: 11px;     /* antes 12px */
+}
+
+.col h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.col:nth-child(1) { border-top: 3px solid #2563eb; }
+.col:nth-child(2) { border-top: 3px solid #f59e0b; }
+.col:nth-child(3) { border-top: 3px solid #16a34a; }
+
+/* ===============================
+   TEXTAREA
+================================= */
+textarea {
+  resize: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 12px;
+  min-height: 50px;     /* 🔥 más pequeño */
+}
+
+/* ===============================
+   IMÁGENES
+================================= */
+.imagenes-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.imagenes-grid img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-
-.estado-aprobado {
-  background-color: #d4edda;
-  color: #155724;
-  font-weight: bold;
-  border-radius: 4px;
-  padding: 4px 8px;
+/* ===============================
+   PREVIEW NUEVAS
+================================= */
+.preview-wrapper img {
+  width: 65px;
+  height: 65px;
 }
 
-.estado-rechazado {
-  background-color: #f8d7da;
-  color: #721c24;
-  font-weight: bold;
-  border-radius: 4px;
-  padding: 4px 8px;
+.btn-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  cursor: pointer;
 }
 
-
-/* 🟡 Filas de logística resaltadas */
-.fila-logistica td {
-  background-color: #f9ffac; /* amarillo suave */
-  color: #000000;
-  font-weight: 500;
+/* ===============================
+   ACTIONS
+================================= */
+.conta-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
 }
 
-.fila-conta td {
-  background-color: #e8ece9; /* amarillo suave */
-  color: #000000;
-  font-weight: 500;
+.conta-actions input {
+  width: 60px;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 12px;
+}
+
+.conta-actions button {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+
+  font-size: 12px;
+}
+
+/* 🔵 BOTÓN NORMAL (AZUL) */
+.btn-guardar {
+  background: #2563eb;
+  color: white;
+}
+
+/* 🟢 BOTÓN CUANDO YA ESTÁ GUARDADO */
+.btn-guardado {
+  background: #16a34a;
+  color: white;
+}
+
+/* ===============================
+   BOTÓN CERRAR
+================================= */
+.modal-close-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ===============================
+   TOAST
+================================= */
+.toast-success {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #16a34a;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  z-index: 9999;
 }

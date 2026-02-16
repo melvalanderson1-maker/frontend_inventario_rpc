@@ -4,6 +4,8 @@ import "./MovimientosTablas.css";
 
 export default function TablaPendientes({ productoId, varianteId, filtro = "" }) {
   const [rows, setRows] = useState([]);
+  const [modalTexto, setModalTexto] = useState(null);
+
 
   useEffect(() => {
     api
@@ -25,6 +27,13 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
     return "";
   };
 
+
+  const cortar = (text, n = 36) => {
+    if (!text) return "-";
+    return text.length > n ? text.slice(0, n) + "…" : text;
+  };
+
+
   // ✅ FILTRO REAL MULTICAMPO
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
@@ -38,6 +47,7 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
         r.precio,
         r.cantidad,
         r.empresa,
+        r.observaciones_compras,
         r.estado,
         r.fecha_creacion,
       ]
@@ -49,52 +59,84 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
   }, [rows, filtro]);
 
   return (
-    <div className="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>OP vinc</th>
-            <th>Fabricante</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Empresa</th>
-            <th>F Registro</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {rowsFiltrados.length === 0 ? (
+    <>
+      <div className="table-wrapper">
+        <table>
+          <thead>
             <tr>
-              <td colSpan="8" style={{ textAlign: "center", padding: 16 }}>
-                No se encontraron resultados
-              </td>
+              <th>Tipo</th>
+              <th>OP vinc</th>
+              <th>Fabricante</th>
+              <th>Precio</th>
+              <th>Cantidad</th>
+              <th>Empresa</th>
+              <th>Obs Compras</th>
+              <th>F Registro</th>
+              <th>Estado</th>
             </tr>
-          ) : (
-            rowsFiltrados.map((r) => (
-              <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
-                <td data-label="Tipo">{r.tipo_movimiento}</td>
-                <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
-                <td data-label="Fabricante">{r.fabricante || "-"}</td>
-                <td data-label="Precio" className="td-num">
-                  {r.precio}
-                </td>
-                <td data-label="Cantidad">{r.cantidad}</td>
-                <td data-label="Empresa">{r.empresa}</td>
-                <td data-label="F Registro">
-                  {new Date(r.fecha_creacion).toLocaleString()}
-                </td>
-                <td data-label="Estado">
-                  <span className={`estado estado-${r.estado}`}>
-                    {r.estado.replaceAll("_", " ")}
-                  </span>
+          </thead>
+
+          <tbody>
+            {rowsFiltrados.length === 0 ? (
+              <tr>
+                <td colSpan="9" style={{ textAlign: "center", padding: 16 }}>
+                  No se encontraron resultados
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            ) : (
+              rowsFiltrados.map((r) => (
+                <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
+                  <td data-label="Tipo">{r.tipo_movimiento}</td>
+                  <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
+                  <td data-label="Fabricante">{r.fabricante || "-"}</td>
+                  <td data-label="Precio" className="td-num">
+                    {r.precio}
+                  </td>
+                  <td data-label="Cantidad">{r.cantidad}</td>
+                  <td data-label="Empresa">{r.empresa}</td>
+
+                  <td
+                    data-label="Obs Compras"
+                    className="td-obs"
+                    onClick={() => setModalTexto(r.observaciones_compras)}
+                  >
+                    {cortar(r.observaciones_compras)}
+                  </td>
+
+                  <td data-label="F Registro">
+                    {new Date(r.fecha_creacion).toLocaleString()}
+                  </td>
+
+                  <td data-label="Estado">
+                    <span className={`estado estado-${r.estado}`}>
+                      {r.estado?.replaceAll("_", " ")}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* MODAL */}
+      {modalTexto && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModalTexto(null)}
+        >
+          <div
+            className="modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">{modalTexto}</div>
+            <button onClick={() => setModalTexto(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
+
 }

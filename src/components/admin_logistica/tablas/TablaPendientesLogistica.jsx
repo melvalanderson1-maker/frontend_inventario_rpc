@@ -14,6 +14,8 @@ export default function TablaPendientesLogistica({
   const [showValidar, setShowValidar] = useState(false);
   const [showRechazar, setShowRechazar] = useState(false);
 
+  const [modalTexto, setModalTexto] = useState(null);
+
   useEffect(() => {
     cargar();
   }, [productoId, varianteId]);
@@ -53,6 +55,12 @@ export default function TablaPendientesLogistica({
     return "";
   };
 
+  const cortar = (text, n = 36) => {
+    if (!text) return "-";
+    return text.length > n ? text.slice(0, n) + "…" : text;
+  };
+
+
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
@@ -65,6 +73,7 @@ export default function TablaPendientesLogistica({
         r.precio,
         r.cantidad,
         r.empresa,
+        r.observaciones_compras,
         r.estado,
         r.fecha_creacion,
       ]
@@ -110,6 +119,7 @@ export default function TablaPendientesLogistica({
             <th>Precio</th>
             <th>Cantidad</th>
             <th>Empresa</th>
+            <th>Obs Compras</th>
             <th>F Registro</th>
             <th>Estado</th>
             <th style={{ width: 160 }}>Acciones</th>
@@ -132,6 +142,13 @@ export default function TablaPendientesLogistica({
                 <td className="td-num">{formatPrecio(r.precio)}</td>
                 <td>{r.cantidad}</td>
                 <td>{r.empresa}</td>
+                <td
+                  data-label="Obs Compras"
+                  className="td-obs"
+                  onClick={() => setModalTexto(r.observaciones_compras)}
+                >
+                  {cortar(r.observaciones_compras)}
+                </td>
                 <td>{formatFecha(r.fecha_creacion)}</td>
                 <td>
                   <span className={`estado estado-${r.estado}`}>
@@ -175,6 +192,28 @@ export default function TablaPendientesLogistica({
           onSuccess={onProcesado}
         />
       )}
-    </div>
+
+
+
+      {/* MODAL */}
+      {modalTexto && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModalTexto(null)}
+        >
+          <div
+            className="modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">{modalTexto}</div>
+            <button onClick={() => setModalTexto(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+   
+    </div>  
+
   );
 }

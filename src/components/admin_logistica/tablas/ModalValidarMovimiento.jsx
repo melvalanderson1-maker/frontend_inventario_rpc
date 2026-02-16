@@ -33,7 +33,7 @@ export default function ModalValidarMovimiento({
 
 
 
-  const [evidenciaImagen, setEvidenciaImagen] = useState(null); // 🖼️ para la evidencia
+  const [evidenciaImagenes, setEvidenciaImagenes] = useState([]);// 🖼️ para las evidencias
   const evidenciaInputRef = useRef(null); // ref para limpiar input
 
   const [loading, setLoading] = useState(false);
@@ -149,6 +149,12 @@ export default function ModalValidarMovimiento({
       return;
     }
 
+    if (evidenciaImagenes.length === 0) {
+      setError("Debe adjuntar al menos una imagen de evidencia");
+      return;
+    }
+
+
     try {
       setLoading(true);
       setError(null);
@@ -165,7 +171,10 @@ export default function ModalValidarMovimiento({
       if (numeroOrden) formData.append("numero_orden", numeroOrden);
       if (opVinculada) formData.append("op_vinculada", opVinculada);
       if (observaciones) formData.append("observaciones", observaciones);
-      if (evidenciaImagen) formData.append("imagen", evidenciaImagen);
+      evidenciaImagenes.forEach((img) => {
+        formData.append("imagenes", img);
+      });
+
 
       await api.post(
         `/api/logistica/movimientos/${movimiento.id}/validar`,
@@ -205,10 +214,12 @@ export default function ModalValidarMovimiento({
 
   // cuando seleccionan una nueva imagen de evidencia
   const handleEvidenciaChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setEvidenciaImagen(e.target.files[0]);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setEvidenciaImagenes(files);
     }
   };
+
 
   // anular imagen de evidencia
   const anularEvidencia = () => {
@@ -344,27 +355,33 @@ export default function ModalValidarMovimiento({
               <label>Imagen evidencia</label>
 
               {/* PREVIEW DE LA IMAGEN */}
-              {evidenciaImagen && (
+              {evidenciaImagenes.length > 0 && (
                 <div className="preview-evidencia">
-                  <img 
-                    src={URL.createObjectURL(evidenciaImagen)} 
-                    alt="Evidencia" 
-                    style={{ maxWidth: "150px", maxHeight: "150px", marginBottom: "8px" }}
-                  />
+                  {evidenciaImagenes.map((img, index) => (
+                    <img
+                      key={index}
+                      src={URL.createObjectURL(img)}
+                      alt="Evidencia"
+                      style={{ maxWidth: "120px", marginRight: "10px" }}
+                    />
+                  ))}
                   <br />
-                  <button type="button" onClick={anularEvidencia}>
-                    X Anular imagen de evidencia
+                  <button type="button" onClick={() => setEvidenciaImagenes([])}>
+                    X Anular imágenes
                   </button>
                 </div>
               )}
+
 
               {/* INPUT DE ARCHIVO */}
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleEvidenciaChange}
                 ref={evidenciaInputRef}
               />
+
             </div>
           </div>
 
