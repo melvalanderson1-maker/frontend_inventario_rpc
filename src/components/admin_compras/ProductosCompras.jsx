@@ -318,39 +318,34 @@ export default function ProductosCompras() {
 
   const productosFiltrados = productos
     .map(p => {
+
+
+      // ================= FILTROS ESTRUCTURALES SIEMPRE ACTIVOS =================
+      const coincideTipo =
+        tipoProducto === "todos" ||
+        (tipoProducto === "simples" && p.es_catalogo === 0) ||
+        (tipoProducto === "variantes" && p.es_catalogo === 1);
+
+      const coincideCategoria =
+        categoria === "todas" ||
+        Number(p.categoria_id) === Number(categoria);
+
+      const coincideStock =
+        stock === "todos" ||
+        (stock === "con" && p.stock_total > 0) ||
+        (stock === "sin" && p.stock_total <= 0);
+
+      if (!coincideTipo || !coincideCategoria || !coincideStock) {
+        return null;
+      }
  
-      const sinBusqueda = !search.trim();
 
       // 👉 Si NO hay búsqueda, aplicar SOLO filtros clásicos
+      const sinBusqueda = !search.trim();
+
       if (sinBusqueda) {
-        const coincideTipo =
-          tipoProducto === "todos" ||
-          (tipoProducto === "simples" && p.es_catalogo === 0) ||
-          (tipoProducto === "variantes" && p.es_catalogo === 1);
-
-        const coincideCategoria =
-          categoria === "todas" ||
-          Number(p.categoria_id) === Number(categoria);
-
-        const coincideStock =
-          stock === "todos" ||
-          (stock === "con" && p.stock_total > 0) ||
-          (stock === "sin" && p.stock_total <= 0);
-
-        if (!coincideTipo || !coincideCategoria || !coincideStock) {
-
-            
-
-          return null;
-        }
-
-        
-
-        // 🔹 FILTRO SOLO PRODUCTOS ACTIVOS
-       
         return { ...p, score: 1 };
       }
-
 
       const textoBusqueda = normalizarTexto(search);
 
@@ -471,26 +466,6 @@ export default function ProductosCompras() {
           score += 30;
         }
       });
-
-
-    // 🔹 Filtros clásicos (los tuyos)
-    const coincideTipo =
-      tipoProducto === "todos" ||
-      (tipoProducto === "simples" && p.es_catalogo === 0) ||
-      (tipoProducto === "variantes" && p.es_catalogo === 1);
-
-    const coincideCategoria =
-      categoria === "todas" ||
-      Number(p.categoria_id) === Number(categoria);
-
-    const coincideStock =
-      stock === "todos" ||
-      (stock === "con" && p.stock_total > 0) ||
-      (stock === "sin" && p.stock_total <= 0);
-
-    if (!coincideTipo || !coincideCategoria || !coincideStock) {
-      return null;
-    }
 
 
     // 🚫 Si buscó categoría específica y este producto no coincide, descartar

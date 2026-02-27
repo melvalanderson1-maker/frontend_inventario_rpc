@@ -9,21 +9,23 @@
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   background: #ffffff;
   border-radius: 14px;
   box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+  -webkit-overflow-scrolling: touch;
 }
+
 
 /* ===============================
    TABLA BASE
 ================================ */
 
 table {
-  width: 100%;
-  min-width: 1200px; /* mantiene estructura mínima */
-  table-layout: fixed;  /* 🔥 CLAVE */
+  width: max-content;      /* 🔥 CLAVE: la tabla mide lo que necesita */
+  min-width: 100%;         /* nunca menor al contenedor */
+  border-collapse: collapse;
 }
-
 /* ===============================
    HEADER PROFESIONAL
 ================================ */
@@ -62,8 +64,8 @@ td {
   vertical-align: middle;
   background: transparent;
   line-height: 1.4;
-  white-space: normal;
   word-break: break-word;
+  white-space: normal;
 }
 
 /* Hover elegante */
@@ -140,12 +142,13 @@ td:nth-child(11) {
 /* Acciones */
 th:nth-child(12),
 td:nth-child(12) {
-  width: 260px;
   min-width: 260px;
-  max-width: 260px;
+  width: 260px;
   text-align: center;
-  overflow: hidden;  /* 🔥 evita que se salga */
+  white-space: nowrap;
 }
+
+
 /* ===============================
    BADGES ESTADO CORPORATIVO
 ================================ */
@@ -194,77 +197,44 @@ td:nth-child(12) {
   gap: 6px;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;  /* 🔥 si no entra, baja elegante */
+  flex-wrap: wrap; /* 🔥 si no entra, baja elegante */
   background: transparent;
 }
 .btn-accion {
   flex: 1 1 auto;
   min-width: 70px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 6px 10px;
   font-size: 10.5px;
   font-weight: 600;
-
   border-radius: 8px;
-  border: none;              /* 🔥 importante */
+  border: none;
   cursor: pointer;
   transition: all 0.15s ease;
 }
-/* Detalle */
 .btn-detalle {
   background: #f8fafc;
   color: #334155;
   border-color: #e2e8f0;
 }
-.btn-detalle:hover {
-  background: #e2e8f0;
-}
-
-/* Validar */
-.btn-validar {
-  background: #16a34a;
-  color: #ffffff;
-}
-.btn-validar:hover {
-  background: #15803d;
-}
-
-/* Rechazar */
-.btn-rechazar {
-  background-color: #dc2626;  /* rojo sólido */
-  color: #ffffff;
-
-  
-}
-
-button.btn-rechazar {
-  background-color: #dc2626;
-  color: #ffffff;
-}
-
-.btn-rechazar:hover {
-  background-color: #b91c1c;
-}
-.btn-accion:active {
-  transform: scale(0.96);
-}
+.btn-detalle:hover { background: #e2e8f0; }
+.btn-validar { background: #16a34a; color: #fff; }
+.btn-validar:hover { background: #15803d; }
+.btn-rechazar { background-color: #dc2626; color: #fff; }
+.btn-rechazar:hover { background-color: #b91c1c; }
+.btn-accion:active { transform: scale(0.96); }
 
 /* ===============================
    MODAL PROFESIONAL
 ================================ */
 
-/* ===============================
-   MODAL RECHAZO – ENTERPRISE CLEAN
-================================ */
-
+/* Modal rechazo */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(15,23,42,0.55);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -277,15 +247,12 @@ button.btn-rechazar {
   background: #ffffff;
   width: 460px;
   max-width: 92%;
-  padding: 28px 28px 24px 28px;
+  padding: 28px;
   border-radius: 18px;
-  box-shadow: 
-    0 30px 80px rgba(15, 23, 42, 0.25),
-    0 10px 25px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 30px 80px rgba(15,23,42,0.25), 0 10px 25px rgba(15,23,42,0.08);
   animation: scaleInModal 0.2s ease-out;
 }
 
-/* Título elegante */
 .modal-rechazo h3 {
   margin: 0;
   font-size: 18px;
@@ -293,8 +260,6 @@ button.btn-rechazar {
   color: #0f172a;
   letter-spacing: 0.3px;
 }
-
-/* Sub línea decorativa corporativa */
 .modal-rechazo h3::after {
   content: "";
   display: block;
@@ -305,7 +270,6 @@ button.btn-rechazar {
   background: #dc2626;
 }
 
-/* Textarea premium */
 .modal-rechazo textarea {
   width: 100%;
   height: 120px;
@@ -319,23 +283,19 @@ button.btn-rechazar {
   resize: none;
   transition: all 0.2s ease;
 }
-
 .modal-rechazo textarea:focus {
   outline: none;
   border-color: #dc2626;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
 }
 
-/* Botonera */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 22px;
 }
-
-/* Botón cancelar */
 .btn-modal-cancelar {
   padding: 8px 16px;
   border-radius: 10px;
@@ -346,12 +306,7 @@ button.btn-rechazar {
   cursor: pointer;
   transition: all 0.15s ease;
 }
-
-.btn-modal-cancelar:hover {
-  background: #f1f5f9;
-}
-
-/* Botón confirmar rechazo */
+.btn-modal-cancelar:hover { background: #f1f5f9; }
 .btn-danger {
   padding: 8px 18px;
   border-radius: 10px;
@@ -362,30 +317,16 @@ button.btn-rechazar {
   cursor: pointer;
   transition: all 0.15s ease;
 }
-
-.btn-danger:hover {
-  background: #b91c1c;
-}
-
-.btn-danger:active {
-  transform: scale(0.97);
-}
+.btn-danger:hover { background: #b91c1c; }
+.btn-danger:active { transform: scale(0.97); }
 
 /* Animaciones suaves */
 @keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; } to { opacity: 1; }
 }
-
 @keyframes scaleInModal {
-  from { 
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to { 
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); } 
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* ===============================
@@ -403,7 +344,6 @@ button.btn-rechazar {
   box-shadow: 0 15px 35px rgba(0,0,0,0.25);
   z-index: 10000;
 }
-
 .toast-success { background: #15803d; }
 .toast-error { background: #b91c1c; }
 
@@ -411,14 +351,33 @@ button.btn-rechazar {
    RESPONSIVE PROFESIONAL
 ================================ */
 
-@media (max-width: 900px) {
-  table {
-    font-size: 11px;
-  }
+/* Tabla ajustable para tablets */
+@media (max-width: 1200px) {
+  table { font-size: 12px; min-width: 1000px; }
+  th, td { padding: 8px 10px; }
+}
 
-  th, td {
-    padding: 8px 10px;
-  }
+/* Para pantallas medianas */
+@media (max-width: 992px) {
+  table { font-size: 11px; min-width: 900px; }
+  th:nth-child(1), td:nth-child(1) { width: 60px; }
+  th:nth-child(2), td:nth-child(2) { width: 90px; }
+  th:nth-child(3), td:nth-child(3) { width: 130px; }
+  th:nth-child(4), td:nth-child(4) { width: 70px; }
+  th:nth-child(5), td:nth-child(5) { width: 70px; }
+  th:nth-child(6), td:nth-child(6) { width: 150px; }
+  th:nth-child(8), td:nth-child(8) { width: 140px; }
+  th:nth-child(9), td:nth-child(9) { width: 120px; }
+  th:nth-child(11), td:nth-child(11) { width: 140px; }
+  th:nth-child(12), td:nth-child(12) { width: 220px; }
+}
+
+/* Para móviles (scroll horizontal inevitable) */
+@media (max-width: 768px) {
+  table { font-size: 10px; min-width: 700px; }
+  th, td { padding: 6px 8px; }
+  .acciones { gap: 4px; }
+  .btn-accion { min-width: 60px; font-size: 9.5px; padding: 4px 6px; }
 }
 
 /* ===== FORZAR ROJO ABSOLUTO ===== */
@@ -427,7 +386,6 @@ button.btn-accion.btn-rechazar {
   color: #ffffff !important;
   border: none !important;
 }
-
 button.btn-accion.btn-rechazar:hover {
   background-color: #b91c1c !important;
 }

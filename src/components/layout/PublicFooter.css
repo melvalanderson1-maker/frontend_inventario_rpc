@@ -1,15 +1,28 @@
-/* src/components/layout/PublicFooter.css */
+/* ==============================
+   ERP Footer Profesional
+============================== */
+
 .public-footer {
-  background: #000;
+  background: var(--erp-blue-dark);
   color: #fff;
   padding: 18px 0;
-  margin-top: 250px;
+  font-size: 14px;
 }
 
 .public-footer .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  opacity: .85;
+}
+
+@media (max-width: 768px) {
+  .public-footer .container {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
 }

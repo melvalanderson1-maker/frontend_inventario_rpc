@@ -165,24 +165,29 @@ export default function ProductosLogistica() {
   /* ================= FILTRO ================= */
   const productosFiltrados = productos
     .map(p => {
+
+
+      // ================= FILTROS ESTRUCTURALES SIEMPRE ACTIVOS =================
+      const okTipo =
+        tipoProducto === "todos" ||
+        (tipoProducto === "simples" && p.es_catalogo === 0) ||
+        (tipoProducto === "variantes" && p.es_catalogo === 1);
+
+      const okCategoriaSelect =
+        categoria === "todas" ||
+        Number(p.categoria_id) === Number(categoria);
+
+      const okStock =
+        stock === "todos" ||
+        (stock === "con" && p.stock_total > 0) ||
+        (stock === "sin" && p.stock_total <= 0);
+
+      // Si NO cumple filtros base → descartar inmediatamente
+      if (!okTipo || !okCategoriaSelect || !okStock) return null;
       const sinBusqueda = !search.trim();
 
       if (sinBusqueda) {
-        const okTipo =
-          tipoProducto === "todos" ||
-          (tipoProducto === "simples" && p.es_catalogo === 0) ||
-          (tipoProducto === "variantes" && p.es_catalogo === 1);
-
-        const okCat =
-          categoria === "todas" ||
-          Number(p.categoria_id) === Number(categoria);
-
-        const okStock =
-          stock === "todos" ||
-          (stock === "con" && p.stock_total > 0) ||
-          (stock === "sin" && p.stock_total <= 0);
-
-        return okTipo && okCat && okStock ? { ...p, score: 1 } : null;
+        return { ...p, score: 1 };
       }
 
       if (coincideCodigo(p, search)) return { ...p, score: 1000 };

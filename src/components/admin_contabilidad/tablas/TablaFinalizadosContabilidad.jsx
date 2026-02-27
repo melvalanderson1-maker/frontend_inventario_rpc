@@ -94,7 +94,7 @@ export default function TablaFinalizadosContabilidad({
         <tbody>
           {rowsFiltrados.length === 0 ? (
             <tr>
-              <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>
+              <td colSpan="12" style={{ textAlign: "center", padding: 16 }}>
                 No se encontraron resultados
               </td>
             </tr>
@@ -123,10 +123,13 @@ export default function TablaFinalizadosContabilidad({
                   </span>
                 </td>
                 <td>
-                  <button onClick={() => setModalMovimiento(r.id)}>
-                    Detalles
-                  </button>
+                  <div className="acciones">
+                    <button onClick={() => setModalMovimiento(r.id)}>
+                      Detalles
+                    </button>
+                  </div>
                 </td>
+
               </tr>
             ))
           )}

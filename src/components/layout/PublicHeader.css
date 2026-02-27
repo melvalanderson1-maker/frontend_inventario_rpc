@@ -1,149 +1,97 @@
 /* ==============================
-   Public Header - Fusión 1x3 Responsive
+   ERP Public Header - Premium
 ============================== */
+
+:root {
+  --erp-blue-dark: #0b1f4b;
+  --erp-blue-main: #123c8c;
+  --erp-gold: #f4c430;
+  --erp-light: #f8fafc;
+  --erp-text: #1e293b;
+}
+
+/* HEADER */
 .public-header {
-  background: #051f5b;
-  color: white;
-  padding: 12px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: linear-gradient(90deg, var(--erp-blue-dark), var(--erp-blue-main));
+  color: #fff;
+  padding: 14px 0;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-/* Contenedor principal */
 .public-header .container {
-  display: grid;
-  grid-template-columns: 1fr auto; /* Escritorio: marca | enlaces */
-  align-items: center;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
-  gap: 16px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Marca a la izquierda */
+/* BRAND */
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  font-size: 20px;
   font-weight: 700;
-  font-size: 22px;
+  letter-spacing: .5px;
+  text-decoration: none;
   color: #fff;
-  justify-self: start;
-  text-decoration: none; /* quita subrayado del Link */
 }
 
-
 .logo {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
-/* Nav a la derecha en escritorio */
+/* NAV */
 .nav {
   display: flex;
-  justify-content: flex-end;
-  gap: 16px;
+  gap: 22px;
   align-items: center;
 }
 
-/* Enlaces normales */
 .nav a {
-  color: #fff;
   text-decoration: none;
-  padding: 6px 12px;
+  color: #fff;
   font-weight: 500;
+  padding: 6px 12px;
   border-radius: 6px;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: all .25s ease;
 }
 
 .nav a:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
 }
 
-/* Botón Inicia sesión */
+/* CTA BUTTON */
 .nav .btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f6c53a;
-  color: #050a41;
-  padding: 6px 14px;
-  border-radius: 6px;
+  background: var(--erp-gold);
+  color: var(--erp-blue-dark);
+  padding: 8px 16px;
+  border-radius: 8px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all .25s ease;
 }
 
 .nav .btn:hover {
-  background: #e5b200;
-  color: #fff;
+  background: #e6b800;
+  transform: translateY(-1px);
 }
 
-/* ==============================
-   Responsive
-============================== */
-
-/* Tablets grandes y medianas */
-@media (max-width: 1024px) {
+/* RESPONSIVE */
+@media (max-width: 768px) {
   .public-header .container {
-    grid-template-columns: 1fr auto; /* mantener marca izquierda y nav derecha */
-  }
-
-  .nav {
-    justify-content: center; /* centrar enlaces en tablets */
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 12px;
   }
 
-  .brand {
-    font-size: 20px;
-  }
-
-  .nav a, .nav .btn {
-    font-size: 14px;
-    padding: 6px 10px;
-  }
-}
-
-/* Tablets pequeñas y móviles medianos */
-@media (max-width: 768px) {
-  .public-header .container {
-    grid-template-columns: 1fr 1fr; /* apilar marca y nav */
-    text-align: center;
-  }
-
   .nav {
+    flex-wrap: wrap;
     justify-content: center;
-    margin-top: 8px;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .nav a, .nav .btn {
-    width: 100%;
-  }
-
-  .logo {
-    width: 36px;
-    height: 36px;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .brand {
-    font-size: 18px;
-  }
-
-  .nav a, .nav .btn {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-
-  .logo {
-    width: 32px;
-    height: 32px;
   }
 }

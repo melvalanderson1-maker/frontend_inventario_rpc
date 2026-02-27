@@ -206,21 +206,28 @@ export default function ProductosContabilidad() {
   /* 🔍 FILTRADO INTELIGENTE */
   const productosFiltrados = productos
     .map(p => {
+
+      // ================= FILTROS ESTRUCTURALES SIEMPRE ACTIVOS =================
+      const okTipo =
+        tipoProducto === "todos" ||
+        (tipoProducto === "simples" && p.es_catalogo === 0) ||
+        (tipoProducto === "variantes" && p.es_catalogo === 1);
+
+      const okCategoriaSelect =
+        categoria === "todas" ||
+        Number(p.categoria_id) === Number(categoria);
+
+      const okStock =
+        stock === "todos" ||
+        (stock === "con" && p.stock_total > 0) ||
+        (stock === "sin" && p.stock_total <= 0);
+
+      // Si NO cumple filtros base → descartar inmediatamente
+      if (!okTipo || !okCategoriaSelect || !okStock) return null;
+
+
       if (!search.trim()) {
-        const okTipo =
-          tipoProducto === "todos" ||
-          (tipoProducto === "simples" && p.es_catalogo === 0) ||
-          (tipoProducto === "variantes" && p.es_catalogo === 1);
-
-        const okCat =
-          categoria === "todas" || Number(p.categoria_id) === Number(categoria);
-
-        const okStock =
-          stock === "todos" ||
-          (stock === "con" && p.stock_total > 0) ||
-          (stock === "sin" && p.stock_total <= 0);
-
-        return okTipo && okCat && okStock ? { ...p, score: 1 } : null;
+        return { ...p, score: 1 };
       }
 
       if (coincideCodigo(p, search)) return { ...p, score: 1000 };
@@ -254,20 +261,7 @@ export default function ProductosContabilidad() {
       palabras.forEach(w => textoProducto.includes(w) && (score += 40));
       numeros.forEach(n => textoProducto.includes(n.toString()) && (score += 50));
 
-      const okTipo =
-        tipoProducto === "todos" ||
-        (tipoProducto === "simples" && p.es_catalogo === 0) ||
-        (tipoProducto === "variantes" && p.es_catalogo === 1);
 
-      const okCat =
-        categoria === "todas" || Number(p.categoria_id) === Number(categoria);
-
-      const okStock =
-        stock === "todos" ||
-        (stock === "con" && p.stock_total > 0) ||
-        (stock === "sin" && p.stock_total <= 0);
-
-      if (!okTipo || !okCat || !okStock) return null;
 
       return score >= 40 ? { ...p, score } : null;
     })
