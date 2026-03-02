@@ -115,11 +115,14 @@ export default function DeleteProducto({
       onEliminado();
       onCerrar();
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        "No se pudo completar la acción"
-      );
-    } finally {
+    console.log("ERROR COMPLETO:", err.response?.data);
+
+    setError(
+      err.response?.data?.detalle ||
+      err.response?.data?.error ||
+      "No se pudo completar la acción"
+    );
+  } finally {
       setCargando(false);
     }
   };
