@@ -1,5 +1,5 @@
 /* ==============================
-   ERP Public Header - Premium
+   ERP Public Header - Premium Fusion
 ============================== */
 
 :root {
@@ -10,7 +10,9 @@
   --erp-text: #1e293b;
 }
 
-/* HEADER */
+/* ==============================
+   HEADER
+============================== */
 .public-header {
   background: linear-gradient(90deg, var(--erp-blue-dark), var(--erp-blue-main));
   color: #fff;
@@ -21,16 +23,22 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
+/* ==============================
+   CONTENEDOR (Mantenemos GRID del original)
+============================== */
 .public-header .container {
+  display: grid;
+  grid-template-columns: 1fr auto; /* Marca izquierda | Nav derecha */
+  align-items: center;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 20px;
 }
 
-/* BRAND */
+/* ==============================
+   BRAND
+============================== */
 .brand {
   display: flex;
   align-items: center;
@@ -40,27 +48,37 @@
   letter-spacing: .5px;
   text-decoration: none;
   color: #fff;
+  justify-self: start;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+  transition: transform .3s ease;
 }
 
-/* NAV */
+.brand:hover .logo {
+  transform: scale(1.05);
+}
+
+/* ==============================
+   NAV (alineado a la derecha)
+============================== */
 .nav {
   display: flex;
-  gap: 22px;
+  justify-content: flex-end;
+  gap: 20px;
   align-items: center;
 }
 
+/* Links normales */
 .nav a {
   text-decoration: none;
   color: #fff;
   font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   transition: all .25s ease;
 }
 
@@ -72,26 +90,85 @@
 .nav .btn {
   background: var(--erp-gold);
   color: var(--erp-blue-dark);
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 8px;
   font-weight: 600;
   transition: all .25s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .nav .btn:hover {
   background: #e6b800;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
+/* ==============================
+   RESPONSIVE
+============================== */
+
+/* Tablets */
+@media (max-width: 1024px) {
   .public-header .container {
-    flex-direction: column;
-    gap: 12px;
+    grid-template-columns: 1fr auto; /* mantener orden */
   }
 
   .nav {
-    flex-wrap: wrap;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .nav a,
+  .nav .btn {
+    font-size: 14px;
+    padding: 7px 12px;
+  }
+}
+
+/* Tablets pequeñas y móviles */
+@media (max-width: 768px) {
+  .public-header .container {
+    grid-template-columns: 1fr 1fr; /* mismo comportamiento que tu versión original */
+    text-align: center;
+  }
+
+  .nav {
+    justify-content: center;
+    margin-top: 8px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav a,
+  .nav .btn {
+    width: 100%;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .brand {
+    font-size: 17px;
+  }
+
+  .nav a,
+  .nav .btn {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
   }
 }
