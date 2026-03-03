@@ -219,12 +219,7 @@ const guardarCambios = async () => {
               ref={inputFileRef} 
             />
 
-            {/* Solo mostrar botón si hay nuevaImagen */}
-            {nuevaImagen && (
-              <button type="button" onClick={anularCambioImagen}>
-                  X Anular cambio de imagen
-              </button>
-            )}
+
           </div>
         </div>
         </div>
@@ -279,17 +274,7 @@ const guardarCambios = async () => {
 
         {/* BOTONES */}
         <div className="modal-acciones">
-          <button
-            className="btn-guardar"
-            onClick={guardarCambios}
-            disabled={!codigoValido || guardando}
-          >
-            {guardando ? (
-              <span className="spinner"></span>
-            ) : (
-              "💾 Guardar"
-            )}
-          </button>
+
           <button
             className="btn-cancelar"
             onClick={() => {

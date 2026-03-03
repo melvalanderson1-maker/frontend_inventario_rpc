@@ -1,0 +1,49 @@
+.field {
+  position: relative; /* para controlar posicionamiento interno */
+}
+
+.crear-nuevo,
+.volver-select {
+  display: inline-block;      /* que solo ocupe lo que dice el texto */
+  width: auto;                /* no expandirse */
+  padding: 2px 6px;           /* opcional: un poco de espacio */
+  margin-top: 4px;            /* separación del select/input */
+  cursor: pointer;            /* mano al pasar el mouse */
+  font-size: 0.875rem;
+  color: #2563eb;             /* azul para crear nuevo */
+}
+
+.volver-select {
+  color: #dc2626;             /* rojo para volver */
+}
+
+.select-container {
+  display: flex;
+  flex-direction: column;     /* select arriba, small abajo */
+  align-items: flex-start;    /* que los small queden al inicio, no ancho total */
+}
+
+
+.crear-nuevo {
+  color: #2563eb !important; /* azul */
+  cursor: pointer;
+  display: inline-block;
+  padding: 2px 6px;
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+.volver-select {
+  color: #dc2626 !important; /* rojo */
+  cursor: pointer;
+  display: inline-block;
+  padding: 2px 6px;
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+.select-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}

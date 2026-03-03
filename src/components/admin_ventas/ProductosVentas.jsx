@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
@@ -9,7 +10,7 @@ import DeleteProducto from "./productos/DeleteProducto";
 
 
 
-import "./ProductosVentas.css";
+import "./ProductosCompras.css";
 import { useRef } from "react";
 
 
@@ -237,7 +238,7 @@ function coincideCodigo(p, textoBusqueda) {
 
 
 
-export default function ProductosVentas() {
+export default function ProductosCompras() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -256,6 +257,7 @@ export default function ProductosVentas() {
 
   const [categorias, setCategorias] = useState([]);
   
+  const navigate = useNavigate();
 
   const [mensajeResultados, setMensajeResultados] = useState("");
 
@@ -304,13 +306,13 @@ export default function ProductosVentas() {
 
 
   useEffect(() => {
-    api.get("/api/ventas/categorias")
+    api.get("/api/compras/categorias")
       .then(res => setCategorias(res.data.categorias || []))
       .catch(() => setCategorias([]));
   }, []);
 
   useEffect(() => {
-    api.get("/api/ventas/productos")
+    api.get("/api/compras/productos")
       .then(res => setProductos(res.data.productos || []))
       .catch(() => setProductos([]));
   }, []);
@@ -521,9 +523,7 @@ export default function ProductosVentas() {
       <div className="productos-header">
         <h2>Productos</h2>
 
-        <Link to="nuevo" className="btn-nuevo">
-          + Nuevo Producto
-        </Link>
+
       </div>
 
       <div className="productos-filtros">
@@ -636,18 +636,30 @@ export default function ProductosVentas() {
 
 
       <div className="productos-grid">
-        {productosFiltrados.map(p => (
-          
-          <div key={p.id} className="producto-card">
+        {productosFiltrados.map(p => {
+          const detailUrl = `../producto/${p.id}?search=${encodeURIComponent(search)}&tipo=${tipoProducto}&stock=${stock}&categoria=${categoria}`;
+          return (
+            <div
+              key={p.id}
+              className="producto-card"
+              tabIndex={0}
+              onClick={() => navigate(detailUrl)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate(detailUrl); }}
+            >
 
           <div className="acciones-card">
-            <button onClick={() => setProductoEditar(p)}>✏️</button>
             <button
-              className="btn-eliminar"
-              onClick={() => setProductoEliminar(p)}
+              onClick={(e) => { e.stopPropagation(); setProductoEditar(p); }}
+              aria-label={`Ver/Editar ${p.codigo}`}
+              title="Ver detalles"
             >
-              🗑️
+              {/* Eye SVG (no emoji) */}
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
+
           </div>
 
 
@@ -711,13 +723,15 @@ export default function ProductosVentas() {
             <Link
               to={`../producto/${p.id}?search=${search}&tipo=${tipoProducto}&stock=${stock}&categoria=${categoria}`}
               className="producto-link"
+              onClick={(e) => e.stopPropagation()}
             >
               Ver detalle →
             </Link>
 
 
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
       <EditAndDelete
         producto={productoEditar}
@@ -725,7 +739,7 @@ export default function ProductosVentas() {
         abierto={!!productoEditar}
         onCerrar={() => setProductoEditar(null)}
         onActualizado={() => {
-          api.get("/api/ventas/productos")
+          api.get("/api/compras/productos")
             .then(res => setProductos(res.data.productos || []));
         }}
       />
@@ -735,7 +749,7 @@ export default function ProductosVentas() {
         abierto={!!productoEliminar}
         onCerrar={() => setProductoEliminar(null)}
         onEliminado={() => {
-          api.get("/api/ventas/productos")
+          api.get("/api/compras/productos")
             .then(res => setProductos(res.data.productos || []));
         }}
       />

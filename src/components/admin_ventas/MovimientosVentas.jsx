@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import TablaPendientesCompras from "./tablaAllVentas/TablaPendientesVentas";
-import TablaRechazadosCompras from "./tablaAllVentas/TablaRechazadosVentas";
-import TablaAprobadosCompras from "./tablaAllVentas/TablaAprobadosVentas";
-import TablaHistorialCompras from "./tablaAllVentas/TablaHistorialVentas";
-
-import TablaStockCompleto from "./tablaAllVentas/TablaStockCompleto";
+import TablaPendientesCompras from "./tablaAllCompra/TablaPendientesCompras";
+import TablaRechazadosCompras from "./tablaAllCompra/TablaRechazadosCompras";
+import TablaAprobadosCompras from "./tablaAllCompra/TablaAprobadosCompras";
+import TablaHistorialCompras from "./tablaAllCompra/TablaHistorialCompras";
+import TablaCambiosAlmacenPendientesCompras from "./tablaAllCompra/TablaCambiosAlmacenPendientesCompras";
+import TablaStockCompleto from "./tablaAllCompra/TablaStockCompleto";
 
 export default function MovimientosCompras() {
   const [tab, setTab] = useState("pendientes");
 
   return (
-    <div className="ventas-page">
+    <div className="logistica-page">
+              <h1>Movimientos</h1>
       <div className="page-header">
-        <h1>Movimientos</h1>
-        <p>Gestión de validaciones de logística</p>
+
+
       </div>
 
       <div className="tabs">

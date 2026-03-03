@@ -39,7 +39,7 @@ export default function ProductoDetalle() {
 
 
   useEffect(() => {
-    api.get(`/api/ventas/productos/${id}`)
+    api.get(`/api/compras/productos/${id}`)
       .then(res => {
         setProducto(res.data.producto);
 
@@ -77,23 +77,6 @@ export default function ProductoDetalle() {
         </button>
 
 
-
-
-        <div className="detalle-actions">
-          <Link
-            to={`/ventas/movimiento/entrada/${contexto.id}`}
-            className="btn-accion"
-          >
-            + Registrar entrada
-          </Link>
-
-          <Link
-            to={`/ventas/movimiento/salida/${contexto.id}`}
-            className="btn-accion outline"
-          >
-            + Registrar salida
-          </Link>
-        </div>
       </div>
 
       {/* ===================== */}

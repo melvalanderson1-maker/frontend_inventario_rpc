@@ -1,37 +1,54 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import { Link } from "react-router-dom";
+import ModalMovimientoDetalle from "../modales/ModalMovimientoDetalle";
+import "./BotonElegante.css";
 
-export default function TablaPendientesCompras({ filtro = "" }) {
+export default function TablaAprobadosCompras({ filtro = "" }) {
   const [rows, setRows] = useState([]);
+  const [modo, setModo] = useState("compras"); // compras | todos
   const [loading, setLoading] = useState(false);
+  const [modalMovimiento, setModalMovimiento] = useState(null);
 
-  const cargar = () => {
+  const cargar = async () => {
     setLoading(true);
+    try {
+      const estados =
+        modo === "todos"
+          ? "APROBADO_FINAL,RECHAZADO_CONTABILIDAD,RECHAZADO_LOGISTICA"
+          : "APROBADO_FINAL";
 
-    const estados = "VALIDADO_LOGISTICA";
+      const { data } = await api.get("/api/compras/movimientos/todos", {
+        params: { estados },
+      });
 
-    api
-      .get("/api/compras/movimientos/todos", { params: { estados } })
-      .then((res) => setRows(res.data || []))
-      .catch((err) => {
-        console.error("❌ Error cargando pendientes compras:", err);
-        setRows([]);
-      })
-      .finally(() => setLoading(false));
+      console.log("🧪 MOVIMIENTOS COMPRAS:", data);
+      setRows(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("❌ Error cargando aprobados compras:", error);
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [modo]);
 
-  const formatPrecio = (precio) =>
-    precio === null || precio === undefined ? "-" : `S/ ${Number(precio).toFixed(2)}`;
+  const formatPrecio = (precio) => {
+    if (precio === null || precio === undefined) return "-";
+    return `S/ ${Number(precio).toFixed(2)}`;
+  };
 
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
-    return isNaN(d) ? "-" : d.toLocaleString();
+    if (isNaN(d)) return "-";
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
   const getRowClass = (tipo) => {
@@ -49,19 +66,17 @@ export default function TablaPendientesCompras({ filtro = "" }) {
 
     return rows.filter((r) =>
       [
+        r.producto_codigo,
+        r.codigo_modelo,
+        r.producto_descripcion,
         r.tipo_movimiento,
         r.op_vinculada,
         r.fabricante,
-        r.precio,
-        r.cantidad,
         r.empresa,
         r.almacen,
         r.estado,
         r.fecha_creacion,
         r.fecha_validacion_logistica,
-        r.producto_codigo,
-        r.codigo_modelo,
-        r.producto_descripcion,
       ]
         .filter(Boolean)
         .some((campo) => campo.toString().toLowerCase().includes(texto))
@@ -70,7 +85,25 @@ export default function TablaPendientesCompras({ filtro = "" }) {
 
   return (
     <div className="table-wrapper">
-      <strong>Pendientes de compras</strong>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <strong>Movimientos aprobados (Compras)</strong>
+
+        <button
+          onClick={() =>
+            setModo((m) => (m === "compras" ? "todos" : "compras"))
+          }
+          className="btn-ir"
+          style={{ padding: "6px 12px" }}
+        >
+          {modo === "todos" ? "Solo aprobados" : "Ver todo"}
+        </button>
+      </div>
 
       <table>
         <thead>
@@ -86,7 +119,7 @@ export default function TablaPendientesCompras({ filtro = "" }) {
             <th>Almacén</th>
             <th>F Validación</th>
             <th>Estado</th>
-            <th></th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
@@ -111,6 +144,7 @@ export default function TablaPendientesCompras({ filtro = "" }) {
                     {r.producto_codigo || "-"}
                     {r.codigo_modelo && ` · ${r.codigo_modelo}`}
                   </div>
+
                 </td>
                 <td>{r.tipo_movimiento}</td>
                 <td>{r.op_vinculada || "-"}</td>
@@ -123,11 +157,18 @@ export default function TablaPendientesCompras({ filtro = "" }) {
                 <td>{formatFecha(r.fecha_validacion_logistica)}</td>
                 <td>
                   <span className={`estado estado-${r.estado}`}>
-                    {r.estado.replaceAll("_", " ")}
+                    {r.estado?.replaceAll("_", " ")}
                   </span>
                 </td>
                 <td>
-                  <Link to={`/compras/producto/${r.producto_id}`} className="btn-ir">
+                  <button className="btn-detalle" onClick={() => setModalMovimiento(r.id)}>
+                    Detalles
+                  </button>
+                  <Link
+                    to={`/compras/producto/${r.producto_id}`}
+                    className="btn-ir"
+                    style={{ marginLeft: 8 }}
+                  >
                     Ir →
                   </Link>
                 </td>
@@ -136,6 +177,13 @@ export default function TablaPendientesCompras({ filtro = "" }) {
           )}
         </tbody>
       </table>
+
+      {modalMovimiento && (
+        <ModalMovimientoDetalle
+          movimientoId={modalMovimiento}
+          onClose={() => setModalMovimiento(null)}
+        />
+      )}
     </div>
   );
 }

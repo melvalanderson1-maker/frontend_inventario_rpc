@@ -4,11 +4,23 @@
   width: 100%;
 }
 
-.compras-title {
-  font-size: 28px;
-  margin-bottom: 6px;
+/* Cuando el menú está oculto, permitimos que el main ocupe todo el ancho */
+.compras-main.full {
+  margin-left: 0;
+  transition: margin-left 0.25s ease;
 }
 
+
+.compras-main.full {
+  margin-left: 0;
+  transition: margin-left 0.25s ease;
+}
+
+/* Solo desplazar el subtítulo cuando el sidebar está oculto */
+.compras-subtitle.subtitle-offset {
+  padding-left: 80px; /* espacio para la hamburguesa */
+  transition: padding-left 0.2s ease;
+}
 .compras-subtitle {
   color: #666;
   margin-bottom: 18px;

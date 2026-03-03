@@ -16,6 +16,46 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Compact tables: fixed layout, professional column widths and truncation
+   Applied to tables with wrapper class `table-wrapper compact` */
+.table-wrapper.compact table {
+  width: 100%;
+  table-layout: fixed;
+}
+.table-wrapper.compact td,
+.table-wrapper.compact th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-wrapper.compact th:nth-child(1), .table-wrapper.compact td:nth-child(1) { width: 140px; }
+.table-wrapper.compact th:nth-child(2), .table-wrapper.compact td:nth-child(2) { width: 110px; }
+.table-wrapper.compact th:nth-child(3), .table-wrapper.compact td:nth-child(3) { width: 120px; }
+.table-wrapper.compact th:nth-child(4), .table-wrapper.compact td:nth-child(4) { width: 140px; }
+.table-wrapper.compact th:nth-child(5), .table-wrapper.compact td:nth-child(5) { width: 110px; }
+.table-wrapper.compact th:nth-child(6), .table-wrapper.compact td:nth-child(6) { width: 72px; }
+.table-wrapper.compact th:nth-child(7), .table-wrapper.compact td:nth-child(7) { width: 150px; }
+.table-wrapper.compact th:nth-child(8), .table-wrapper.compact td:nth-child(8) { width: 150px; }
+.table-wrapper.compact th:nth-child(9), .table-wrapper.compact td:nth-child(9) { width: 120px; }
+.table-wrapper.compact th:nth-child(10), .table-wrapper.compact td:nth-child(10) { width: 150px; }
+.table-wrapper.compact th:nth-child(11), .table-wrapper.compact td:nth-child(11) { width: 130px; }
+.table-wrapper.compact th:nth-child(12), .table-wrapper.compact td:nth-child(12) { width: 140px; min-width: 120px; }
+
+/* Make action buttons fully visible inside the compact actions column */
+.table-wrapper.compact .btn-ir,
+.table-wrapper.compact .btn-detalle,
+.table-wrapper.compact .btn-accion {
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* Responsive fallback: allow horizontal scroll below 900px */
+@media (max-width: 900px) {
+  .table-wrapper.compact table { table-layout: auto; }
+  .table-wrapper.compact td, .table-wrapper.compact th { white-space: normal; }
+}
+
 
 /* ===============================
    TABLA BASE
@@ -77,6 +117,10 @@ tbody tr:hover {
   background: rgba(15, 23, 42, 0.035);
 }
 
+/* Make rows visually clickable */
+.table-wrapper table tbody tr { cursor: pointer; }
+.table-wrapper table tbody tr:focus { outline: 3px solid rgba(37,99,235,0.12); }
+
 /* ===============================
    FILAS CON IDENTIDAD (TIPO)
 ================================ */
@@ -111,12 +155,13 @@ tbody tr:hover {
    COLUMNAS OPTIMIZADAS
 ================================ */
 
-th:nth-child(1), td:nth-child(1) { width: 80px; text-align: center; font-weight: 600; }
-th:nth-child(2), td:nth-child(2) { width: 110px; }
-th:nth-child(3), td:nth-child(3) { width: 170px; }
-th:nth-child(4), td:nth-child(4) { width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
-th:nth-child(5), td:nth-child(5) { width: 90px; text-align: right; font-weight: 600; }
-th:nth-child(6), td:nth-child(6) { width: 200px; }
+/* Column widths tuned for professional layout */
+th:nth-child(1), td:nth-child(1) { width: 120px; text-align: left; font-weight: 700; }
+th:nth-child(2), td:nth-child(2) { width: 120px; }
+th:nth-child(3), td:nth-child(3) { width: 140px; }
+th:nth-child(4), td:nth-child(4) { width: 140px; text-align: left; }
+th:nth-child(5), td:nth-child(5) { width: 110px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+th:nth-child(6), td:nth-child(6) { width: 80px; text-align: center; }
 /* F Registro */
 td:nth-child(7) {
   font-size: 13.5px;
@@ -130,13 +175,13 @@ td:nth-child(10) {
   font-weight: 500;
   color: #0f172a;
 }
+th:nth-child(7), td:nth-child(7) { width: 160px; }
 th:nth-child(8), td:nth-child(8) { width: 170px; }
-th:nth-child(9), td:nth-child(9) { width: 150px; font-size: 11px; }
+th:nth-child(9), td:nth-child(9) { width: 120px; font-size: 11px; }
 
-th:nth-child(11),
-td:nth-child(11) {
-  width: 170px;
-  min-width: 170px;
+th:nth-child(11), td:nth-child(11) {
+  width: 140px;
+  min-width: 120px;
 }
 
 /* Acciones */
@@ -146,6 +191,38 @@ td:nth-child(12) {
   width: 260px;
   text-align: center;
   white-space: nowrap;
+}
+
+/* Mantener la columna de acciones siempre visible (sticky a la derecha) */
+th:nth-child(12), td:nth-child(12) {
+  position: -webkit-sticky;
+  position: sticky;
+  right: 0;
+  z-index: 6; /* encima de otras celdas pero debajo del header sticky */
+  background: #ffffff; /* asegura contraste cuando se vuelve sticky */
+  box-shadow: -6px 0 12px rgba(15,23,42,0.04);
+}
+
+/* Botón 'Ir' visible y consistente */
+.btn-ir {
+  display: inline-block;
+  padding: 6px 10px;
+  background: linear-gradient(180deg,#06b6d4,#0891b2);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  min-width: 56px;
+  text-align: center;
+}
+.btn-ir:hover { opacity: 0.95; transform: translateY(-1px); }
+
+/* Ajustes para pantalla pequeña: reducir anchura de la columna de acciones */
+@media (max-width: 768px) {
+  th:nth-child(12), td:nth-child(12) { min-width: 120px; width: 120px; }
+  .btn-ir { padding: 6px 8px; font-size: 13px; }
 }
 
 
@@ -215,11 +292,26 @@ td:nth-child(12) {
   transition: all 0.15s ease;
 }
 .btn-detalle {
-  background: #f8fafc;
-  color: #334155;
-  border-color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
 }
-.btn-detalle:hover { background: #e2e8f0; }
+.btn-detalle:hover {
+  background: #f1f5f9;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+}
 .btn-validar { background: #16a34a; color: #fff; }
 .btn-validar:hover { background: #15803d; }
 .btn-rechazar { background-color: #dc2626; color: #fff; }

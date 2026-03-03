@@ -1,27 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import MenuVentas from "../components/admin_ventas/MenuVentas";
 import "../components/admin_compras/dashboardCompras.css";
 import { Outlet, Link, useLocation } from "react-router-dom";
 
 export default function DashboardVentas() {
   const location = useLocation();
-  const esHomeCompras = location.pathname === "/ventas";
+  const esHomeVentas = location.pathname === "/ventas";
+
+  // 🔥 Estado global del menú
+  const [menuOpen, setMenuOpen] = useState(true);
 
   return (
     <div style={{ display: "flex" }}>
-      <MenuVentas />
+      {/* Pasamos open y setOpen al menú */}
+      <MenuVentas open={menuOpen} setOpen={setMenuOpen} />
 
-      <main className="compras-main">
-        <h1 className="compras-title">Panel de Ventas</h1>
-        <p className="compras-subtitle">
-          Gestión de productos, movimientos de entrada y control de stock.
-        </p>
+            <main className={`compras-main ${!menuOpen ? "full" : ""}`}>
 
-        {/* 🔥 SOLO mostrar cards en /compras */}
-        {esHomeCompras && (
+        
+         <p className={`compras-subtitle ${!menuOpen ? "subtitle-offset" : ""}`}>
+           Gestión de productos, movimientos de entrada y control de stock.
+         </p>
+
+        {esHomeVentas && (
           <div className="compras-dashboard-container">
             <div className="compras-grid">
-
               <Link className="compras-card" to="productos">
                 <span className="emoji">📦</span>
                 <h3>Productos</h3>
@@ -39,12 +42,10 @@ export default function DashboardVentas() {
                 <h3>Aprobaciones</h3>
                 <p>Pendientes de logística</p>
               </Link>
-
             </div>
           </div>
         )}
 
-        {/* 👇 AQUÍ se renderizan productos / crear producto */}
         <Outlet />
       </main>
     </div>

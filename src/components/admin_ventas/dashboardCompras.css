@@ -1,31 +1,38 @@
-.ventas-main {
-  margin-left: 240px;
+.compras-main {
+  margin-left: 240px;     /* ancho del menú cuando está abierto */
   padding: 24px;
+  width: calc(100% - 240px);
+  transition: margin-left 0.3s, width 0.3s;
+}
+
+/* Cuando el menú se oculta */
+.compras-main.full {
+  margin-left: 0;
   width: 100%;
 }
 
-.ventas-title {
+.compras-title {
   font-size: 28px;
   margin-bottom: 6px;
 }
 
-.ventas-subtitle {
+.compras-subtitle {
   color: #666;
   margin-bottom: 18px;
 }
 
-.ventas-dashboard-container {
+.compras-dashboard-container {
   max-width: 1200px;
   margin: 24px auto;
 }
 
-.ventas-grid {
+.compras-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
-.ventas-card {
+.compras-card {
   display: block;
   background: #fff;
   padding: 18px;
@@ -36,22 +43,22 @@
   transition: transform .12s ease, box-shadow .12s ease;
 }
 
-.ventas-card:hover {
+.compras-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.06);
 }
 
-.ventas-card .emoji {
+.compras-card .emoji {
   font-size: 28px;
   display: block;
   margin-bottom: 10px;
 }
 
-.ventas-card h3 {
+.compras-card h3 {
   margin: 0 0 6px 0;
 }
 
-.ventas-card p {
+.compras-card p {
   margin: 0;
   color: #666;
   font-size: 14px;
