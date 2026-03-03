@@ -1,0 +1,173 @@
+/* ===============================
+   CONTENEDOR SCROLL (ÚNICO SCROLL)
+================================= */
+/* CONTENEDOR SCROLL */
+.tabla-aprobados-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  scrollbar-gutter: stable;
+}
+
+/* TABLA */
+.tabla-aprobados {
+  width: max-content;     /* 🔥 CLAVE ABSOLUTA */
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #1f2937;
+  table-layout: fixed;
+}
+
+/* CELDAS */
+.tabla-aprobados th,
+.tabla-aprobados td {
+  white-space: nowrap;
+  padding: 8px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ===============================
+   HEADER
+================================= */
+.tabla-aprobados thead th {
+  background: #f9fafb;
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* ===============================
+   BODY
+================================= */
+.tabla-aprobados tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabla-aprobados tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ===============================
+   FILAS
+================================= */
+.row-entrada { background: #f2fbf6; border-left: 4px solid #16a34a; }
+.row-salida  { background: #fff5f5; border-left: 4px solid #dc2626; }
+.row-ajuste  { background: #f5f7ff; border-left: 4px solid #6366f1; }
+
+/* ===============================
+   NUMÉRICOS
+================================= */
+.td-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===============================
+   OBSERVACIONES
+================================= */
+.td-obs {
+  cursor: pointer;
+}
+
+.td-obs:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ===============================
+   ESTADOS
+================================= */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-VALIDADO_LOGISTICA {
+  background: #e8f7ee;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.estado-PENDIENTE_LOGISTICA {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.estado-RECHAZADO_LOGISTICA {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ===============================
+   TABLA VACÍA
+================================= */
+.tabla-vacia {
+  text-align: center;
+  padding: 16px;
+  color: #6b7280;
+}
+
+/* CONTENEDOR SCROLL */
+.tabla-aprobados-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  scrollbar-gutter: stable;
+}
+
+/* TABLA */
+.tabla-aprobados {
+  width: max-content;     /* 🔥 CLAVE ABSOLUTA */
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #1f2937;
+  table-layout: fixed;
+}
+
+/* CELDAS */
+.tabla-aprobados th,
+.tabla-aprobados td {
+  white-space: nowrap;
+  padding: 8px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+.td-click {
+  cursor: pointer;
+}
+
+.td-click:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}

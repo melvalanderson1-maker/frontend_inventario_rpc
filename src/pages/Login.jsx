@@ -32,7 +32,7 @@ export default function Login() {
           case "ADMIN_COMPRAS": navigate("/compras"); break;
           case "ADMIN_LOGISTICA": navigate("/logistica"); break;
           case "ADMIN_CONTABILIDAD": navigate("/contabilidad"); break;
-          case "ADMIN_VENTAS": navigate("/dashboard/admin/ventas"); break;
+          case "ADMIN_VENTAS": navigate("/ventas"); break;
           case "DOCENTE": navigate("/dashboard/docente"); break;
           case "SECRETARIA": navigate("/dashboard/secretaria"); break;
           case "ESTUDIANTE": navigate("/dashboard/estudiante"); break;

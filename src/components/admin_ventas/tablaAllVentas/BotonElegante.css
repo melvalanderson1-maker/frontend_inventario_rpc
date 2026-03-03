@@ -1,0 +1,39 @@
+/* Botón elegante y profesional */
+.btn-ir {
+  display: inline-block;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(63, 63, 180, 0.2);
+}
+
+.btn-ir:hover {
+  background: linear-gradient(135deg, #4338ca, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(63, 63, 180, 0.3);
+}
+
+.btn-ir:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(63, 63, 180, 0.2);
+}
+
+.btn-ir:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .btn-ir {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}

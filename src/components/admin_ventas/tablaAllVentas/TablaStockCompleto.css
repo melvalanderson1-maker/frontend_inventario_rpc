@@ -1,0 +1,456 @@
+.tabla-container {
+  width: 100%;
+}
+
+/* ===== FILTROS 1x5 ===== */
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.filtros-grid input,
+.filtros-grid select {
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid #707070;
+  font-size: 13px;
+}
+
+.filtros-grid input:focus,
+.filtros-grid select:focus {
+  outline: none;
+  border-color: #374afa;
+  box-shadow: 0 0 0 2px rgba(0, 85, 255, 0.15);
+}
+
+/* ===== RESULTADOS ===== */
+.resultados {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+/* ===== TABLA ===== */
+.tabla-stock {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tabla-stock th,
+.tabla-stock td {
+  border: 0.08px solid #a19c9c;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.tabla-stock th {
+  background: #0c2557;
+  color: white;
+}
+
+/* Alternancia por grupo */
+.grupo-par td {
+  background-color: #ffffff;
+}
+
+.grupo-impar td {
+  background-color: #c6d5ff;
+}
+
+
+
+.grupo-par .total-grupo {
+  background: #ffffff;
+}
+
+.grupo-impar .total-grupo {
+  background: #c6d5ff;
+}
+
+
+.tabla-stock tbody tr:hover td {
+  background-color: #d6d6d6 !important;
+  transition: 0.2s ease;
+}
+
+.tabla-stock td,
+.tabla-stock th {
+  height: 36px;
+  vertical-align: middle;
+}
+
+
+/* ===== FILTRO ITEM CON BOTÓN ===== */
+
+.filtro-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filtro-item input,
+.filtro-item select {
+  width: 100%;
+  padding: 8px 34px 8px 10px; /* espacio para el botón */
+}
+
+.filtro-item {
+  position: relative; /* IMPORTANTE */
+}
+
+.filtro-item button {
+  position: absolute;
+  top: -20px;       /* 🔥 ESTO LO SUBE ENCIMA */
+  right: -0px;     /* 🔥 LO PEGA AL BORDE */
+  background: #d9534f;
+  border: none;
+  color: white;
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  z-index: 5;      /* 🔥 para que quede encima */
+}
+
+.filtro-item button:hover {
+  background: #c9302c;
+}
+
+/* ===== BARRA LIMPIAR GENERAL ===== */
+
+.barra-limpiar {
+  margin-bottom: 10px;
+  text-align: right;
+}
+
+.barra-limpiar button {
+  background: #0c2557;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.barra-limpiar button:hover {
+  background: #163a85;
+}
+
+/* ================= HEADER SUPERIOR ================= */
+
+.tabla-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.tabla-titulo {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0c2557;
+  letter-spacing: 0.5px;
+}
+
+/* Botón elegante */
+.btn-limpiar-global {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* espacio entre ícono y texto */
+  background: linear-gradient(135deg, #0c2557, #163a85);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-limpiar-global svg {
+  stroke-width: 2.5;
+}
+.btn-limpiar-global:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #163a85, #1f4fc1);
+}
+
+.btn-limpiar-global:active {
+  transform: scale(0.96);
+}
+
+.tabla-stock td,
+.tabla-stock th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== NUMEROS GRANDES STOCK ===== */
+
+.col-stock {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+/* ===== TOTAL GRUPO GRANDE PRO ===== */
+
+.col-total {
+  font-size: 16px !important;     /* 🔥 tamaño grande */
+  font-weight: 900 !important;    /* 🔥 bien grueso */
+  color: #0c2557 !important;      /* azul corporativo */
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.col-stock,
+.col-total {
+  white-space: normal;
+  overflow: visible;
+}
+
+.acciones-export {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.acciones-export button,
+.acciones-export select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #374afa;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.acciones-export button:hover {
+  background: #374afa;
+  color: white;
+}
+
+/* ================= EXPORT ZONE PRO ================= */
+
+.acciones-export {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ===== SELECT WRAPPER ===== */
+
+.export-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  font-weight: 500;
+  color: #555;
+}
+
+.export-select-wrapper label {
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* ===== SELECT MODERNO ===== */
+
+.export-select {
+  appearance: none;
+  padding: 8px 34px 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 140px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Flecha custom */
+.export-select {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.export-select:hover {
+  border-color: #374afa;
+}
+
+.export-select:focus {
+  outline: none;
+  border-color: #374afa;
+  box-shadow: 0 0 0 3px rgba(55, 74, 250, 0.15);
+}
+
+/* ===== BOTONES ===== */
+
+.btn-export {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+/* ===== PRIMARIO ===== */
+
+.btn-primary {
+  background: linear-gradient(135deg, #11be5f, #163a85);
+  color: white;
+  box-shadow: 0 4px 10px rgba(12, 37, 87, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(12, 37, 87, 0.35);
+}
+
+/* ===== OUTLINE ===== */
+
+.btn-outline {
+  background: white;
+  border: 1px solid #d0d5dd;
+  color: #344054;
+}
+
+.btn-outline:hover {
+  background: #f0f4ff;
+  border-color: #374afa;
+  color: #374afa;
+}
+
+/* CLICK EFFECT */
+
+.btn-export:active {
+  transform: scale(0.96);
+}
+
+
+/* ================= HEADER ERP PRO ================= */
+
+.tabla-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: grid;
+  grid-template-columns: 140px repeat(4, auto);
+  gap: 10px;
+  align-items: center;
+}
+
+/* ===== SELECT ERP ===== */
+
+.export-select-pro {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: white;
+  transition: 0.2s ease;
+}
+
+.export-select-pro:hover {
+  border-color: #16a34a;
+}
+
+.export-select-pro:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+/* ===== BOTONES BASE ===== */
+
+.btn-export-pro {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* ===== EXCEL VERDE PROFESIONAL ===== */
+
+.btn-excel {
+  background: linear-gradient(135deg, #16a34a, #0f7a36);
+  color: white;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+}
+
+.btn-excel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(22, 163, 74, 0.4);
+}
+
+/* ===== BOTONES OUTLINE ===== */
+
+.btn-outline-pro {
+  background: white;
+  border: 1px solid #d0d5dd;
+  color: #344054;
+}
+
+.btn-outline-pro:hover {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+/* ===== LIMPIAR ===== */
+
+.btn-limpiar-global {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0c2557, #163a85);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-limpiar-global:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* CLICK EFFECT */
+.btn-export-pro:active,
+.btn-limpiar-global:active {
+  transform: scale(0.96);
+}

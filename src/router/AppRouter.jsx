@@ -66,6 +66,22 @@ import ProductosCompras from "../components/admin_compras/ProductosCompras";
 import MovimientoSaldoInicial from "../components/admin_compras/MovimientoSaldoInicial";
 
 
+// ADMIN VENTAS
+import DashboardVentas from "../pages/DashboardVentas";
+import ProductosVentas from "../components/admin_ventas/ProductosVentas";
+import CrearProductoVentas from "../components/admin_ventas/CrearProducto";
+import ProductoDetalleVentas from "../components/admin_ventas/ProductoDetalle";
+import MovimientosVentas from "../components/admin_ventas/MovimientosVentas";
+import AprobacionesVentas from "../components/admin_ventas/Aprobacionesventas";
+
+// 🚨 COMPONENTES MOVIMIENTOS VENTAS
+import MovimientoEntradaVentas from "../components/admin_ventas/MovimientoEntrada";
+import MovimientoSalidaVentas from "../components/admin_ventas/MovimientoSalida";
+import MovimientoSaldoInicialVentas from "../components/admin_ventas/MovimientoSaldoInicial";
+
+
+
+
 
 
 //ADMIN LOGISTICA
@@ -187,6 +203,44 @@ export default function AppRouter() {
             element={<MovimientoSalida />}
           />
 
+        </Route>
+
+
+
+        <Route
+          path="/ventas"
+          element={
+            <PrivateRoute roles={["ADMIN_VENTAS"]}>
+              <DashboardVentas />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={null} />
+
+          <Route path="productos" element={<ProductosVentas />} />
+
+          <Route path="productos/nuevo" element={<CrearProductoVentas />} />
+
+          <Route path="producto/:id" element={<ProductoDetalleVentas />} />
+
+          <Route path="movimientos" element={<MovimientosVentas />} />
+
+          <Route path="aprobaciones" element={<AprobacionesVentas />} />
+
+          <Route
+            path="movimiento/entrada/:productoId"
+            element={<MovimientoEntradaVentas />}
+          />
+
+          <Route
+            path="movimiento/:tipo/:productoId"
+            element={<MovimientoSaldoInicialVentas />}
+          />
+
+          <Route
+            path="movimiento/salida/:productoId"
+            element={<MovimientoSalidaVentas />}
+          />
         </Route>
 
 
