@@ -93,9 +93,40 @@ export default function EditAndDelete({ producto, categorias, abierto, onCerrar,
     }
   }, [abierto, producto]);
 
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (!abierto) return;
+
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        if (!guardando) onCerrar();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+
+    const timer = setTimeout(() => {
+      const focusable = modalRef.current?.querySelector("button, [tabindex]:not([tabindex='-1']), input, textarea, select");
+      if (focusable) focusable.focus();
+      else modalRef.current?.focus();
+    }, 60);
+
+    // bloquear scroll de la página mientras el modal está abierto
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      clearTimeout(timer);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [abierto, guardando, onCerrar]);
 
   if (!abierto || !producto) return null;
-
+  // calcular número de columnas para la cuadrícula de atributos:
+  // por defecto 2 columnas; si hay más de 3 atributos usamos 3 columnas
+  const attrCols = (Array.isArray(atributosCategoria) && atributosCategoria.length > 3) ? 3 : 2;
 
 const guardarCambios = async () => {
   if (!codigoValido || guardando) return;
@@ -151,7 +182,10 @@ const guardarCambios = async () => {
   };
 
   return (
-    <div className="modal-overlay">
+    <div
+      className="modal-overlay"
+      onClick={() => { if (!guardando) onCerrar(); }}
+    >
         {/* 🔔 TOAST DE ÉXITO / ERROR */}
         {toast && (
           <div className="toast-exito">
@@ -165,8 +199,25 @@ const guardarCambios = async () => {
             <p>Guardando cambios...</p>
           </div>
         )}
-      <div className={`modal ${guardando ? "modal-guardando" : ""}`}>
-        <h3>Editar producto</h3>
+      <div
+        className={`modal ${guardando ? "modal-guardando" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-product-title"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+      >
+        <button
+          className="modal-close"
+          onClick={() => { if (!guardando) onCerrar(); }}
+          aria-label="Cerrar diálogo"
+          title="Cerrar (Esc)"
+        >
+          ✕
+        </button>
+
+        <h3 id="edit-product-title">Detalles del producto</h3>
 
         {/* IMAGEN + STOCK + CODIGO */}
         <div className="imagen-detalle-grid">
@@ -210,17 +261,7 @@ const guardarCambios = async () => {
             )}
           </div>
 
-          {/* NUEVO: input file + botón debajo del código */}
-          <div className="imagen-botones-grid">
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={onChangeImagen} 
-              ref={inputFileRef} 
-            />
-
-
-          </div>
+          {/* (file input eliminado por solicitud) */}
         </div>
         </div>
 
@@ -251,7 +292,7 @@ const guardarCambios = async () => {
         </div>
 
         {/* ATRIBUTOS n x 4 */}
-        <div className="atributos-grid">
+        <div className={`atributos-grid cols-${attrCols}`} style={{ gridTemplateColumns: `repeat(${attrCols}, 1fr)` }}>
           {atributosCategoria.map((attr, index) => {
             const id = attr.atributo_id || attr.id;
             const nombre = attr.atributo_nombre || attr.nombre;
@@ -275,18 +316,7 @@ const guardarCambios = async () => {
         {/* BOTONES */}
         <div className="modal-acciones">
 
-          <button
-            className="btn-cancelar"
-            onClick={() => {
-              setNuevaImagen(null);
-              if (inputFileRef.current) {
-                inputFileRef.current.value = "";
-              }
-              onCerrar();
-            }}
-          >
-            ❌ Cancelar
-          </button>
+
         </div>
       </div>
     </div>
