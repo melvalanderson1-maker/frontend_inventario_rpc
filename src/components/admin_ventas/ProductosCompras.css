@@ -518,3 +518,93 @@
 .producto-card:hover .acciones-card button {
   transform: scale(1.05);
 }
+
+/* ===============================
+   🎛️ SELECTOR DE ITEMS POR PÁGINA
+================================ */
+.pagination-settings {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 1.5rem 0 2rem 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fb 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pagination-settings label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+/* Botón pequeño y amigable para limpiar filtros */
+.btn-limpiar {
+  margin-left: 8px;
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.btn-limpiar:hover {
+  background-color: #e0e0e0;
+}
+.pagination-settings span {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.select-items-per-page {
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.select-items-per-page:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  background-color: #eff6ff;
+}
+
+.select-items-per-page:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* ===============================
+   ⏳ LOADING SPINNER
+================================ */
+.products-grid .loading-spinner {
+  grid-column: 1 / -1;
+  padding: 3rem 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.productos-grid .no-results {
+  grid-column: 1 / -1;
+  padding: 3rem 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #9ca3af;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 8px;
+  border: 1px dashed #fecaca;
+}

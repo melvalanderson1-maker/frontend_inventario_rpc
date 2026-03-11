@@ -69,6 +69,7 @@ import MovimientoSaldoInicial from "../components/admin_compras/MovimientoSaldoI
 // ADMIN VENTAS
 import DashboardVentas from "../pages/DashboardVentas";
 import ProductosVentas from "../components/admin_ventas/ProductosVentas";
+import Reportes from "../components/admin_ventas/Reportes";
 import CrearProductoVentas from "../components/admin_ventas/CrearProducto";
 import ProductoDetalleVentas from "../components/admin_ventas/ProductoDetalle";
 import MovimientosVentas from "../components/admin_ventas/MovimientosVentas";
@@ -218,6 +219,7 @@ export default function AppRouter() {
           <Route index element={null} />
 
           <Route path="productos" element={<ProductosVentas/>} />
+          <Route path="reportes" element={<Reportes/>} />
 
           <Route path="productos/nuevo" element={<CrearProductoVentas />} />
 

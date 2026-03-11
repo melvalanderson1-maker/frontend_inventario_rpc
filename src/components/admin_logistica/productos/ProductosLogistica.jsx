@@ -36,7 +36,7 @@ const aliasCategorias = {
   recogedor: [14], recogedores: [14],
   tacho: [15], tachos: [15], buzon: [15], buzones: [15],
   bolsa: [23], bolsas: [23],
-  papel: [10, 11, 25], higienico: [10], toal: [11], sabanilla: [25],
+  papel: [10, 11, 25], higienico: [10], toall: [11], sabanilla: [25],
   esponja: [7], esponjas: [7], fibra: [7],
   escoba: [5], escobas: [5],
   trapeador: [9], mopa: [9],
@@ -163,52 +163,70 @@ export default function ProductosLogistica() {
   }, []);
 
   /* ================= FILTRO ================= */
+  /* ================= FILTRADO INTELIGENTE ================= */
   const productosFiltrados = productos
     .map(p => {
-      const sinBusqueda = !search.trim();
 
-      if (sinBusqueda) {
-        const okTipo =
-          tipoProducto === "todos" ||
-          (tipoProducto === "simples" && p.es_catalogo === 0) ||
-          (tipoProducto === "variantes" && p.es_catalogo === 1);
+      // ================= FILTROS ESTRUCTURALES SIEMPRE ACTIVOS =================
+      const okTipo =
+        tipoProducto === "todos" ||
+        (tipoProducto === "simples" && p.es_catalogo === 0) ||
+        (tipoProducto === "variantes" && p.es_catalogo === 1);
 
-        const okCat =
-          categoria === "todas" ||
-          Number(p.categoria_id) === Number(categoria);
+      const okCategoriaSelect =
+        categoria === "todas" ||
+        Number(p.categoria_id) === Number(categoria);
 
-        const okStock =
-          stock === "todos" ||
-          (stock === "con" && p.stock_total > 0) ||
-          (stock === "sin" && p.stock_total <= 0);
+      const okStock =
+        stock === "todos" ||
+        (stock === "con" && p.stock_total > 0) ||
+        (stock === "sin" && p.stock_total <= 0);
 
-        return okTipo && okCat && okStock ? { ...p, score: 1 } : null;
+      // Si NO cumple filtros base → descartar inmediatamente
+      if (!okTipo || !okCategoriaSelect || !okStock) return null;
+
+      // Si no hay texto → mostrar todos los que pasaron filtros
+      if (!search.trim()) {
+        return { ...p, score: 1 };
       }
 
+      // búsqueda por código exacto
       if (coincideCodigo(p, search)) return { ...p, score: 1000 };
 
       const { palabras, numeros } = extraerTokens(search);
-      const textoProducto = normalizarTexto(`${p.descripcion} ${p.marca} ${p.modelo}`);
+      const medidas = extraerMedidas(search);
+      const colores = detectarColoresDesdeTexto(palabras);
+
+      const textoProducto = normalizarTexto(
+        `${p.descripcion || ""} ${p.marca || ""} ${p.modelo || ""}`
+      );
+
       let score = 0;
 
+      // categoría detectada en texto
       if (hayBusquedaPorCategoria(palabras)) {
-        const cats = detectarCategoriasDesdeTexto(palabras);
-        if (!cats.includes(Number(p.categoria_id))) return null;
+        if (!detectarCategoriasDesdeTexto(palabras).includes(Number(p.categoria_id))) {
+          return null;
+        }
         score += 300;
       }
 
-      const medidas = extraerMedidas(search);
+      // medidas
       if (medidas.length) {
         const r = scoreMedidasFlexible(medidas, textoProducto);
         if (!r.valido) return null;
         score += r.score;
       }
 
-      detectarColoresDesdeTexto(palabras).forEach(c => {
-        if (!textoProducto.includes(c)) return null;
-      });
+      // colores
+      if (colores.length && !colores.some(c => textoProducto.includes(c))) {
+        return null;
+      }
 
-      palabras.forEach(pal => textoProducto.includes(pal) && (score += 40));
+      // palabras
+      palabras.forEach(w => textoProducto.includes(w) && (score += 40));
+
+      // números
       numeros.forEach(n => textoProducto.includes(n.toString()) && (score += 50));
 
       return score >= 40 ? { ...p, score } : null;

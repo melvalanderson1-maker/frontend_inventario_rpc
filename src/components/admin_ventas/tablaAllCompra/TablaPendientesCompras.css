@@ -1,0 +1,228 @@
+
+.tabla-header {
+  margin-bottom: 12px;
+}
+
+.tabla-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #2d3748;
+}
+
+.tabla-pendientes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed; /* 🔥 CLAVE */
+}
+
+.tabla-pendientes th {
+  padding: 8px 6px;
+  text-align: left;
+  font-weight: 600;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.tabla-pendientes td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+.tabla-pendientes tbody tr:hover td {
+  filter: brightness(0.97);
+}
+
+.tabla-pendientes tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* PRODUCTO */
+.producto-cell {
+  max-width: 220px;
+}
+
+.producto-codigo {
+  font-weight: 700;     /* 🔥 un poco más fuerte */
+  font-size: 14px;      /* 🔥 más grande */
+  letter-spacing: 0.3px; /* 🔥 más elegante */
+}
+
+.producto-desc {
+  font-size: 11px;
+  color: #6b7280;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 🔥 SOLO 2 LÍNEAS */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* NUMÉRICOS */
+.td-num {
+  text-align: right;
+  font-weight: 500;
+}
+
+/* ESTADO */
+.estado {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-VALIDADO_LOGISTICA {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* ACCIÓN */
+.col-accion {
+  width: 40px;
+  text-align: center;
+}
+
+.btn-ir {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.btn-ir:hover {
+  background: #4338ca;
+}
+
+/* TIPOS */
+.row-entrada td {
+  background-color: #ecfdf5;
+}
+
+.row-salida td {
+  background-color: #fef2f2;
+}
+
+.row-ajuste td {
+  background-color: #fffbeb;
+}
+
+/* 🔥 IMPORTANTE: incluir también th si quieres */
+.row-entrada .col-accion,
+.row-salida .col-accion,
+.row-ajuste .col-accion {
+  background-color: inherit !important;
+}
+/* ===== AJUSTE FINO DE COLUMNAS ===== */
+
+/* Precio */
+.tabla-pendientes th:nth-child(5),
+.tabla-pendientes td:nth-child(5) {
+  width: 75px;
+  text-align: right;
+}
+
+/* Cantidad */
+.tabla-pendientes th:nth-child(6),
+.tabla-pendientes td:nth-child(6) {
+  width: 55px;
+  text-align: center;
+}
+
+/* Estado MÁS COMPACTO */
+.tabla-pendientes th:nth-child(11),
+.tabla-pendientes td:nth-child(11) {
+  width: 95px;          /* 🔥 más compacto */
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* Acción */
+.tabla-pendientes th:nth-child(12),
+.tabla-pendientes td:nth-child(12) {
+  width: 95px;   /* 🔥 mucho más compacto */
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* ===== FECHAS MÁS COMPACTAS ===== */
+
+/* F Registro */
+.tabla-pendientes th:nth-child(8),
+.tabla-pendientes td:nth-child(8) {
+  width: 130px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+/* F Validación */
+.tabla-pendientes th:nth-child(10),
+.tabla-pendientes td:nth-child(10) {
+  width: 130px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.btn-eye {
+  background: rgba(255, 255, 255, 0.6); /* 🔥 antes era blanco sólido */
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-eye svg {
+  width: 18px;
+  height: 18px;
+  color: #374151;
+  transition: 0.2s ease;
+}
+
+.btn-eye:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
+}
+
+.btn-eye:hover svg {
+  color: #4f46e5;
+  transform: scale(1.05);
+}
+
+.acciones-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.btn-ir {
+  flex: 0 0 auto;       /* 🔥 no crece */
+  width: 24px;          /* 🔥 más pequeño */
+  height: 24px;
+  font-size: 12px;
+  padding: 0;           /* 🔥 quita padding */
+  background: rgba(79, 70, 229, 0.9);
+  color: white;
+  border-radius: 6px;
+  display: inline-flex; /* 🔥 mejor que flex */
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  line-height: 1;       /* 🔥 elimina espacio vertical extra */
+  transition: 0.2s ease;
+}
+.btn-ir:hover {
+  background: #4338ca;
+  transform: scale(1.05);
+}
+
+

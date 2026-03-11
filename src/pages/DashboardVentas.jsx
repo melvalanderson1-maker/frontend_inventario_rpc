@@ -42,6 +42,13 @@ export default function DashboardVentas() {
                 <h3>Aprobaciones</h3>
                 <p>Pendientes de logística</p>
               </Link>
+
+              <Link className="compras-card" to="reportes">
+                <span className="emoji">📊</span>
+                <h3>Reportes</h3>
+                <p>Generar informes</p>
+              </Link>
+
             </div>
           </div>
         )}

@@ -86,6 +86,9 @@ export default function MenuVentas({ open: propOpen, setOpen: setPropOpen }) {
           <NavLink to="/ventas/aprobaciones" onClick={handleNavClick}>
             Aprobaciones
           </NavLink>
+          <NavLink to="/ventas/reportes" onClick={handleNavClick}>
+            Reportes
+          </NavLink>
         </nav>
 
         <div className="menu-footer">

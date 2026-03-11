@@ -1,11 +1,22 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../../api/api";
 import { Link } from "react-router-dom";
+import api from "../../../api/api";
+
+
+
+import EditAndDelete from "../productos/EditAndDelete";//IMPORT PARA EL OJITO
+import "./TablaPendientesCompras.css";
 
 export default function TablaPendientesCompras({ filtro = "" }) {
+  const navigate = useNavigate();
+
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  //PARA EL OJITO
+
+  const [productoEditar, setProductoEditar] = useState(null);
 
   const cargar = () => {
     setLoading(true);
@@ -15,10 +26,7 @@ export default function TablaPendientesCompras({ filtro = "" }) {
     api
       .get("/api/compras/movimientos/todos", { params: { estados } })
       .then((res) => setRows(res.data || []))
-      .catch((err) => {
-        console.error("❌ Error cargando pendientes compras:", err);
-        setRows([]);
-      })
+      .catch(() => setRows([]))
       .finally(() => setLoading(false));
   };
 
@@ -27,12 +35,20 @@ export default function TablaPendientesCompras({ filtro = "" }) {
   }, []);
 
   const formatPrecio = (precio) =>
-    precio === null || precio === undefined ? "-" : `S/ ${Number(precio).toFixed(2)}`;
+    precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`;
 
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
     return isNaN(d) ? "-" : d.toLocaleString();
+  };
+
+  const formatEstado = (estado) => {
+    const estadosMap = {
+      VALIDADO_LOGISTICA: "VALIDADO",
+    };
+
+    return estadosMap[estado] || estado?.replaceAll("_", " ") || "-";
   };
 
   const getRowClass = (tipo) => {
@@ -65,18 +81,22 @@ export default function TablaPendientesCompras({ filtro = "" }) {
         r.producto_descripcion,
       ]
         .filter(Boolean)
-        .some((campo) => campo.toString().toLowerCase().includes(texto))
+        .some((campo) =>
+          campo.toString().toLowerCase().includes(texto)
+        )
     );
   }, [rows, filtro]);
 
   return (
-    <div className="table-wrapper compact">
-      <strong>Pendientes de compras</strong>
+    <>
+      <div className="tabla-header">
+        <h3>Pendientes de Compras</h3>
+      </div>
 
-      <table>
+      <table className="tabla-pendientes">
         <thead>
           <tr>
-            <th>Producto</th>
+            <th>PRODUCTO</th>
             <th>Tipo</th>
             <th>OP</th>
             <th>Fabricante</th>
@@ -87,69 +107,127 @@ export default function TablaPendientesCompras({ filtro = "" }) {
             <th>Almacén</th>
             <th>F Validación</th>
             <th>Estado</th>
-            <th></th>
+            <th>Acción</th>
           </tr>
         </thead>
 
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="12" style={{ textAlign: "center", padding: 16 }}>
+              <td colSpan="12" className="center">
                 Cargando...
               </td>
             </tr>
           ) : rowsFiltrados.length === 0 ? (
             <tr>
-              <td colSpan="12" style={{ textAlign: "center", padding: 16 }}>
+              <td colSpan="12" className="center">
                 No se encontraron resultados
               </td>
             </tr>
           ) : (
-              rowsFiltrados.map((r) => (
-                <tr
-                  key={r.id}
-                  className={getRowClass(r.tipo_movimiento)}
-                  tabIndex={0}
-                  onClick={() => navigate(`/compras/producto/${r.producto_id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") navigate(`/compras/producto/${r.producto_id}`);
-                  }}
-                >
-                <td title={`${r.producto_codigo || "-"}${r.codigo_modelo ? ` · ${r.codigo_modelo}` : ""}${r.producto_descripcion ? ` — ${r.producto_descripcion}` : ""}`}>
-                  <div style={{ fontWeight: 600 }}>
+            rowsFiltrados.map((r) => (
+              <tr
+                key={r.id}
+                className={getRowClass(r.tipo_movimiento)}
+                onClick={() =>
+                  navigate(`/compras/producto/${r.producto_id}`)
+                }
+              >
+                <td className="producto-cell">
+                  <div className="producto-codigo">
                     {r.producto_codigo || "-"}
                     {r.codigo_modelo && ` · ${r.codigo_modelo}`}
                   </div>
+
+                  <div
+                    className="producto-desc"
+                    title={r.producto_descripcion}
+                  >
+                    {r.producto_descripcion}
+                  </div>
                 </td>
-                <td title={r.tipo_movimiento || "-"}>{r.tipo_movimiento}</td>
-                <td title={r.op_vinculada || "-"}>{r.op_vinculada || "-"}</td>
-                <td title={r.fabricante || "-"}>{r.fabricante || "-"}</td>
-                <td className="td-num" title={formatPrecio(r.precio)}>{formatPrecio(r.precio)}</td>
-                <td title={r.cantidad != null ? String(r.cantidad) : "-"}>{r.cantidad}</td>
-                <td title={r.empresa || "-"}>{r.empresa}</td>
-                <td title={formatFecha(r.fecha_creacion)}>{formatFecha(r.fecha_creacion)}</td>
-                <td title={r.almacen || "-"}>{r.almacen}</td>
-                <td title={formatFecha(r.fecha_validacion_logistica)}>{formatFecha(r.fecha_validacion_logistica)}</td>
-                <td title={r.estado ? r.estado.replaceAll("_", " ") : "-"}>
+
+                <td>{r.tipo_movimiento}</td>
+                <td>{r.op_vinculada || "-"}</td>
+                <td>{r.fabricante || "-"}</td>
+                <td className="td-num">{formatPrecio(r.precio)}</td>
+                <td>{r.cantidad}</td>
+                <td>{r.empresa}</td>
+                <td>{formatFecha(r.fecha_creacion)}</td>
+                <td>{r.almacen}</td>
+                <td>{formatFecha(r.fecha_validacion_logistica)}</td>
+
+                <td>
                   <span className={`estado estado-${r.estado}`}>
-                    {r.estado.replaceAll("_", " ")}
+                    {formatEstado(r.estado)}
                   </span>
                 </td>
-                <td>
-                  <Link
-                    to={`/ventas/producto/${r.producto_id}`}
-                    className="btn-ir"
-                    onClick={(e) => e.stopPropagation()}
-                    title="Ir al detalle del producto"
-                  >
-                    Ir →
-                  </Link>
+
+                <td className="col-accion">
+                  <div className="acciones-wrapper">
+
+                                        {/* BOTÓN OJITO */}
+                    <button
+                      className="btn-eye"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+
+                        try {
+                          const res = await api.get(`/api/compras/productos/${r.producto_id}`);
+                          setProductoEditar(res.data.producto);
+                        } catch (error) {
+                          console.error("Error cargando producto:", error);
+                        }
+                      }}
+                      title="Ver detalles"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="3"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* BOTÓN IR */}
+                    <Link
+                      to={`/compras/producto/${r.producto_id}`}
+                      className="btn-ir"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Ir al producto"
+                    >
+                      →
+                    </Link>
+
+
+
+                  </div>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-    </div>
+
+
+      <EditAndDelete
+        producto={productoEditar}
+        abierto={!!productoEditar}
+        onCerrar={() => setProductoEditar(null)}
+        onActualizado={cargar}
+      />
+    </>
   );
 }
