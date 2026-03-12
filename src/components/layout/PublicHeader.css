@@ -3,11 +3,13 @@
 ============================== */
 
 :root {
-  --erp-blue-dark: #0b1f4b;
-  --erp-blue-main: #123c8c;
-  --erp-gold: #f4c430;
+  --erp-blue-dark: #ffffff;
+   --erp-gold: #0817df;
+  --erp-blue-main: #ffffff;
+
+ 
   --erp-light: #f8fafc;
-  --erp-text: #1e293b;
+  --erp-text: #000dff;
 }
 
 /* ==============================
@@ -17,6 +19,7 @@
   background: linear-gradient(90deg, var(--erp-blue-dark), var(--erp-blue-main));
   color: #fff;
   padding: 14px 0;
+  padding: 8px 0;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -47,17 +50,16 @@
   font-weight: 700;
   letter-spacing: .5px;
   text-decoration: none;
-  color: #fff;
+  color: #fcfcfc;
   justify-self: start;
 }
 
 .logo {
-  width: 42px;
-  height: 42px;
+  width: 110px;
+  height: auto;
   object-fit: contain;
   transition: transform .3s ease;
 }
-
 .brand:hover .logo {
   transform: scale(1.05);
 }
@@ -75,7 +77,7 @@
 /* Links normales */
 .nav a {
   text-decoration: none;
-  color: #fff;
+  color: #000000;
   font-weight: 500;
   padding: 8px 14px;
   border-radius: 8px;
@@ -98,7 +100,10 @@
 }
 
 .nav .btn:hover {
-  background: #e6b800;
+  background: #06229e;
+  color: #fff;
+  border-bottom: #f8fafc;
+ 
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }

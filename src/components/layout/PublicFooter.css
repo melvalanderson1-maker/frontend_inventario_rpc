@@ -3,8 +3,8 @@
 ============================== */
 
 .public-footer {
-  background: var(--erp-blue-dark);
-  color: #fff;
+  background: #000000;
+  color: #ffffff;
   padding: 18px 0;
   font-size: 14px;
 }

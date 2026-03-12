@@ -13,7 +13,6 @@ export default function PublicHeader() {
             alt="Logo Universidad Quantum"
             className="logo"
           />
-          <span>GRUPO RPC</span>
         </Link>
 
         <nav className="nav">
