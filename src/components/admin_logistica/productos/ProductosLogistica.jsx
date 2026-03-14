@@ -307,9 +307,6 @@ useEffect(() => {
         </button>
       </div>
 
-
-
-
         {/* SELECT tipoProducto */}
         <select
           value={tipoProducto}
