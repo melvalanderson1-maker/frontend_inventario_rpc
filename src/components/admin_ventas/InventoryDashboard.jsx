@@ -1,237 +1,539 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import api from "../../api/api";
 
 import { Bar, Pie } from "react-chartjs-2";
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend
+Chart as ChartJS,
+CategoryScale,
+LinearScale,
+BarElement,
+ArcElement,
+Tooltip,
+Legend
 } from "chart.js";
 
 import "./InventoryDashboard.css";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend
+CategoryScale,
+LinearScale,
+BarElement,
+ArcElement,
+Tooltip,
+Legend
 );
 
-export default function InventoryDashboard() {
-  const [kpis, setKpis] = useState({});
-  const [topValor, setTopValor] = useState([]);
-  const [rotacion, setRotacion] = useState([]);
-  const [inventario, setInventario] = useState([]);
+export default function InventoryDashboard(){
 
-  const [empresas, setEmpresas] = useState([]);
-  const [almacenes, setAlmacenes] = useState([]);
-  const [fabricantes, setFabricantes] = useState([]);
+/* =======================
+STATE
+======================= */
 
-  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+const [kpis,setKpis]=useState({});
+const [topValor,setTopValor]=useState([]);
+const [rotacion,setRotacion]=useState([]);
+const [inventario,setInventario]=useState([]);
+const [empresasValor,setEmpresasValor]=useState([]);
+const [stockProductos,setStockProductos]=useState([]);
 
-  const [filters, setFilters] = useState({
-    empresa: "",
-    almacen: "",
-    fabricante: ""
-  });
+const [categorias,setCategorias]=useState([]);
 
-  const [loading, setLoading] = useState(true);
+const [valorTipo,setValorTipo]=useState("mayor");
+const [stockTipo,setStockTipo]=useState("mayor");
 
-  const formatCurrency = value =>
-    new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(value || 0);
+const [limit,setLimit]=useState(10);
 
-  const buildQuery = () => {
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([k, v]) => {
-      if (v) params.append(k, v);
-    });
-    return params.toString();
-  };
+const [productoSeleccionado,setProductoSeleccionado]=useState(null);
 
-  const loadCatalogos = async () => {
-    const [emp, alm, fab] = await Promise.all([
-      api.get("/api/empresas"),
-      api.get("/api/almacenes"),
-      api.get("/api/fabricantes")
-    ]);
+const [filters,setFilters]=useState({
+categoria:""
+});
 
-    setEmpresas(emp.data || []);
-    setAlmacenes(alm.data || []);
-    setFabricantes(fab.data || []);
-  };
+const [loading,setLoading]=useState(true);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const query = buildQuery();
-      const [kpisRes, topValorRes, rotacionRes, inventarioRes] = await Promise.all([
-        api.get(`/api/dashboard/kpis?${query}`),
-        api.get(`/api/dashboard/top-productos-valor?${query}`),
-        api.get(`/api/dashboard/rotacion?${query}`),
-        api.get(`/api/dashboard/inventario?${query}`)
-      ]);
 
-      setKpis(kpisRes.data || {});
-      setTopValor(topValorRes.data || []);
-      setRotacion(rotacionRes.data || []);
-      setInventario(inventarioRes.data || []);
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  };
+/* =======================
+UTILS
+======================= */
 
-  useEffect(() => {
-    loadCatalogos();
-  }, []);
+const formatCurrency=(value)=>
+new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"}).format(value||0);
 
-  useEffect(() => {
-    loadData();
-  }, [filters]);
 
-  /* CLICK EN BARRA */
-  const handleBarClick = (event, elements) => {
-    if (!elements.length) return;
-    const index = elements[0].index;
-    const producto = topValor[index].codigo_producto;
-    setProductoSeleccionado(producto);
-  };
+/* =======================
+QUERY BUILDER
+======================= */
 
-  /* FILTRO TABLA */
-  const inventarioFiltrado = productoSeleccionado
-    ? inventario.filter(i => String(i.codigo_producto) === String(productoSeleccionado))
-    : inventario;
+const buildQuery=useCallback(()=>{
 
-  /* DATA CHART */
-  const dataValor = {
-    labels: topValor.map(p => p.codigo_producto),
-    datasets: [{
-      label: "Valor inventario",
-      data: topValor.map(p => Number(p.valor_total_producto)),
-      backgroundColor: "#2563eb"
-    }]
-  };
+const params=new URLSearchParams();
 
-  const dataRotacion = {
-    labels: rotacion.map(r => r.estado),
-    datasets: [{
-      data: rotacion.map(r => Number(r.total)),
-      backgroundColor: ["#3b82f6", "#60a5fa", "#93c5fd"]
-    }]
-  };
+Object.entries(filters).forEach(([k,v])=>{
+if(v) params.append(k,v);
+});
 
-  if (loading) return <div className="dashboard-loading">Cargando dashboard...</div>;
+return params.toString();
 
-  return (
-    <div className="inventory-dashboard">
-      <div className="dashboard-header">
-        <h1>Dashboard Inventario</h1>
-        <span>Análisis ejecutivo de inventarios</span>
-      </div>
+},[filters]);
 
-      {/* FILTROS */}
-      <div className="filters">
-        <select value={filters.empresa} onChange={e => setFilters({ ...filters, empresa: e.target.value })}>
-          <option value="">Todas empresas</option>
-          {empresas.map(e => <option key={e.id} value={e.nombre}>{e.nombre}</option>)}
-        </select>
 
-        <select value={filters.almacen} onChange={e => setFilters({ ...filters, almacen: e.target.value })}>
-          <option value="">Todos almacenes</option>
-          {almacenes.map(a => <option key={a.id} value={a.nombre}>{a.nombre}</option>)}
-        </select>
+/* =======================
+CARGAR CATEGORIAS
+======================= */
 
-        <select value={filters.fabricante} onChange={e => setFilters({ ...filters, fabricante: e.target.value })}>
-          <option value="">Todos fabricantes</option>
-          {fabricantes.map(f => <option key={f.id} value={f.nombre}>{f.nombre}</option>)}
-        </select>
+const loadCategorias=async()=>{
 
-        <button className="reset-btn" onClick={() => setProductoSeleccionado(null)}>Mostrar todos los productos</button>
-      </div>
+try{
 
-      {/* KPIs */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-title">Productos</div>
-          <div className="kpi-value">{kpis.productos}</div>
-        </div>
+const res=await api.get("/api/dashboard/categorias-resumen");
 
-        <div className="kpi-card">
-          <div className="kpi-title">Con stock</div>
-          <div className="kpi-value">{kpis.con_stock}</div>
-        </div>
+const ordenadas=(res.data||[]).sort(
+(a,b)=>b.stock_total-a.stock_total
+);
 
-        <div className="kpi-card">
-          <div className="kpi-title">Valor inventario</div>
-          <div className="kpi-value">{formatCurrency(kpis.valor)}</div>
-        </div>
+setCategorias(ordenadas);
 
-        <div className="kpi-card warning">
-          <div className="kpi-title">Inmovilizado</div>
-          <div className="kpi-value">{kpis.inmovilizado}</div>
-        </div>
-      </div>
+}catch(e){
+console.error(e);
+}
 
-      {/* CHARTS */}
-      <div className="charts-grid">
-        <div className="chart-card">
-          <h3>Top productos por valor</h3>
-          <Bar data={dataValor} options={{ onClick: handleBarClick, plugins: { legend: { display: false } } }} />
-        </div>
+};
 
-        <div className="chart-card">
-          <h3>Rotación inventario</h3>
-          <div className="pie-container">
-            <Pie data={dataRotacion} options={{ maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }} />
-          </div>
-        </div>
-      </div>
 
-      {/* TABLA */}
-      <div className="tabla-inventario">
-        <h3>Detalle inventario {productoSeleccionado && `- Producto ${productoSeleccionado}`}</h3>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Codigo</th>
-                <th>Producto</th>
-                <th>Empresa</th>
-                <th>Almacen</th>
-                <th>Fabricante</th>
-                <th>Stock lote</th>
-                <th>Precio</th>
-                <th>Valor lote</th>
-                <th>Dias sin mov</th>
-                <th>Rotacion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {inventarioFiltrado.map((row, i) => (
-                <tr key={i} className={productoSeleccionado && row.codigo_producto === productoSeleccionado ? "highlight-row" : ""}>
-                  <td>{row.codigo_producto}</td>
-                  <td>{row.producto}</td>
-                  <td>{row.empresa}</td>
-                  <td>{row.almacen}</td>
-                  <td>{row.fabricante}</td>
-                  <td>{row.stock_lote}</td>
-                  <td>{row.precio_promedio_lote}</td>
-                  <td>{formatCurrency(row.valor_lote)}</td>
-                  <td>{row.dias_sin_movimiento}</td>
-                  <td>{row.estado_rotacion}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+/* =======================
+CARGAR DATA
+======================= */
+
+const loadData=async()=>{
+
+setLoading(true);
+
+try{
+
+const query=buildQuery();
+
+const [
+kpisRes,
+topValorRes,
+rotacionRes,
+inventarioRes,
+stockRes,
+empresasValorRes
+]=await Promise.all([
+
+api.get(`/api/dashboard/kpis?${query}`),
+
+api.get(`/api/dashboard/top-productos-valor?tipo=${valorTipo}&limit=${limit}&${query}`),
+
+api.get(`/api/dashboard/rotacion?${query}`),
+
+api.get(`/api/dashboard/inventario?${query}`),
+
+api.get(`/api/dashboard/productos-stock?tipo=${stockTipo}&limit=${limit}&${query}`),
+
+api.get(`/api/dashboard/valor-por-empresa?${query}`)
+
+]);
+
+setKpis(kpisRes.data||{});
+setTopValor(topValorRes.data||[]);
+setRotacion(rotacionRes.data||[]);
+setInventario(inventarioRes.data||[]);
+setStockProductos(stockRes.data||[]);
+setEmpresasValor(empresasValorRes.data||[]);
+
+}catch(e){
+
+console.error(e);
+
+}
+
+setLoading(false);
+
+};
+
+
+/* =======================
+INIT
+======================= */
+
+useEffect(()=>{ loadCategorias(); },[]);
+
+useEffect(()=>{
+loadData();
+},[filters,valorTipo,stockTipo,limit]);
+
+
+/* =======================
+CLICK BARRA
+======================= */
+
+const handleBarClick=useCallback((event,elements)=>{
+
+if(!elements.length) return;
+
+const index=elements[0].index;
+
+if(!topValor[index]) return;
+
+const producto=topValor[index].codigo_producto;
+
+setProductoSeleccionado(producto);
+
+window.scrollTo({
+top:document.body.scrollHeight,
+behavior:"smooth"
+});
+
+},[topValor]);
+
+
+/* =======================
+FILTRAR TABLA
+======================= */
+
+const inventarioFiltrado=useMemo(()=>{
+
+if(!productoSeleccionado) return inventario;
+
+return inventario.filter(
+i=>String(i.codigo_producto)===String(productoSeleccionado)
+);
+
+},[inventario,productoSeleccionado]);
+
+
+/* =======================
+DATASETS
+======================= */
+
+const dataValor=useMemo(()=>({
+
+labels:topValor.map(p=>p.codigo_producto),
+
+datasets:[{
+label:"Valor inventario",
+data:topValor.map(p=>Number(p.valor_total_producto)),
+backgroundColor:"#2563eb"
+}]
+
+}),[topValor]);
+
+
+const dataStock=useMemo(()=>({
+
+labels:stockProductos.map(p=>p.codigo_producto),
+
+datasets:[{
+label:"Stock",
+data:stockProductos.map(p=>Number(p.stock_total_producto)),
+backgroundColor:stockTipo==="mayor"?"#16a34a":"#dc2626"
+}]
+
+}),[stockProductos,stockTipo]);
+
+
+const dataRotacion=useMemo(()=>({
+
+labels:rotacion.map(r=>r.estado),
+
+datasets:[{
+data:rotacion.map(r=>Number(r.total)),
+backgroundColor:["#16a34a","#f59e0b","#dc2626"]
+}]
+
+}),[rotacion]);
+
+
+const dataEmpresas=useMemo(()=>({
+
+labels:empresasValor.map(e=>e.empresa),
+
+datasets:[{
+label:"Valor inventario",
+data:empresasValor.map(e=>Number(e.valor_inventario)),
+backgroundColor:"#2563eb",
+borderRadius:6,
+barThickness:18
+}]
+
+}),[empresasValor]);
+
+
+/* =======================
+LOADING
+======================= */
+
+if(loading)
+return <div className="dashboard-loading">Cargando...</div>;
+
+
+/* =======================
+UI
+======================= */
+
+return(
+
+<div className="inventory-dashboard">
+
+{/* =======================
+HEADER KPIS + FILTRO
+======================= */}
+
+<div className="kpi-header">
+
+<div className="kpi-grid">
+
+<div className="kpi-card">
+<div className="kpi-title">Productos</div>
+<div className="kpi-value">{kpis.productos}</div>
+</div>
+
+<div className="kpi-card">
+<div className="kpi-title">Productos con stock</div>
+<div className="kpi-value">{kpis.productos_con_stock}</div>
+</div>
+
+<div className="kpi-card">
+<div className="kpi-title">Valor inventario</div>
+<div className="kpi-value">{formatCurrency(kpis.valor)}</div>
+</div>
+
+<div className="kpi-card warning">
+<div className="kpi-title">Inmovilizado</div>
+<div className="kpi-value">{kpis.inmovilizado}</div>
+</div>
+
+{/* FILTRO CATEGORIA COMO KPI */}
+
+<div className="kpi-card categoria-card">
+
+<div className="kpi-title">
+Categoría
+</div>
+
+<select
+className="categoria-select"
+value={filters.categoria}
+onChange={(e)=>
+setFilters({
+...filters,
+categoria:e.target.value
+})
+}
+>
+
+<option value="">Todas las categorias</option>
+
+{categorias.map(c=>(
+
+<option
+key={c.categoria_id}
+value={c.categoria_id}
+>
+
+{c.categoria} | 📦 {c.stock_total} | 💰 {formatCurrency(c.valor_total)}
+
+</option>
+
+))}
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+
+{/* =======================
+CHARTS
+======================= */}
+
+<div className="charts-grid">
+
+<div className="chart-card">
+
+<div className="chart-header">
+
+<h3>Inventario por valor</h3>
+
+<div className="chart-buttons">
+
+<button
+className={valorTipo==="mayor"?"active":""}
+onClick={()=>setValorTipo("mayor")}
+>
+Mayor
+</button>
+
+<button
+className={valorTipo==="menor"?"active":""}
+onClick={()=>setValorTipo("menor")}
+>
+Menor
+</button>
+
+</div>
+
+</div>
+
+<Bar
+data={dataValor}
+options={{
+responsive:true,
+maintainAspectRatio:false,
+onClick:handleBarClick,
+plugins:{legend:{display:false}}
+}}
+/>
+
+</div>
+
+
+<div className="chart-card">
+
+<div className="chart-header">
+
+<h3>Inventario por stock</h3>
+
+<div className="chart-buttons">
+
+<button
+className={stockTipo==="mayor"?"active":""}
+onClick={()=>setStockTipo("mayor")}
+>
+Mayor
+</button>
+
+<button
+className={stockTipo==="menor"?"active":""}
+onClick={()=>setStockTipo("menor")}
+>
+Menor
+</button>
+
+</div>
+
+</div>
+
+<Bar
+data={dataStock}
+options={{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}}
+}}
+/>
+
+</div>
+
+
+<div className="chart-card">
+
+<h3>Rotación inventario</h3>
+
+<Pie
+data={dataRotacion}
+options={{
+plugins:{legend:{position:"bottom"}}
+}}
+/>
+
+</div>
+
+
+<div className="chart-card">
+
+<h3>Valor inventario por empresa</h3>
+
+<Bar
+data={dataEmpresas}
+options={{
+responsive:true,
+maintainAspectRatio:false,
+indexAxis:'y',
+plugins:{legend:{display:false}}
+}}
+/>
+
+</div>
+
+</div>
+
+
+{/* =======================
+TABLA
+======================= */}
+
+<div className="tabla-inventario">
+
+<h3>
+Detalle inventario
+{productoSeleccionado&&` - Producto ${productoSeleccionado}`}
+</h3>
+
+<div className="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Codigo</th>
+<th>Producto</th>
+<th>Empresa</th>
+<th>Almacen</th>
+<th>Fabricante</th>
+<th>Stock lote</th>
+<th>Precio</th>
+<th>Valor lote</th>
+<th>Dias sin mov</th>
+<th>Rotacion</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{inventarioFiltrado.map((row,i)=>(
+
+<tr
+key={i}
+className={
+productoSeleccionado && row.codigo_producto===productoSeleccionado
+? "highlight-row"
+: ""
+}
+>
+
+<td>{row.codigo_producto}</td>
+<td>{row.producto}</td>
+<td>{row.empresa}</td>
+<td>{row.almacen}</td>
+<td>{row.fabricante}</td>
+<td>{row.stock_lote}</td>
+<td>{formatCurrency(row.precio_promedio_lote)}</td>
+<td>{formatCurrency(row.valor_lote)}</td>
+<td>{row.dias_sin_movimiento}</td>
+<td>{row.estado_rotacion}</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+);
+
 }
