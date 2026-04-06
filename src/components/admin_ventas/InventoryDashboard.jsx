@@ -46,6 +46,9 @@ const [limit,setLimit]=useState(10);
 
 const [productoSeleccionado,setProductoSeleccionado]=useState(null);
 
+const [abc,setABC]=useState([]);
+const [heatmap,setHeatmap]=useState([]);
+
 const [filters,setFilters]=useState({
 categoria:""
 });
@@ -119,7 +122,9 @@ topValorRes,
 rotacionRes,
 inventarioRes,
 stockRes,
-empresasValorRes
+empresasValorRes,
+abcRes,
+heatmapRes
 ]=await Promise.all([
 
 api.get(`/api/dashboard/kpis?${query}`),
@@ -132,7 +137,11 @@ api.get(`/api/dashboard/inventario?${query}`),
 
 api.get(`/api/dashboard/productos-stock?tipo=${stockTipo}&limit=${limit}&${query}`),
 
-api.get(`/api/dashboard/valor-por-empresa?${query}`)
+api.get(`/api/dashboard/valor-por-empresa?${query}`),
+
+api.get(`/api/dashboard/abc-inventario?${query}`),
+
+api.get(`/api/dashboard/heatmap-almacenes?${query}`)
 
 ]);
 
@@ -142,6 +151,9 @@ setRotacion(rotacionRes.data||[]);
 setInventario(inventarioRes.data||[]);
 setStockProductos(stockRes.data||[]);
 setEmpresasValor(empresasValorRes.data||[]);
+
+setABC(abcRes.data||[]);
+setHeatmap(heatmapRes.data||[]);
 
 }catch(e){
 
@@ -259,6 +271,19 @@ barThickness:18
 }]
 
 }),[empresasValor]);
+
+
+const dataABC=useMemo(()=>({
+
+labels:abc.map(a=>"Categoria "+a.categoria),
+
+datasets:[{
+label:"Valor inventario",
+data:abc.map(a=>Number(a.valor)),
+backgroundColor:["#dc2626","#f59e0b","#16a34a"]
+}]
+
+}),[abc]);
 
 
 /* =======================
@@ -458,6 +483,70 @@ indexAxis:'y',
 plugins:{legend:{display:false}}
 }}
 />
+
+</div>
+
+
+
+
+<div className="chart-card">
+
+<h3>Matriz ABC Inventario</h3>
+
+<Bar
+data={dataABC}
+options={{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}}
+}}
+/>
+
+</div>
+
+
+
+<div className="chart-card">
+
+<h3>Inventario por almacén</h3>
+
+<table className="heatmap-table">
+
+<thead>
+<tr>
+<th>Almacen</th>
+<th>Valor inventario</th>
+</tr>
+</thead>
+
+<tbody>
+
+{heatmap.map((a,i)=>{
+
+let color="green";
+
+if(a.valor_inventario>1000000) color="red";
+else if(a.valor_inventario>300000) color="orange";
+
+return(
+
+<tr key={i}>
+
+<td>{a.almacen}</td>
+
+<td className={`heat-${color}`}>
+{formatCurrency(a.valor_inventario)}
+</td>
+
+</tr>
+
+);
+
+})}
+
+</tbody>
+
+</table>
 
 </div>
 

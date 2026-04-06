@@ -228,3 +228,23 @@ padding:4px 8px;
 font-size:13px;
 width:100%;
 }
+
+
+.heat-red{
+background:#fecaca;
+font-weight:600;
+}
+
+.heat-orange{
+background:#fde68a;
+font-weight:600;
+}
+
+.heat-green{
+background:#bbf7d0;
+font-weight:600;
+}
+
+.heatmap-table td{
+padding:8px;
+}
