@@ -50,6 +50,10 @@ export default function MenuContabilidad() {
             Movimientos
           </NavLink>
 
+          <NavLink to="/contabilidad/inventory">
+            Reportes
+          </NavLink>
+
 
 
 

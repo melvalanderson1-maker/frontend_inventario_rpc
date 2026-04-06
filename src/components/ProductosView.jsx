@@ -23,7 +23,7 @@ const ProductosView = () => {
     cargarProductos();
   }, []);
 
-  const cargarProductos = () => {
+  const cargarProductos  = () => {
     fetch(`${API_URL}/api/productos`)
       .then(res => res.json())
       .then(data => setProductos(data));

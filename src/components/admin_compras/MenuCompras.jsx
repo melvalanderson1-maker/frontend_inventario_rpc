@@ -48,8 +48,10 @@ export default function MenuCompras() {
             Movimientos
           </NavLink>
 
-          <NavLink to="/compras/aprobaciones" onClick={() => setOpen(false)}>
-            Aprobaciones
+
+
+          <NavLink to="/compras/inventory" onClick={() => setOpen(false)}>
+            Reportes
           </NavLink>
         </nav>
 

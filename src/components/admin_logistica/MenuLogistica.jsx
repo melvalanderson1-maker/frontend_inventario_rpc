@@ -47,6 +47,12 @@ export default function MenuLogistica() {
           <NavLink to="/logistica/movimientos">
             Movimientos
           </NavLink>
+
+
+          <NavLink to="/logistica/inventory">
+            Reportes
+          </NavLink>
+
         </nav>
 
         <div className="menu-footer">

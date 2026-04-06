@@ -165,7 +165,8 @@ export default function AppRouter() {
           <Route index element={null} />
 
           <Route path="productos" element={<ProductosCompras />} />
-       
+
+          <Route path="inventory" element={<InventoryDashboard />} />
 
 
           <Route path="productos/nuevo" element={<CrearProducto />} />
@@ -259,6 +260,8 @@ export default function AppRouter() {
         >
           <Route index element={<MovimientosLogistica />} />
 
+
+          <Route path="inventory" element={<InventoryDashboard />} />
           <Route path="movimientos" element={<MovimientosLogistica />} />
           <Route path="aprobaciones" element={<ValidarMovimiento />} />
           <Route path="rechazar/:id" element={<RechazarMovimiento />} />
@@ -284,6 +287,7 @@ export default function AppRouter() {
           <Route index element={<MovimientosContabilidad />} />
           <Route path="pendientes" element={<MovimientosContabilidad />} />
           <Route path="movimientos" element={<MovimientosContabilidad />} />
+          <Route path="inventory" element={<InventoryDashboard />} />
           <Route path="productos" element={<ProductosContabilidad />} />
           <Route path="producto/:id" element={<ProductoDetalleContabilidad />} />
           <Route path="aprobaciones" element={<ValidarMovimientoContabilidad />} />

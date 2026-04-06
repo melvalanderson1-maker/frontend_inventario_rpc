@@ -210,8 +210,6 @@ export default function HomePublica() {
           </div>
         </section>
 
-
-
         {/* Call to Action */}
         <section className="cta">
           <div className="container">
