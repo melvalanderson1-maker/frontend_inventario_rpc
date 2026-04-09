@@ -297,3 +297,11 @@ td:nth-child(10) {
   font-weight: 500;
 }
 
+
+.row-entrada {
+  background-color: #e6f4ea;
+}
+
+.row-salida {
+  background-color: #fdecea;
+}

@@ -364,7 +364,7 @@ export default function MovimientoSalida() {
           </div>
 
           <div>
-            <label>Precio unitario</label>
+            <label>Costo unitario</label>
 
             {preciosHistoricos.length > 1 && (
               <select

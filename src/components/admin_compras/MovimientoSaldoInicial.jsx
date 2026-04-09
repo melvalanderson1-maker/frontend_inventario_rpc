@@ -574,7 +574,7 @@ const ejecutarGuardado = async () => {
           </div>
 
           <div className={errores.precio ? "field error" : "field"}>
-            <label>Precio *</label>
+            <label>Costo *</label>
             <input
               type="number"
               name="precio"

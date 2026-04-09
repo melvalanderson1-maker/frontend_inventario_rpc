@@ -62,8 +62,14 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
             <th>Tipo</th>
             <th>OP vinc</th>
             <th>Fabricante</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
+            <th>C/U</th>
+            <th>Q</th>
+            <th>Saldo</th>
+
+            <th>C/U</th>
+            <th>Q Acu</th>
+            <th>Saldo</th>
+
             <th>Empresa</th>
             <th>F Registro</th>
             <th>Lug Almac</th>
@@ -85,10 +91,15 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
                 <td data-label="Tipo">{r.tipo_movimiento}</td>
                 <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
                 <td data-label="Fabricante">{r.fabricante || "-"}</td>
-                <td data-label="Precio" className="td-num">
-                  {formatPrecio(r.precio)}
-                </td>
-                <td data-label="Cantidad">{r.cantidad}</td>
+                {/* MOVIMIENTO */}
+                <td>{formatPrecio(r.precio)}</td>
+                <td>{r.cantidad}</td>
+                <td>{formatPrecio((r.precio || 0) * r.cantidad)}</td>
+
+                {/* ACUMULADO (LO IMPORTANTE 🔥) */}
+                <td>{formatPrecio(r.costo_promedio_resultante)}</td>
+                <td>{r.stock_resultante}</td>
+                <td>{formatPrecio(r.valor_stock_resultante)}</td>
                 <td data-label="Empresa">{r.empresa}</td>
                 <td data-label="F Registro">
                   {new Date(r.fecha_creacion).toLocaleString()}

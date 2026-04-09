@@ -193,7 +193,7 @@ const handleGuardarGeneral = async () => {
               <span>{movimiento.almacen || "-"}</span>
             </div>
             <div>
-              <label>Precio</label>
+              <label>Costo</label>
               <span>{formatPrecio(movimiento.precio)}</span>
             </div>
 

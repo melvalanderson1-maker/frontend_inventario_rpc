@@ -105,13 +105,13 @@ export default function TablaHistorial({ filtro = "" }) {
             <th>OP</th>
             
             <th>Fabricante</th>
-            <th>Precio</th>
+            <th>COSTO</th>
             <th>Cant</th>
             <th>Empresa</th>
             <th>F Registro</th>
             <th>Almacén</th>
             <th>F Validación</th>
-            <th>Estado</th>
+            <th>Estados</th>
             <th></th>
           </tr>
         </thead>

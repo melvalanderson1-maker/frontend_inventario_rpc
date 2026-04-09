@@ -75,7 +75,7 @@ export default function TablaStockEmpresa({
     if (!texto) return rows;
 
     return rows.filter((r) =>
-      [r.empresa, r.almacen, r.fabricante, r.cantidad, r.updated_at]
+      [r.empresa, r.almacen, r.fabricante, r.cantidad, r.costo_promedio, r.valor_stock, r.updated_at]
         .filter(Boolean)
         .some((campo) =>
           campo.toString().toLowerCase().includes(texto)
@@ -85,40 +85,48 @@ export default function TablaStockEmpresa({
 
   return (
     <div className="table-wrapper">
-      <table>
-        <thead>
+    <table>
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Almacén</th>
+          <th>Fabricante</th>
+          <th>Stock</th>
+          <th>Costo Unitario</th>   {/* Nueva */}
+          <th>Saldo Total</th>      {/* Nueva */}
+          <th>Últ. actualización</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rowsFiltrados.length === 0 ? (
           <tr>
-            <th>Empresa</th>
-            <th>Almacén</th>
-            <th>Fabricante</th>
-            <th>Stock</th>
-            <th>Últ. actualización</th>
+            <td colSpan="7" style={{ textAlign: "center", padding: 16 }}>
+              No se encontraron resultados
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {rowsFiltrados.length === 0 ? (
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center", padding: 16 }}>
-                No se encontraron resultados
+        ) : (
+          rowsFiltrados.map((r, i) => (
+            <tr
+              key={`${r.empresa}-${r.almacen}-${r.fabricante || "x"}-${i}`}
+              className="row-empresa"
+              style={{ backgroundColor: getEmpresaColor(r.empresa) }}
+            >
+              <td>{r.empresa}</td>
+              <td>{r.almacen}</td>
+              <td>{r.fabricante || "-"}</td>
+              <td className="td-num">{r.cantidad}</td>
+              <td className="td-num">
+                {r.costo_promedio != null ? Number(r.costo_promedio).toFixed(2) : "-"}
               </td>
+              <td className="td-num">
+                {r.valor_stock != null ? Number(r.valor_stock).toFixed(2) : "-"}
+              </td>
+              <td>{formatFecha(r.updated_at)}</td>
             </tr>
-          ) : (
-            rowsFiltrados.map((r, i) => (
-              <tr
-                key={`${r.empresa}-${r.almacen}-${r.fabricante || "x"}-${i}`}
-                className="row-empresa"
-                style={{ backgroundColor: getEmpresaColor(r.empresa) }}
-              >
-                <td>{r.empresa}</td>
-                <td>{r.almacen}</td>
-                <td>{r.fabricante || "-"}</td>
-                <td className="td-num">{r.cantidad}</td>
-                <td>{formatFecha(r.updated_at)}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+          ))
+        )}
+      </tbody>
+    </table>
     </div>
   );
 }

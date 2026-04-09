@@ -273,9 +273,24 @@ barThickness:18
 }),[empresasValor]);
 
 
+const totalABC = useMemo(
+() => abc.reduce((sum,a)=>sum + Number(a.valor||0),0),
+[abc]
+);
+
 const dataABC=useMemo(()=>({
 
-labels:abc.map(a=>"Categoria "+a.categoria),
+labels:abc.map(a=>{
+
+const porcentaje = totalABC
+? ((Number(a.valor)/totalABC)*100).toFixed(1)
+: 0;
+
+if(a.categoria==="A") return `A - Críticos (${a.productos} productos | ${porcentaje}%)`;
+if(a.categoria==="B") return `B - Importantes (${a.productos} productos | ${porcentaje}%)`;
+return `C - Bajo impacto (${a.productos} productos | ${porcentaje}%)`;
+
+}),
 
 datasets:[{
 label:"Valor inventario",
@@ -283,7 +298,7 @@ data:abc.map(a=>Number(a.valor)),
 backgroundColor:["#dc2626","#f59e0b","#16a34a"]
 }]
 
-}),[abc]);
+}),[abc,totalABC]);
 
 
 /* =======================

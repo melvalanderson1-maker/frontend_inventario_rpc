@@ -651,7 +651,7 @@ export default function MovimientoEntrada({
           </div>
 
           <div className={errores.precio ? "field error" : "field"}>
-            <label>Precio unitario *</label>
+            <label>Costo unitario *</label>
 
             {preciosHistoricos.length > 1 && (
                 <select

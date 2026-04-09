@@ -70,7 +70,7 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
             <th>Tipo</th>
             <th>OP vinc</th>
             <th>Fabricante</th>
-            <th>Precio</th>
+            <th>COSTO</th>
             <th>Cantidad</th>
             <th>Empresa</th>
             <th>F Registro</th>
