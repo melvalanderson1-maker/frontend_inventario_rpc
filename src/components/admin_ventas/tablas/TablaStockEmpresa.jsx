@@ -53,6 +53,16 @@ function formatFecha(fecha) {
   });
 }
 
+const formatPrecio = (precio) => {
+  if (precio === null || precio === undefined) return "-";
+  return `S/ ${Number(precio).toFixed(2)}`;
+};
+
+const formatPrecio4 = (precio) => {
+  if (precio === null || precio === undefined) return "-";
+  return Number(precio).toFixed(4);
+};
+
 export default function TablaStockEmpresa({
   productoId,
   varianteId,
@@ -116,10 +126,15 @@ export default function TablaStockEmpresa({
               <td>{r.fabricante || "-"}</td>
               <td className="td-num">{r.cantidad}</td>
               <td className="td-num">
-                {r.costo_promedio != null ? Number(r.costo_promedio).toFixed(2) : "-"}
+                {formatPrecio(r.costo_promedio)}
+                <div style={{ fontSize: "10px", color: "#666" }}>
+                  ({formatPrecio4(r.costo_promedio)})
+                </div>
               </td>
               <td className="td-num">
-                {r.valor_stock != null ? Number(r.valor_stock).toFixed(2) : "-"}
+                {formatPrecio(
+                  Number(r.cantidad) * Number(r.costo_promedio)
+                )}
               </td>
               <td>{formatFecha(r.updated_at)}</td>
             </tr>

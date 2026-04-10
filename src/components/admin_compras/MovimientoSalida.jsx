@@ -93,52 +93,23 @@ export default function MovimientoSalida() {
         )
       : null;
 
-  /* =========================
-     PRECIO AUTOMÁTICO
-  ========================= */
-  useEffect(() => {
-    const cargarPrecios = async () => {
-      if (!form.empresa_id || !form.almacen_id) {
-        setForm(f => ({ ...f, precio: "" }));
-        setPreciosHistoricos([]);
-        return;
-      }
+        // 🔥 AUTO COSTO PROMEDIO (REEMPLAZA PRECIO)
+      useEffect(() => {
+        if (!stockSeleccionado) return;
 
-      try {
-        const { data } = await axios.get("/api/compras/precio-stock", {
-          params: {
-            productoId,
-            empresa_id: form.empresa_id,
-            almacen_id: form.almacen_id,
-            fabricante_id: form.fabricante_id || null
-          }
-        });
+        const costo = Number(stockSeleccionado?.costo_promedio || 0);
 
-        setPreciosHistoricos(data.historicos || []);
+        if (!costo) return;
 
-        if (data.precio_actual !== null && data.precio_actual !== undefined) {
-          setForm(f => ({ ...f, precio: String(data.precio_actual) }));
-        } else {
-          setForm(f => ({ ...f, precio: "" }));
-        }
-      } catch (e) {
-        console.error("❌ Error cargando precios:", e);
-        setPreciosHistoricos([]);
-        setForm(f => ({ ...f, precio: "" }));
-      }
-    };
+        setForm(f => ({
+          ...f,
+          precio: costo.toFixed(4)
+        }));
 
-    cargarPrecios();
-  }, [productoId, form.empresa_id, form.almacen_id, form.fabricante_id]);
+      }, [stockSeleccionado]);
 
-  useEffect(() => {
-    if (!form.op_vinculada || !preciosHistoricos.length) return;
 
-    const match = preciosHistoricos.find(p => p.op_vinculada === form.op_vinculada);
-    if (match) {
-      setForm(f => ({ ...f, precio: String(match.precio) }));
-    }
-  }, [form.op_vinculada, preciosHistoricos]);
+
 
   /* =========================
      VALIDACIÓN
@@ -323,7 +294,7 @@ export default function MovimientoSalida() {
             nameNuevo="fabricante_nuevo"
             options={fabricantesDisponibles.map(f => ({
               ...f,
-              label: `${f.fabricante || "Sin fabricante"} (${f.cantidad})`
+              label: `${f.fabricante || "Sin fabricante"} (${f.cantidad}) - S/ ${Number(f.costo_promedio).toFixed(2)}`
             }))}
             optionLabel="label"
             optionValue="fabricante_id"
@@ -366,39 +337,13 @@ export default function MovimientoSalida() {
           <div>
             <label>Costo unitario</label>
 
-            {preciosHistoricos.length > 1 && (
-              <select
-                value={form.precio}
-                onChange={e => setForm({ ...form, precio: e.target.value })}
-                style={{ marginBottom: 6 }}
-              >
-                <option value="">Seleccionar precio histórico</option>
-                {preciosHistoricos.map((p, i) => (
-                  <option key={i} value={p.precio}>
-                    {Number(p.precio).toFixed(2)} — {p.tipo_movimiento} —{" "}
-                    {new Date(p.created_at).toLocaleDateString()}
-                    {p.op_vinculada ? ` — OP ${p.op_vinculada}` : ""}
-                  </option>
-                ))}
-              </select>
-            )}
 
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              name="precio"
-              value={form.precio}
-              disabled={!stockSeleccionado}
-              placeholder={
-                preciosHistoricos.length
-                  ? "Precio sugerido cargado automáticamente"
-                  : "Ingrese precio manual"
-              }
-              onChange={e =>
-                setForm({ ...form, precio: e.target.value })
-              }
-            />
+
+            {stockSeleccionado && (
+              <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                Costo promedio actual: S/ {Number(stockSeleccionado.costo_promedio).toFixed(4)}
+              </div>
+            )}
           </div>
 
           <div>

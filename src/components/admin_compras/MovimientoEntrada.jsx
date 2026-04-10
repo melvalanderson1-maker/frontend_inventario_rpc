@@ -63,6 +63,9 @@ export default function MovimientoEntrada({
   const [ops, setOps] = useState([]);
   const [preciosHistoricos, setPreciosHistoricos] = useState([]);
 
+
+  const [precioSugerido, setPrecioSugerido] = useState(null);
+
   const isHydratingRef = useRef(false);
 
   /* =====================================================
@@ -236,8 +239,7 @@ export default function MovimientoEntrada({
         return;
       }
 
-      const estado = formsPorVariante[productoEnUso.id];
-      if (estado?.dirty) return; // 🔒 si el usuario ya tocó algo, NO pisar
+
 
       try {
         const { data } = await axios.get("/api/compras/precio-stock", {
@@ -251,16 +253,11 @@ export default function MovimientoEntrada({
 
         setPreciosHistoricos(data.historicos || []);
 
-        if (data.precio_actual !== null && data.precio_actual !== undefined) {
-          isHydratingRef.current = true;
-          setForm(f => ({ ...f, precio: String(data.precio_actual) }));
-          isHydratingRef.current = false;
-
-          persistirActual(curr => ({
-            ...curr,
-            data: { ...curr.data, precio: String(data.precio_actual) }
-          }));
-        }
+      if (data.precio_actual !== null && data.precio_actual !== undefined) {
+        setPrecioSugerido(Number(data.precio_actual));
+      } else {
+        setPrecioSugerido(null);
+      }
       } catch (e) {
         console.error("❌ Error cargando precios:", e);
         setPreciosHistoricos([]);
@@ -287,7 +284,7 @@ export default function MovimientoEntrada({
 
     if (match) {
       isHydratingRef.current = true;
-      setForm(f => ({ ...f, precio: String(match.precio) }));
+      setPrecioSugerido(Number(match.precio));
       isHydratingRef.current = false;
 
       persistirActual(curr => ({
@@ -638,6 +635,7 @@ export default function MovimientoEntrada({
 
           <div className={errores.cantidad ? "field error" : "field"}>
             <label>Cantidad *</label>
+            
             <input
               type="number"
               name="cantidad"
@@ -648,6 +646,9 @@ export default function MovimientoEntrada({
             {errores.cantidad && (
               <span className="error-text">{errores.cantidad}</span>
             )}
+
+
+
           </div>
 
           <div className={errores.precio ? "field error" : "field"}>
@@ -674,6 +675,29 @@ export default function MovimientoEntrada({
               </select>
             )}
 
+            {precioSugerido !== null && (
+              <div style={{ fontSize: 15, color: "#666", marginBottom: 4 }}>
+                💡 Precio sugerido: <strong>S/ {precioSugerido.toFixed(2)}</strong>
+
+                <button
+                  type="button"
+                  style={{
+                    marginLeft: 8,
+                    fontSize: 11,
+                    padding: "2px 6px",
+                    cursor: "pointer"
+                  }}
+                  onClick={() =>
+                    handleChange({
+                      target: { name: "precio", value: String(precioSugerido) }
+                    })
+                  }
+                >
+                  Usar
+                </button>
+              </div>
+            )}
+
             <input
               type="number"
               step="0.01"
@@ -685,6 +709,17 @@ export default function MovimientoEntrada({
 
             {errores.precio && (
               <span className="error-text">{errores.precio}</span>
+            )}
+
+            {precioSugerido !== null && form.precio && (
+              <div style={{
+                fontSize: 11,
+                color: Math.abs(Number(form.precio) - precioSugerido) > 5 ? "red" : "green"
+              }}>
+                {Math.abs(Number(form.precio) - precioSugerido) > 5
+                  ? "⚠️ Precio muy diferente al sugerido"
+                  : "✔ Precio dentro del rango sugerido"}
+              </div>
             )}
           </div>
 

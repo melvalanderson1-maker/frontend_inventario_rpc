@@ -20,6 +20,12 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
     return `S/ ${Number(precio).toFixed(2)}`;
   };
 
+
+  const formatPrecio4 = (precio) => {
+    if (precio === null || precio === undefined) return "-";
+    return Number(precio).toFixed(4);
+  };
+
   const getRowClass = (tipo) => {
     if (!tipo) return "";
     const t = tipo.toLowerCase();
@@ -92,14 +98,34 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
                 <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
                 <td data-label="Fabricante">{r.fabricante || "-"}</td>
                 {/* MOVIMIENTO */}
-                <td>{formatPrecio(r.precio)}</td>
+                <td>
+                {r.tipo_movimiento === "salida"
+                  ? formatPrecio(r.costo_anterior)
+                  : formatPrecio(r.precio)}
+              </td>
                 <td>{r.cantidad}</td>
-                <td>{formatPrecio((r.precio || 0) * r.cantidad)}</td>
+                <td>
+                {formatPrecio(
+                  (r.tipo_movimiento === "salida"
+                    ? r.costo_anterior
+                    : r.precio || 0) * r.cantidad
+                )}
+              </td>
 
                 {/* ACUMULADO (LO IMPORTANTE 🔥) */}
-                <td>{formatPrecio(r.costo_promedio_resultante)}</td>
+                <td>
+                  {formatPrecio(r.costo_promedio_resultante)}
+                  <div style={{ fontSize: "10px", color: "#888" }}>
+                    ({formatPrecio4(r.costo_promedio_resultante)})
+                  </div>
+                </td>
                 <td>{r.stock_resultante}</td>
-                <td>{formatPrecio(r.valor_stock_resultante)}</td>
+                <td>
+                  {formatPrecio(
+                    Number(r.stock_resultante) *
+                    Number(r.costo_promedio_resultante)
+                  )}
+                </td>
                 <td data-label="Empresa">{r.empresa}</td>
                 <td data-label="F Registro">
                   {new Date(r.fecha_creacion).toLocaleString()}
