@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
-import "./MovimientosTablas.css";
+import "./Historial.css";
 
 export default function TablaHistorial({ productoId, varianteId, filtro = "" }) {
   const [rows, setRows] = useState([]);
@@ -20,6 +20,11 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
     return `S/ ${Number(precio).toFixed(2)}`;
   };
 
+  const formatPrecio4 = (precio) => {
+    if (precio === null || precio === undefined) return "-";
+    return Number(precio).toFixed(4);
+  };
+
   const getRowClass = (tipo) => {
     if (!tipo) return "";
     const t = tipo.toLowerCase();
@@ -29,24 +34,12 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
     return "";
   };
 
-  // ✅ FILTRO REAL MULTICAMPO
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
 
     return rows.filter((r) =>
-      [
-        r.tipo_movimiento,
-        r.op_vinculada,
-        r.fabricante,
-        r.precio,
-        r.cantidad,
-        r.empresa,
-        r.almacen,
-        r.estado,
-        r.fecha_creacion,
-        r.fecha_validacion_logistica,
-      ]
+      Object.values(r)
         .filter(Boolean)
         .some((campo) =>
           campo.toString().toLowerCase().includes(texto)
@@ -55,60 +48,96 @@ export default function TablaHistorial({ productoId, varianteId, filtro = "" }) 
   }, [rows, filtro]);
 
   return (
-    <div className="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>OP vinc</th>
-            <th>Fabricante</th>
-            <th>Costo</th>
-            <th>Cantidad</th>
-            <th>Empresa</th>
-            <th>F Registro</th>
-            <th>Lug Almac</th>
-            <th>F Almacén</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
+    <div className="historial-container">
+      <div className="tabla">
 
-        <tbody>
-          {rowsFiltrados.length === 0 ? (
-            <tr>
-              <td colSpan="10" style={{ textAlign: "center", padding: 16 }}>
-                No se encontraron resultados
-              </td>
-            </tr>
-          ) : (
-            rowsFiltrados.map((r) => (
-              <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
-                <td data-label="Tipo">{r.tipo_movimiento}</td>
-                <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
-                <td data-label="Fabricante">{r.fabricante || "-"}</td>
-                <td data-label="Precio" className="td-num">
-                  {formatPrecio(r.precio)}
-                </td>
-                <td data-label="Cantidad">{r.cantidad}</td>
-                <td data-label="Empresa">{r.empresa}</td>
-                <td data-label="F Registro">
-                  {new Date(r.fecha_creacion).toLocaleString()}
-                </td>
-                <td data-label="Lug Almac">{r.almacen}</td>
-                <td data-label="F Almacén">
-                  {r.fecha_validacion_logistica
-                    ? new Date(r.fecha_validacion_logistica).toLocaleString()
-                    : "-"}
-                </td>
-                <td data-label="Estado">
-                  <span className={`estado estado-${r.estado}`}>
-                    {r.estado.replaceAll("_", " ")}
-                  </span>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+        {/* HEADER */}
+        <div className="fila header">
+          <div>Tipo</div>
+          <div>OP</div>
+          <div>Fabricante</div>
+          <div className="num">C/U</div>
+          <div className="num">Q</div>
+          <div className="num">Total</div>
+
+          <div className="num">C. Prom</div>
+          <div className="num">Stock</div>
+          <div className="num">Valorizado</div>
+
+          <div>Empresa</div>
+          <div>F. Registro</div>
+          <div>Almacén</div>
+          <div>F. Validación</div>
+          <div>Estado</div>
+        </div>
+
+        {/* BODY */}
+        {rowsFiltrados.length === 0 ? (
+          <div className="empty">No hay datos</div>
+        ) : (
+          rowsFiltrados.map((r) => (
+            <div key={r.id} className={`fila ${getRowClass(r.tipo_movimiento)}`}>
+
+              <div data-label="Tipo">{r.tipo_movimiento}</div>
+              <div data-label="OP">{r.op_vinculada || "-"}</div>
+              <div data-label="Fabricante">{r.fabricante || "-"}</div>
+
+              <div className="num">
+                {r.tipo_movimiento === "salida"
+                  ? formatPrecio(r.costo_anterior)
+                  : formatPrecio(r.precio)}
+              </div>
+
+              <div className="num">{r.cantidad}</div>
+
+              <div className="num">
+                {formatPrecio(
+                  (r.tipo_movimiento === "salida"
+                    ? r.costo_anterior
+                    : r.precio || 0) * r.cantidad
+                )}
+              </div>
+
+              <div className="num">
+                {formatPrecio(r.costo_promedio_resultante)}
+                <div className="mini">
+                  ({formatPrecio4(r.costo_promedio_resultante)})
+                </div>
+              </div>
+
+              <div className="num">{r.stock_resultante}</div>
+
+              <div className="num strong">
+                {formatPrecio(
+                  Number(r.stock_resultante) *
+                  Number(r.costo_promedio_resultante)
+                )}
+              </div>
+
+              <div>{r.empresa}</div>
+
+              <div>
+                {new Date(r.fecha_creacion).toLocaleString()}
+              </div>
+
+              <div>{r.almacen}</div>
+
+              <div>
+                {r.fecha_validacion_logistica
+                  ? new Date(r.fecha_validacion_logistica).toLocaleString()
+                  : "-"}
+              </div>
+
+              <div>
+                <span className={`estado estado-${r.estado}`}>
+                  {r.estado.replaceAll("_", " ")}
+                </span>
+              </div>
+
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

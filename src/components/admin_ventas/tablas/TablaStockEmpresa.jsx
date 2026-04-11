@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
+import "./Historial.css";
+
 
 /* ===============================
    PALETA ERP DISCRETA (DISTINGUIBLE)
@@ -93,55 +95,62 @@ export default function TablaStockEmpresa({
     );
   }, [rows, filtro]);
 
-  return (
-    <div className="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Almacén</th>
-          <th>Fabricante</th>
-          <th>Stock</th>
-          <th>Costo Unitario</th>   {/* Nueva */}
-          <th>Saldo Total</th>      {/* Nueva */}
-          <th>Últ. actualización</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rowsFiltrados.length === 0 ? (
-          <tr>
-            <td colSpan="7" style={{ textAlign: "center", padding: 16 }}>
-              No se encontraron resultados
-            </td>
-          </tr>
-        ) : (
-          rowsFiltrados.map((r, i) => (
-            <tr
-              key={`${r.empresa}-${r.almacen}-${r.fabricante || "x"}-${i}`}
-              className="row-empresa"
-              style={{ backgroundColor: getEmpresaColor(r.empresa) }}
-            >
-              <td>{r.empresa}</td>
-              <td>{r.almacen}</td>
-              <td>{r.fabricante || "-"}</td>
-              <td className="td-num">{r.cantidad}</td>
-              <td className="td-num">
-                {formatPrecio(r.costo_promedio)}
-                <div style={{ fontSize: "10px", color: "#666" }}>
-                  ({formatPrecio4(r.costo_promedio)})
-                </div>
-              </td>
-              <td className="td-num">
-                {formatPrecio(
-                  Number(r.cantidad) * Number(r.costo_promedio)
-                )}
-              </td>
-              <td>{formatFecha(r.updated_at)}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+return (
+  <div className="historial-container">
+    <div className="tabla tabla-stock">
+
+      {/* HEADER */}
+      <div className="fila header">
+        <div>Empresa</div>
+        <div>Almacén</div>
+        <div>Fabricante</div>
+        <div className="num">Stock</div>
+        <div className="num">C. Unitario</div>
+        <div className="num">Saldo</div>
+        <div>Últ. actualización</div>
+      </div>
+
+      {/* BODY */}
+      {rowsFiltrados.length === 0 ? (
+        <div className="empty">No se encontraron resultados</div>
+      ) : (
+        rowsFiltrados.map((r, i) => (
+          <div
+            key={`${r.empresa}-${r.almacen}-${r.fabricante || "x"}-${i}`}
+            className="fila"
+            style={{ backgroundColor: getEmpresaColor(r.empresa) }}
+          >
+
+            <div data-label="Empresa">{r.empresa}</div>
+            <div data-label="Almacén">{r.almacen}</div>
+            <div data-label="Fabricante">{r.fabricante || "-"}</div>
+
+            <div className="num" data-label="Stock">
+              {r.cantidad}
+            </div>
+
+            <div className="num" data-label="C. Unitario">
+              {formatPrecio(r.costo_promedio)}
+              <div className="mini">
+                ({formatPrecio4(r.costo_promedio)})
+              </div>
+            </div>
+
+            <div className="num strong" data-label="Saldo">
+              {formatPrecio(
+                Number(r.cantidad) * Number(r.costo_promedio)
+              )}
+            </div>
+
+            <div data-label="Actualización">
+              {formatFecha(r.updated_at)}
+            </div>
+
+          </div>
+        ))
+      )}
+
     </div>
-  );
+  </div>
+);
 }

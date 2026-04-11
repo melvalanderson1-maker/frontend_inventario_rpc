@@ -1,0 +1,258 @@
+.historial-container {
+  width: 100%;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+/* TABLA */
+.tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  min-width: max-content; /* 🔥 clave */
+}
+
+/* FILAS */
+.fila {
+  display: grid;
+
+  grid-template-columns:
+    minmax(120px, 1fr)
+    minmax(100px, 1fr)
+    minmax(140px, 1.2fr)
+    minmax(100px, 0.8fr)
+    minmax(70px, 0.6fr)
+    minmax(120px, 1fr)
+    minmax(120px, 1fr)
+    minmax(90px, 0.8fr)
+    minmax(140px, 1fr)
+    minmax(120px, 1fr)
+    minmax(180px, 1.3fr)
+    minmax(120px, 1fr)
+    minmax(180px, 1.3fr)
+    minmax(150px, 1.2fr);
+
+  min-width: 1500px; /* 🔥 ajustado */
+
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+  align-items: center;
+}
+
+
+
+.historial-container {
+  width: 100%;
+  padding: 12px;
+  overflow-x: auto; /* ✅ SCROLL REAL */
+}
+
+/* 🔥 CONTENEDOR CON SCROLL REAL */
+.tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  min-width: max-content; /* ✅ IMPORTANTE */
+}
+
+/* 🔥 SCROLL BONITO */
+.tabla::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tabla::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.tabla::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 🔥 FILAS PERFECTAS (NO SE ROMPEN NUNCA) */
+.fila {
+  display: grid;
+
+  grid-template-columns:
+    minmax(120px, 1fr)
+    minmax(100px, 1fr)
+    minmax(90px, 0.5fr)
+    minmax(100px, 0.8fr)
+    minmax(70px, 0.6fr)
+    minmax(120px, 1fr)
+    minmax(120px, 1fr)
+    minmax(90px, 0.8fr)
+    minmax(140px, 1fr)
+    minmax(120px, 1fr)
+    minmax(180px, 1.3fr) /* 🔥 más espacio fechas */
+    minmax(120px, 1fr)
+    minmax(180px, 1.3fr)
+    minmax(150px, 1.2fr); /* 🔥 estado SIEMPRE visible */
+
+   min-width: 1500px; /* suficiente */
+
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  align-items: center;
+}
+
+.fila:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: white;
+  font-weight: 600;
+}
+
+/* NUMEROS PERFECTOS */
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* TEXTO PEQUEÑO */
+.mini {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+/* DESTACADO */
+.strong {
+  font-weight: bold;
+  color: #111;
+}
+
+/* COLORES POR TIPO */
+.row-entrada {
+  border-left: 5px solid #10b981;
+}
+
+.row-salida {
+  border-left: 5px solid #ef4444;
+}
+
+.row-ajuste {
+  border-left: 5px solid #f59e0b;
+}
+
+/* ESTADOS */
+.estado {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-PENDIENTE_LOGISTICA {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado-VALIDADO_LOGISTICA {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.estado-RECHAZADO_LOGISTICA,
+.estado-RECHAZADO_CONTABILIDAD {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.estado-APROBADO_FINAL {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* VACIO */
+.empty {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* 📱 RESPONSIVE REAL (SIN ROMPER NADA) */
+@media (max-width: 1024px) {
+  .fila {
+    grid-template-columns: repeat(2, 1fr);
+    min-width: 100%;
+  }
+
+  .header {
+    display: none;
+  }
+
+  .fila div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .fila div::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .num {
+    text-align: right;
+  }
+}
+
+/* 🔥 TABLA STOCK EMPRESA (7 columnas) */
+.tabla-stock .fila {
+  grid-template-columns:
+    minmax(160px, 1.2fr)
+    minmax(120px, 1fr)
+    minmax(140px, 1fr)
+    minmax(100px, 0.8fr)
+    minmax(140px, 1fr)
+    minmax(140px, 1fr)
+    minmax(180px, 1.2fr);
+
+  min-width: 900px;
+}
+
+
+/* 🔥 GRID CORRECTO (ESTADO AL FINAL) */
+.tabla-aprobados-grid .fila {
+  grid-template-columns:
+    minmax(100px, 1fr)   /* Tipo */
+    minmax(90px, 1fr)    /* OP */
+    minmax(140px, 1.2fr) /* Fabricante */
+
+    minmax(100px, 0.8fr) /* C/U */
+    minmax(80px, 0.6fr)  /* Cant */
+    minmax(120px, 1fr)   /* Total */
+
+    minmax(120px, 1fr)   /* C Prom */
+    minmax(90px, 0.8fr)  /* Stock */
+    minmax(140px, 1fr)   /* Valorizado */
+
+    minmax(120px, 1fr)   /* Empresa */
+
+    minmax(160px, 1.2fr) /* F Registro */
+
+    minmax(160px, 1.2fr) /* Obs Compras */
+    minmax(160px, 1.2fr) /* Obs Logística */
+    
+
+    minmax(140px, 1fr)   /* Almacén */
+    minmax(140px, 1fr)   /* Evidencia */
+    minmax(160px, 1.2fr)/* F Validación */
+
+    minmax(150px, 1.2fr); /* Estado */
+
+  min-width: 2000px;
+}

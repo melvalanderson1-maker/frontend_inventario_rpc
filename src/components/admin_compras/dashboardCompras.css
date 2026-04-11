@@ -1,7 +1,9 @@
 .compras-main {
   margin-left: 240px;
   padding: 24px;
-  width: 100%;
+
+  width: calc(100% - 240px); /* 🔥 CLAVE ABSOLUTA */
+  overflow-x: hidden; /* evita doble scroll raro */
 }
 
 /* Cuando el menú está oculto, permitimos que el main ocupe todo el ancho */

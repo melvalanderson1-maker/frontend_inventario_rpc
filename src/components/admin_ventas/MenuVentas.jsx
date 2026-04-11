@@ -62,15 +62,7 @@ export default function MenuVentas({ open: propOpen, setOpen: setPropOpen }) {
       )}
 
       <aside className={`menu-compras ${isOpen ? "open" : "closed"}`}>
-        <button
-          className="menu-collapse"
-          onClick={toggleMenu}
-          aria-label={isOpen ? "Ocultar menú" : "Mostrar menú"}
-          aria-expanded={isOpen}
-          title={isOpen ? "Ocultar menú" : "Mostrar menú"}
-        >
-          ‹
-        </button>
+
         <div className="brand">Ventas</div>
 
         <nav>

@@ -1,7 +1,9 @@
 .contabilidad-main {
   margin-left: 240px;
   padding: 24px;
-  width: 100%;
+
+  width: calc(100% - 240px); /* 🔥 CLAVE ABSOLUTA */
+  overflow-x: hidden; /* evita doble scroll raro */
 }
 
 .contabilidad-title {

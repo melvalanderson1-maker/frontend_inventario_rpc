@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
-import "./TablaAprobados.css";
+import "./Historial.css";
 
 export default function TablaAprobados({
   productoId,
@@ -31,24 +31,14 @@ export default function TablaAprobados({
   const formatPrecio = (precio) =>
     precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`;
 
+  const formatPrecio4 = (precio) =>
+    precio == null ? "-" : Number(precio).toFixed(4);
+
   const formatFecha = (fecha) => {
     if (!fecha) return "-";
     const d = new Date(fecha);
-    if (isNaN(d)) return "-";
-
-    // Formato dd/mm/yyyy hh:mm:ss
-    const pad = (n) => n.toString().padStart(2, "0");
-
-    const dia = pad(d.getDate());
-    const mes = pad(d.getMonth() + 1); // Mes empieza en 0
-    const año = d.getFullYear();
-    const horas = pad(d.getHours());
-    const minutos = pad(d.getMinutes());
-    const segundos = pad(d.getSeconds());
-
-    return `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+    return isNaN(d) ? "-" : d.toLocaleString();
   };
-
 
   const getRowClass = (tipo) => {
     if (!tipo) return "";
@@ -64,21 +54,7 @@ export default function TablaAprobados({
     if (!texto) return rows;
 
     return rows.filter((r) =>
-      [
-        r.codigo_producto,
-        r.tipo_movimiento,
-        r.op_vinculada,
-        r.fabricante,
-        r.precio,
-        r.cantidad,
-        r.empresa,
-        r.almacen,
-        r.estado,
-        r.fecha_creacion,
-        r.fecha_validacion_logistica,
-        r.observaciones_compras,
-        r.observaciones_logistica,
-      ]
+      Object.values(r)
         .filter(Boolean)
         .some((campo) =>
           campo.toString().toLowerCase().includes(texto)
@@ -96,9 +72,7 @@ export default function TablaAprobados({
     setModalTexto(texto);
   };
 
-
-
-    const abrirModalEvidencia = (url) => {
+  const abrirModalEvidencia = (url) => {
     setModalImagen(url);
     setZoom(1);
     setOffset({ x: 0, y: 0 });
@@ -110,29 +84,12 @@ export default function TablaAprobados({
     setModalAbierto(false);
   };
 
-  // Zoom centrado en cursor
   const manejarZoom = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const cursorX = e.clientX - rect.left;
-    const cursorY = e.clientY - rect.top;
-
     const delta = e.deltaY < 0 ? 0.1 : -0.1;
-    setZoom((prevZoom) => {
-      const newZoom = Math.min(Math.max(prevZoom + delta, 1), 5);
-
-      // Ajustar offset para que el zoom sea relativo al cursor
-      setOffset((prev) => ({
-        x: prev.x - (cursorX - rect.width / 2) * (newZoom / prevZoom - 1),
-        y: prev.y - (cursorY - rect.height / 2) * (newZoom / prevZoom - 1),
-      }));
-
-      return newZoom;
-    });
+    setZoom((z) => Math.min(Math.max(z + delta, 1), 5));
   };
 
-  // Drag para mover la imagen
   const iniciarDrag = (e) => {
     e.preventDefault();
     setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
@@ -140,257 +97,208 @@ export default function TablaAprobados({
 
   const moverDrag = (e) => {
     if (!dragStart) return;
-    setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+    setOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
   };
 
   const terminarDrag = () => setDragStart(null);
 
-
   return (
     <>
-      {/* SCROLL SOLO AQUÍ */}
-      <div className="tabla-aprobados-scroll">
-
+      {/* MODAL IMAGEN */}
       {modalAbierto && (
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1000,
-          overflow: "hidden",
-          cursor: dragStart ? "grabbing" : "grab",
-        }}
-        onClick={cerrarModalEvidencia}
-        onMouseMove={moverDrag}
-        onMouseUp={terminarDrag}
-        onMouseLeave={terminarDrag}
-      >
         <div
           style={{
-            position: "relative",
-            maxWidth: "80%",
-            maxHeight: "80%",
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
           }}
-          onClick={(e) => e.stopPropagation()} // prevenir cierre al clickear imagen
-          onWheel={manejarZoom} // zoom solo en la imagen
+          onClick={cerrarModalEvidencia}
+          onMouseMove={moverDrag}
+          onMouseUp={terminarDrag}
         >
-          {/* Botón de cerrar dentro de la imagen */}
-          <button
-            onClick={cerrarModalEvidencia}
-            style={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              background: "rgba(255, 0, 0, 0.9)",
-              color: "#ffffffce",
-              border: "none",
-              borderRadius: "50%",
-              width: 35,
-              height: 35,
-              fontSize: 20,
-              fontWeight: "bold",
-              cursor: "pointer",
-              zIndex: 1010,
-              boxShadow: "0 0 5px rgba(212, 16, 16, 0.5)",
-            }}
-          >
-            ×
-          </button>
-
           <img
             src={modalImagen}
-            alt="Evidencia"
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            onWheel={manejarZoom}
             onMouseDown={iniciarDrag}
             style={{
-              width: "100%",
-              height: "520px",
-              objectFit: "contain",
-              borderRadius: 10,
-              boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
+              maxWidth: "80%",
+              maxHeight: "80%",
               transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-              transition: dragStart ? "none" : "transform 0.1s",
-              cursor: dragStart ? "grabbing" : "grab",
-              display: "block",
+              borderRadius: 10,
+              cursor: "grab",
             }}
           />
         </div>
-      </div>
-    )}
-        <table className="tabla-aprobados">
-          <colgroup>
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "130px" }} />
-            <col style={{ width: "85px" }} />
-            <col style={{ width: "85px" }} />
-            <col style={{ width: "120px" }} />
-            <col style={{ width: "130px" }} />
-            <col style={{ width: "120px" }} />
-            <col style={{ width: "125px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "170px" }} />
-          </colgroup>
+      )}
 
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>OP</th>
-              <th>Fabricante</th>
-              <th>COSTO</th>
-              <th>Cantidad</th>
-              <th>Empresa</th>
-              <th>F Registro</th>
-              <th>Almacén</th>
-              <th>Imagen Evidencia</th>
-              <th>F Validación</th>
-              <th>Obs Compras</th>
-              <th>Obs Logística</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
+      {/* TABLA */}
+      <div className="historial-container">
+        <div className="tabla tabla-aprobados-grid">
 
-          <tbody>
-            {rowsFiltrados.length === 0 ? (
-              <tr>
-                <td colSpan={12} className="tabla-vacia">
-                  No se encontraron resultados
-                </td>
-              </tr>
-            ) : (
-              rowsFiltrados.map((r) => (
-                <tr
-                  key={r.id}
-                  className={getRowClass(r.tipo_movimiento)}
-                >
-                  <td>{r.tipo_movimiento}</td>
-                  <td>{r.op_vinculada || "-"}</td>
+          {/* HEADER */}
+          <div className="fila header">
+            <div>Tipo</div>
+            <div>OP</div>
+            <div>Fabricante</div>
 
-                  {/* ✅ FABRICANTE CLICKABLE */}
-                  <td
-                    className="td-click"
-                    onClick={() => abrirModal(r.fabricante)}
-                  >
-                    {cortar(r.fabricante)}
-                  </td>
+            <div className="num">C/U</div>
+            <div className="num">Q</div>
+            <div className="num">Total</div>
 
-                  <td className="td-num">{formatPrecio(r.precio)}</td>
-                  <td className="td-num">{r.cantidad}</td>
+            <div className="num">C. Prom</div>
+            <div className="num">Stock</div>
+            <div className="num">Valorizado</div>
 
-                  {/* ✅ EMPRESA CLICKABLE */}
-                  <td
-                    className="td-click"
-                    onClick={() => abrirModal(r.empresa)}
-                  >
-                    {cortar(r.empresa)}
-                  </td>
+            <div>Empresa</div>
 
-                  <td>{formatFecha(r.fecha_creacion)}</td>
+            <div>F Registro</div>
 
-                  {/* ✅ ALMACÉN CLICKABLE */}
-                  <td
-                    className="td-click"
-                    onClick={() => abrirModal(r.almacen)}
-                  >
-                    {cortar(r.almacen)}
-                  </td>
-
-
-                  <td>
-                    {r.imagenes ? (
-                      (() => {
-                        let imagenes = [];
-
-                        try {
-                          imagenes =
-                            typeof r.imagenes === "string"
-                              ? JSON.parse(r.imagenes)
-                              : r.imagenes;
-                        } catch {
-                          imagenes = [];
-                        }
-
-                        if (!imagenes || imagenes.length === 0) return "-";
-
-                        return (
-                          <div style={{ display: "flex", gap: 6 }}>
-                            {imagenes.map((img, index) => (
-                              <img
-                                key={index}
-                                src={img.url}
-                                alt="Evidencia"
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  objectFit: "cover",
-                                  cursor: "pointer",
-                                  borderRadius: 6,
-                                }}
-                                onClick={() => abrirModalEvidencia(img.url)}
-                              />
-                            ))}
-                          </div>
-                        );
-                      })()
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-
-                  <td>{formatFecha(r.fecha_validacion_logistica)}</td>
-
-                  <td
-                    className="td-obs"
-                    onClick={() =>
-                      abrirModal(r.observaciones_compras)
-                    }
-                  >
-                    {cortar(r.observaciones_compras)}
-                  </td>
-
-                  <td
-                    className="td-obs"
-                    onClick={() =>
-                      abrirModal(r.observaciones_logistica)
-                    }
-                  >
-                    {cortar(r.observaciones_logistica)}
-                  </td>
-
-                  <td>
-                    <span className={`estado estado-${r.estado}`}>
-                      {r.estado?.replaceAll("_", " ")}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* MODAL */}
-      {modalTexto && (
-        <div
-          className="modal-overlay"
-          onClick={() => setModalTexto(null)}
-        >
-          <div
-            className="modal-box"
-            onClick={(e) => e.stopPropagation()}
-          >
+            {/* 🔥 AQUÍ VA TU CAMBIO */}
+            <div>Obs Compras</div>
+            <div>Obs Logística</div>
             
+
+            <div>Almacén</div>
+            <div>Evidencia</div>
+            <div>F Validación</div>
+
+            <div>Estado</div>
+          </div>
+
+          {/* BODY */}
+          {rowsFiltrados.length === 0 ? (
+            <div className="empty">No hay datos</div>
+          ) : (
+            rowsFiltrados.map((r) => (
+              <div
+                key={r.id}
+                className={`fila ${getRowClass(r.tipo_movimiento)}`}
+              >
+                <div>{r.tipo_movimiento}</div>
+                <div>{r.op_vinculada || "-"}</div>
+
+                <div onClick={() => abrirModal(r.fabricante)}>
+                  {cortar(r.fabricante)}
+                </div>
+
+                <div className="num">
+                  {r.tipo_movimiento === "salida"
+                    ? formatPrecio(r.costo_anterior)
+                    : formatPrecio(r.precio)}
+                </div>
+
+                <div className="num">{r.cantidad}</div>
+
+                <div className="num">
+                  {formatPrecio(
+                    (r.precio || 0) * r.cantidad
+                  )}
+                </div>
+
+                <div className="num">
+                  {formatPrecio(r.costo_promedio_resultante)}
+                  <div className="mini">
+                    ({formatPrecio4(r.costo_promedio_resultante)})
+                  </div>
+                </div>
+
+                <div className="num">{r.stock_resultante}</div>
+
+                <div className="num strong">
+                  {formatPrecio(
+                    r.stock_resultante *
+                      r.costo_promedio_resultante
+                  )}
+                </div>
+
+                <div>{r.empresa}</div>
+
+                <div>{formatFecha(r.fecha_creacion)}</div>
+
+                {/* 🔥 NUEVO ORDEN */}
+                <div onClick={() => abrirModal(r.observaciones_compras)}>
+                  {cortar(r.observaciones_compras)}
+                </div>
+
+                <div onClick={() => abrirModal(r.observaciones_logistica)}>
+                  {cortar(r.observaciones_logistica)}
+                </div>
+
+
+
+                <div onClick={() => abrirModal(r.almacen)}>
+                  {cortar(r.almacen)}
+                </div>
+
+                <div>
+                  {r.imagenes ? (
+                    (() => {
+                      let imgs = [];
+                      try {
+                        imgs =
+                          typeof r.imagenes === "string"
+                            ? JSON.parse(r.imagenes)
+                            : r.imagenes;
+                      } catch {}
+
+                      if (!imgs.length) return "-";
+
+                      return (
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {imgs.map((img, i) => (
+                            <img
+                              key={i}
+                              src={img.url}
+                              alt=""
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 6,
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                abrirModalEvidencia(img.url)
+                              }
+                            />
+                          ))}
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    "-"
+                  )}
+                </div>
+
+                <div>
+                  {formatFecha(r.fecha_validacion_logistica)}
+                </div>
+
+                <div>
+                  <span className={`estado estado-${r.estado}`}>
+                    {r.estado?.replaceAll("_", " ")}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* MODAL TEXTO */}
+      {modalTexto && (
+        <div className="modal-overlay" onClick={() => setModalTexto(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content">{modalTexto}</div>
-            <button onClick={() => setModalTexto(null)}>
-              Cerrar
-            </button>
+            <button onClick={() => setModalTexto(null)}>Cerrar</button>
           </div>
         </div>
       )}
