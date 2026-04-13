@@ -4,6 +4,7 @@ import axios from "../../api/axios";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import SelectOrInput from "./SelectOrInput";
 import Toast from "../ui/Toast";
+import LoaderOverlay from "../ui/LoaderOverlay";
 
 import "./Movimiento.css";
 
@@ -16,6 +17,9 @@ export default function MovimientoSalida() {
   const [ops, setOps] = useState([]);
   const [stockRows, setStockRows] = useState([]);
   const [preciosHistoricos, setPreciosHistoricos] = useState([]);
+
+
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     empresa_id: "",
@@ -181,52 +185,77 @@ export default function MovimientoSalida() {
   /* =========================
      GUARDAR
   ========================= */
-  const guardar = async () => {
-    if (!formValido) {
-      setToast({ type: "error", message: "Completa todos los campos obligatorios correctamente" });
-      return;
-    }
+const guardar = async () => {
+  if (loading) return; // 🔥 anti doble click
 
-    try {
-      const payload = {
-        productoId,
-        empresa_id: form.empresa_id,
-        empresa_nueva: form.empresa_nueva,
-        almacen_id: form.almacen_id,
-        almacen_nuevo: form.almacen_nuevo,
-        fabricante_id: form.fabricante_id,
-        fabricante_nuevo: form.fabricante_nuevo,
-        motivo_id: form.motivo_id,
-        motivo_nuevo: form.motivo_nuevo,
-        op_vinculada: form.op_vinculada,
-        op_vinculada_nueva: form.op_vinculada_nueva,
-        cantidad: form.cantidad,
-        precio: form.precio,
-        observaciones: form.observaciones
-      };
+  if (!formValido) {
+    setToast({
+      type: "error",
+      message: "Completa todos los campos obligatorios correctamente",
+    });
+    return;
+  }
 
-      await axios.post("/api/compras/movimientos/salida", payload);
+  try {
+    setLoading(true); // 🔥 bloquea TODO
 
-      setToast({ type: "success", message: "Movimiento de salida registrado correctamente" });
+    const payload = {
+      productoId,
+      empresa_id: form.empresa_id,
+      empresa_nueva: form.empresa_nueva,
+      almacen_id: form.almacen_id,
+      almacen_nuevo: form.almacen_nuevo,
+      fabricante_id: form.fabricante_id,
+      fabricante_nuevo: form.fabricante_nuevo,
+      motivo_id: form.motivo_id,
+      motivo_nuevo: form.motivo_nuevo,
+      op_vinculada: form.op_vinculada,
+      op_vinculada_nueva: form.op_vinculada_nueva,
+      cantidad: form.cantidad,
+      precio: form.precio,
+      observaciones: form.observaciones,
+    };
 
-      setTimeout(() => {
-        navigate(`/compras/producto/${productoId}`);
-      }, 2000);
-    } catch (error) {
-      setToast({
-        type: "error",
-        message:
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Ocurrió un error al registrar la salida"
-      });
-    }
-  };
+    await axios.post("/api/compras/movimientos/salida", payload);
+
+    setToast({
+      type: "success",
+      message: "Movimiento registrado correctamente",
+    });
+
+    // 🔥 NO APAGUES LOADING
+    // 🔥 NAVEGA DIRECTO
+    navigate(`/compras/producto/${productoId}`, {
+      state: {
+        toast: {
+          type: "success",
+          message: "Movimiento registrado correctamente",
+        },
+      },
+    });
+
+  } catch (error) {
+    setLoading(false); // 🔥 SOLO AQUÍ se apaga
+
+    setToast({
+      type: "error",
+      message:
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Error al registrar",
+    });
+  }
+};
 
   if (!producto) return <p>Cargando...</p>;
 
+
+
   return (
     <div className="mov-container">
+
+      {loading && <LoaderOverlay text="Registrando salida..." />}
+
       {toast && (
         <Toast
           type={toast.type}
@@ -372,9 +401,10 @@ export default function MovimientoSalida() {
           <button
             className="btn-save"
             onClick={guardar}
-            disabled={!formValido}
+            disabled={!formValido || loading}
+            style={{ pointerEvents: loading ? "none" : "auto" }}
           >
-            Registrar Salida
+            {loading ? "Procesando..." : "Registrar Salida"}
           </button>
         </div>
       </div>

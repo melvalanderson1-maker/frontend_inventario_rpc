@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import SelectOrInput from "./SelectOrInput";
 import Toast from "../ui/Toast.jsx";
+
+import LoaderOverlay from "../ui/LoaderOverlay";
 import "./Movimiento.css";
 
 export default function MovimientoEntrada({
@@ -404,14 +406,24 @@ export default function MovimientoEntrada({
 
       showToast("✅ Movimientos de entrada creados correctamente", "success", 2000);
 
-      setTimeout(() => {
-        if (onGuardarFinal) onGuardarFinal();
-        else navigate(`/compras/producto/${productoIdParam}`);
-      }, 1200);
+    setTimeout(() => {
+      if (onGuardarFinal) {
+        onGuardarFinal();
+      } else {
+        navigate(`/compras/producto/${productoIdParam}`, {
+          state: {
+            toast: {
+              type: "success",
+              message: "Movimiento de entrada registrado correctamente",
+            },
+          },
+        });
+      }
+    }, 1200);
     } catch (e) {
+      setLoading(false); // SOLO si hay error
       showToast(e.response?.data?.error || "Error al guardar movimientos");
     } finally {
-      setLoading(false);
       setShowConfirm(false);
     }
   };
@@ -448,7 +460,11 @@ export default function MovimientoEntrada({
   ===================================================== */
   return (
     <div className="mov-container">
+
+      {loading && <LoaderOverlay text="Registrando entrada..." />}
       {toast && <div className={`mov-toast ${toast.type}`}>{toast.msg}</div>}
+
+      
 
       {showConfirm && (
         <div className="mov-modal-backdrop">

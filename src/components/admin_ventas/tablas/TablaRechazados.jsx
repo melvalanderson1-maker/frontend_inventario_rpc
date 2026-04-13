@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
 import ModalEditarRechazado from "../modales/ModalEditarRechazado";
-import "./MovimientosTablas.css";
+import "./Historial.css";
 
-export default function TablaRechazados({ productoId, varianteId, filtro = "" }) {
+export default function TablaRechazados({
+  productoId,
+  varianteId,
+  filtro = "",
+}) {
   const [rows, setRows] = useState([]);
   const [movSeleccionado, setMovSeleccionado] = useState(null);
 
@@ -15,12 +19,23 @@ export default function TablaRechazados({ productoId, varianteId, filtro = "" })
           estados: "RECHAZADO_LOGISTICA",
         },
       })
-      .then((res) => setRows(res.data));
+      .then((res) => setRows(res.data || []))
+      .catch(() => setRows([]));
   };
 
   useEffect(() => {
     cargar();
   }, [productoId, varianteId]);
+
+  // 🔥 MISMO FORMATO QUE HISTORIAL
+  const formatPrecio = (precio) =>
+    precio == null ? "-" : `S/ ${Number(precio).toFixed(2)}`;
+
+  const formatFecha = (fecha) => {
+    if (!fecha) return "-";
+    const d = new Date(fecha);
+    return isNaN(d) ? "-" : d.toLocaleString();
+  };
 
   const getRowClass = (tipo) => {
     if (!tipo) return "";
@@ -31,23 +46,25 @@ export default function TablaRechazados({ productoId, varianteId, filtro = "" })
     return "";
   };
 
+  const cortar = (text, n = 40) => {
+    if (!text) return "-";
+    return text.length > n ? text.slice(0, n) + "…" : text;
+  };
+
+  // 🔥 ESTA ES LA CLAVE (MISMA LOGICA QUE HISTORIAL)
+  const obtenerCosto = (r) => {
+    if (r.tipo_movimiento === "salida") {
+      return r.costo_anterior;
+    }
+    return r.precio;
+  };
+
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
 
     return rows.filter((r) =>
-      [
-        r.tipo_movimiento,
-        r.op_vinculada,
-        r.fabricante,
-        r.precio,
-        r.cantidad,
-        r.empresa,
-        r.estado,
-        r.fecha_creacion,
-        r.motivo_rechazo,
-        r.usuario_logistica
-      ]
+      Object.values(r)
         .filter(Boolean)
         .some((campo) =>
           campo.toString().toLowerCase().includes(texto)
@@ -57,81 +74,85 @@ export default function TablaRechazados({ productoId, varianteId, filtro = "" })
 
   return (
     <>
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>OP vinc</th>
-              <th>Fabricante</th>
-              <th>COSTO</th>
-              <th>Cantidad</th>
-              <th>Empresa</th>
-              <th>F Registro</th>
-              <th>Rechazado por</th>
-              <th>Estado</th>
-              <th>Motivo rechazo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+      <div className="historial-container">
+        <div className="tabla tabla-rechazados-grid">
 
-          <tbody>
-            {rowsFiltrados.length === 0 ? (
-              <tr>
-                <td colSpan="11" style={{ textAlign: "center", padding: 16 }}>
-                  No se encontraron resultados
-                </td>
-              </tr>
-            ) : (
-              rowsFiltrados.map((r) => (
-                <tr
+          {/* HEADER */}
+          <div className="fila header">
+            <div>Tipo</div>
+            <div>OP</div>
+            <div>Fabricante</div>
+
+            <div className="num">Costo</div>
+            <div className="num">Cantidad</div>
+
+            <div>Empresa</div>
+
+            <div>F Registro</div>
+            <div>Rechazado por</div>
+
+            <div>Estado</div>
+
+            <div>Motivo</div>
+
+
+          </div>
+
+          {/* BODY */}
+          {rowsFiltrados.length === 0 ? (
+            <div className="empty">No hay datos</div>
+          ) : (
+            rowsFiltrados.map((r) => {
+              const costo = obtenerCosto(r); // 🔥 AQUI USAS LA LOGICA
+
+              return (
+                <div
                   key={r.id}
-                  className={`${getRowClass(r.tipo_movimiento)} fila-rechazada`}
+                  className={`fila fila-rechazada ${getRowClass(
+                    r.tipo_movimiento
+                  )}`}
                 >
-                  <td data-label="Tipo">{r.tipo_movimiento}</td>
-                  <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
-                  <td data-label="Fabricante">{r.fabricante || "-"}</td>
-                  <td data-label="Precio" className="td-num">
-                    {r.precio ?? "-"}
-                  </td>
-                  <td data-label="Cantidad">{r.cantidad}</td>
-                  <td data-label="Empresa">{r.empresa}</td>
-                  <td data-label="F Registro">
-                    {new Date(r.fecha_creacion).toLocaleString()}
-                  </td>
-                  <td data-label="Rechazado por">{r.usuario_logistica || "-"}</td>
-                  <td data-label="Estado">
+                  <div>{r.tipo_movimiento}</div>
+
+                  <div>{r.op_vinculada || "-"}</div>
+
+                  <div>{cortar(r.fabricante)}</div>
+
+                  {/* 🔥 COSTO CORRECTO */}
+                  <div className="num">
+                    {formatPrecio(costo)}
+                  </div>
+
+                  <div className="num">{r.cantidad}</div>
+
+                  <div>{r.empresa}</div>
+
+                  <div>{formatFecha(r.fecha_creacion)}</div>
+
+                  <div>{r.usuario_logistica || "-"}</div>
+
+                  <div>
                     <span className={`estado estado-${r.estado}`}>
-                      {r.estado.replaceAll("_", " ")}
+                      {r.estado?.replaceAll("_", " ")}
                     </span>
-                  </td>
-                <td className="texto-error">{r.motivo_rechazo || "—"}</td>
-                  <td data-label="Acciones">
-                    <button
-                      className="btn-warning"
-                      onClick={() => setMovSeleccionado(r)}
-                    >
-                      Corregir
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+
+                  <div
+                    className="texto-error"
+                    onClick={() => alert(r.motivo_rechazo)}
+                  >
+                    {cortar(r.motivo_rechazo)}
+                  </div>
+
+
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
-      {movSeleccionado && (
-      <ModalEditarRechazado
-        movimientoId={movSeleccionado.id}
-        onClose={() => setMovSeleccionado(null)}
-        onSuccess={() => {
-          setMovSeleccionado(null);
-          cargar();
-        }}
-      />
 
-      )}
     </>
   );
 }

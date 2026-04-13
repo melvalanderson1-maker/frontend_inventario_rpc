@@ -9,6 +9,9 @@ import TablaAprobados from "./tablas/TablaAprobados";
 import TablaPendientes from "./tablas/TablaPendientes";
 import TablaRechazados from "./tablas/TablaRechazados";
 
+import Toast from "../ui/Toast";
+import { useLocation } from "react-router-dom";
+
 
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -38,6 +41,18 @@ export default function ProductoDetalle() {
   const [filtro, setFiltro] = useState("");
 
 
+
+
+  const location = useLocation();
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.toast) {
+      setToast(location.state.toast);
+    }
+  }, [location.state]);
+
+
   useEffect(() => {
     api.get(`/api/compras/productos/${id}`)
       .then(res => {
@@ -56,6 +71,14 @@ export default function ProductoDetalle() {
 
   return (
     <div className="detalle-container">
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* HEADER */}
       <div className="detalle-header">

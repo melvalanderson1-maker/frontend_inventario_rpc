@@ -78,7 +78,7 @@
   display: grid;
 
   grid-template-columns:
-    minmax(120px, 1fr)
+    minmax(70px, 0.5fr)   /* Tipo */
     minmax(100px, 1fr)
     minmax(90px, 0.5fr)
     minmax(100px, 0.8fr)
@@ -228,7 +228,7 @@
 /* 🔥 GRID CORRECTO (ESTADO AL FINAL) */
 .tabla-aprobados-grid .fila {
   grid-template-columns:
-    minmax(100px, 1fr)   /* Tipo */
+    minmax(70px, 0.5fr)   /* Tipo */
     minmax(90px, 1fr)    /* OP */
     minmax(140px, 1.2fr) /* Fabricante */
 
@@ -255,4 +255,234 @@
     minmax(150px, 1.2fr); /* Estado */
 
   min-width: 2000px;
+}
+
+
+
+/* 🔥 GRID ESPECIFICO PARA PENDIENTES */
+.tabla-pendientes-grid .fila {
+  grid-template-columns:
+    minmax(70px, 0.5fr)   /* Tipo */
+    minmax(90px, 1fr)    /* OP */
+    minmax(140px, 1.2fr) /* Fabricante */
+
+    minmax(100px, 0.8fr) /* Costo */
+    minmax(80px, 0.6fr)  /* Cantidad */
+
+    minmax(140px, 1fr)   /* Empresa */
+
+    minmax(200px, 1.5fr) /* Obs */
+
+    minmax(160px, 1.2fr) /* Fecha */
+
+    minmax(140px, 1fr);  /* Estado */
+
+  min-width: 1400px;
+}
+
+
+
+/* 🔥 GRID RECHAZADOS */
+.tabla-rechazados-grid .fila {
+  grid-template-columns:
+    minmax(75px, 0.4fr)   /* Tipo */
+    minmax(90px, 0.7fr)    /* OP */
+    minmax(140px, 1.2fr) /* Fabricante */
+
+    minmax(100px, 0.8fr) /* Costo */
+    minmax(80px, 0.6fr)  /* Cantidad */
+
+    minmax(140px, 1fr)   /* Empresa */
+
+    minmax(160px, 1.2fr) /* Fecha */
+    minmax(140px, 1fr)   /* Usuario */
+
+    minmax(140px, 1fr)   /* Estado */
+
+    minmax(220px, 1.5fr) /* Motivo */
+
+    minmax(120px, 0.8fr); /* Acción */
+
+  min-width: 1600px;
+}
+
+/* 🔥 FILA RECHAZADA (visual) */
+.fila-rechazada {
+  background: #190e96;
+}
+
+/* 🔥 TEXTO ERROR */
+.texto-error {
+  color: #b91c1c;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* 🔥 BOTON WARNING PRO */
+.btn-warning {
+  background: #f59e0b;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+  transform: scale(1.05);
+}
+
+
+
+
+/* 🔥 GRID PENDIENTES (MISMO ESTILO PRO) */
+.tabla-pendientes-grid .fila {
+  grid-template-columns:
+    minmax(70px, 0.5fr)   /* Tipo */
+    minmax(90px, 1fr)    /* OP */
+    minmax(120px, 0.4fr) /* Fabricante */
+
+    minmax(100px, 0.8fr) /* Costo */
+    minmax(80px, 0.6fr)  /* Cantidad */
+
+    minmax(140px, 1fr)   /* Empresa */
+
+    minmax(150px, 1fr) /* Obs Compras */
+
+    minmax(100px, 0.6fr) /* Fecha */
+
+    minmax(100px, 0.8fr);  /* Estado */
+
+  min-width: 1400px;
+}
+
+
+
+
+
+/* ============================= */
+/* 🔥 RESPONSIVE PRO LEVEL 🔥 */
+/* ============================= */
+
+/* 📱 TABLETS GRANDES */
+@media (max-width: 1400px) {
+  .tabla-aprobados-grid .fila {
+    min-width: 1800px;
+  }
+
+  .tabla-rechazados-grid .fila {
+    min-width: 1400px;
+  }
+
+  .tabla-pendientes-grid .fila {
+    min-width: 1200px;
+  }
+}
+
+/* 📱 TABLETS */
+@media (max-width: 1024px) {
+  .historial-container {
+    padding: 8px;
+  }
+
+  .fila {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .mini {
+    font-size: 9px;
+  }
+}
+
+/* 📱 TABLETS PEQUEÑAS */
+@media (max-width: 768px) {
+  .tabla {
+    gap: 10px;
+  }
+
+  .fila {
+    border-radius: 12px;
+  }
+}
+
+/* 📱📱 MODO MOBILE PRO (TIPO TARJETA) */
+@media (max-width: 640px) {
+  
+  /* ❌ ocultamos header */
+  .header {
+    display: none;
+  }
+
+  /* 🔥 cada fila se vuelve CARD */
+  .fila {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    min-width: 100% !important;
+
+    padding: 12px;
+    border-radius: 14px;
+
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  /* 🔥 cada campo */
+  .fila > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 4px;
+  }
+
+  .fila > div:last-child {
+    border-bottom: none;
+  }
+
+  /* 🔥 LABEL AUTOMÁTICO */
+  .fila > div::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 10px;
+  }
+
+  /* 🔥 números alineados */
+  .num {
+    text-align: right;
+    width: 100%;
+  }
+
+  /* 🔥 estado alineado */
+  .estado {
+    margin-left: auto;
+  }
+
+  /* 🔥 botones más grandes */
+  .btn-warning {
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+  }
+}
+
+/* 📱📱 EXTRA SMALL (celulares chicos) */
+@media (max-width: 400px) {
+  .fila {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .estado {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
 }

@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../../api/api";
-import "./MovimientosTablas.css";
+import "./Historial.css";
 
-export default function TablaPendientes({ productoId, varianteId, filtro = "" }) {
+export default function TablaPendientes({
+  productoId,
+  varianteId,
+  filtro = "",
+}) {
   const [rows, setRows] = useState([]);
   const [modalTexto, setModalTexto] = useState(null);
-
 
   useEffect(() => {
     api
@@ -15,8 +18,25 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
           estados: "PENDIENTE_LOGISTICA",
         },
       })
-      .then((res) => setRows(res.data));
+      .then((res) => setRows(res.data || []))
+      .catch(() => setRows([]));
   }, [productoId, varianteId]);
+
+  // 🔥 FORMATO SEGURO
+  const formatPrecio = (precio) => {
+    if (precio === null || precio === undefined) return "-";
+
+    const num = Number(precio); // 🔥 fuerza conversión
+    if (isNaN(num)) return "-";
+
+    return `S/ ${num.toFixed(2)}`;
+  };
+
+  const formatFecha = (fecha) => {
+    if (!fecha) return "-";
+    const d = new Date(fecha);
+    return isNaN(d) ? "-" : d.toLocaleString();
+  };
 
   const getRowClass = (tipo) => {
     if (!tipo) return "";
@@ -27,30 +47,17 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
     return "";
   };
 
-
   const cortar = (text, n = 36) => {
     if (!text) return "-";
     return text.length > n ? text.slice(0, n) + "…" : text;
   };
 
-
-  // ✅ FILTRO REAL MULTICAMPO
   const rowsFiltrados = useMemo(() => {
     const texto = filtro.toLowerCase().trim();
     if (!texto) return rows;
 
     return rows.filter((r) =>
-      [
-        r.tipo_movimiento,
-        r.op_vinculada,
-        r.fabricante,
-        r.precio,
-        r.cantidad,
-        r.empresa,
-        r.observaciones_compras,
-        r.estado,
-        r.fecha_creacion,
-      ]
+      Object.values(r)
         .filter(Boolean)
         .some((campo) =>
           campo.toString().toLowerCase().includes(texto)
@@ -60,66 +67,83 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
 
   return (
     <>
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>OP vinc</th>
-              <th>Fabricante</th>
-              <th>COSTO</th>
-              <th>Cantidad</th>
-              <th>Empresa</th>
-              <th>Obs Compras</th>
-              <th>F Registro</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
+      <div className="historial-container">
+        <div className="tabla tabla-pendientes-grid">
 
-          <tbody>
-            {rowsFiltrados.length === 0 ? (
-              <tr>
-                <td colSpan="9" style={{ textAlign: "center", padding: 16 }}>
-                  No se encontraron resultados
-                </td>
-              </tr>
-            ) : (
-              rowsFiltrados.map((r) => (
-                <tr key={r.id} className={getRowClass(r.tipo_movimiento)}>
-                  <td data-label="Tipo">{r.tipo_movimiento}</td>
-                  <td data-label="OP vinc">{r.op_vinculada || "-"}</td>
-                  <td data-label="Fabricante">{r.fabricante || "-"}</td>
-                  <td data-label="Precio" className="td-num">
-                    {r.precio}
-                  </td>
-                  <td data-label="Cantidad">{r.cantidad}</td>
-                  <td data-label="Empresa">{r.empresa}</td>
+          {/* HEADER */}
+          <div className="fila header">
+            <div>Tipo</div>
+            <div>OP</div>
+            <div>Fabricante</div>
 
-                  <td
-                    data-label="Obs Compras"
-                    className="td-obs"
-                    onClick={() => setModalTexto(r.observaciones_compras)}
+            <div className="num">Costo</div>
+            <div className="num">Cantidad</div>
+
+            <div>Empresa</div>
+
+            <div>Obs Compras</div>
+
+            <div>F Registro</div>
+
+            <div>Estado</div>
+          </div>
+
+          {/* BODY */}
+          {rowsFiltrados.length === 0 ? (
+            <div className="empty">No hay datos</div>
+          ) : (
+            rowsFiltrados.map((r) => {
+              // 🔥 COSTO EXACTO COMO HISTORIAL PERO ROBUSTO
+              const costo =
+                r.tipo_movimiento === "salida"
+                  ? r.costo_anterior
+                  : r.precio;
+
+              return (
+                <div
+                  key={r.id}
+                  className={`fila ${getRowClass(r.tipo_movimiento)}`}
+                >
+                  <div>{r.tipo_movimiento}</div>
+
+                  <div>{r.op_vinculada || "-"}</div>
+
+                  <div onClick={() => setModalTexto(r.fabricante)}>
+                    {cortar(r.fabricante)}
+                  </div>
+
+                  {/* 🔥 AQUI YA FUNCIONA BIEN */}
+                  <div className="num">
+                    {formatPrecio(costo)}
+                  </div>
+
+                  <div className="num">{r.cantidad}</div>
+
+                  <div>{r.empresa}</div>
+
+                  <div
+                    onClick={() =>
+                      setModalTexto(r.observaciones_compras)
+                    }
                   >
                     {cortar(r.observaciones_compras)}
-                  </td>
+                  </div>
 
-                  <td data-label="F Registro">
-                    {new Date(r.fecha_creacion).toLocaleString()}
-                  </td>
+                  <div>{formatFecha(r.fecha_creacion)}</div>
 
-                  <td data-label="Estado">
+                  <div>
                     <span className={`estado estado-${r.estado}`}>
                       {r.estado?.replaceAll("_", " ")}
                     </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL TEXTO */}
       {modalTexto && (
         <div
           className="modal-overlay"
@@ -138,5 +162,4 @@ export default function TablaPendientes({ productoId, varianteId, filtro = "" })
       )}
     </>
   );
-
 }
