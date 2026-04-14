@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import api from "../../api/api";
 
 import { Bar, Pie } from "react-chartjs-2";
-
+import { Trash2 } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,7 +27,14 @@ ChartJS.register(
   ChartDataLabels
 );
 
+
+
+
 export default function InventoryDashboard(){
+
+  
+const chartValorRef = useRef(null);
+const chartStockRef = useRef(null);
 
 /* ======================= STATE ======================= */
 
@@ -69,7 +76,8 @@ const [valorLimit, setValorLimit] = useState(100);
 const [stockLimit, setStockLimit] = useState(100);
 const [tablaLimit, setTablaLimit] = useState(10);
 
-
+const [activeIndexValor, setActiveIndexValor] = useState(null);
+const [activeIndexStock, setActiveIndexStock] = useState(null);
 
 
 
@@ -112,7 +120,7 @@ useEffect(() => {
 const baseChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  interaction: { mode: "index", intersect: false },
+  interaction: { mode: "nearest", intersect: true },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -122,10 +130,28 @@ const baseChartOptions = {
     }
   },
   scales: {
-    x: {
-      ticks: { color: "#6b7280", autoSkip:true },
-      grid: { display:false }
-    },
+x: {
+  ticks: {
+    color: "#6b7280",
+    autoSkip: false,
+    maxRotation: 45,
+    minRotation: 45,
+
+    callback: function(value) {
+      const label = this.getLabelForValue(value);
+
+      // 🔥 divide en bloques de 8 caracteres
+      const chunkSize = 15;
+      const result = [];
+
+      for (let i = 0; i < label.length; i += chunkSize) {
+        result.push(label.substring(i, i + chunkSize));
+      }
+
+      return result; // 🔥 ESTO HACE MULTILINEA
+    }
+  }
+},
     y: {
       ticks: { color:"#6b7280" },
       grid: { color:"#e5e7eb" }
@@ -321,15 +347,19 @@ const loadResumen = async () => {
     ]);
 
     setKpis(kpisRes.data || {});
-    setRotacion(rotacionRes.data || []);
-    setEmpresasValor(empresasValorRes.data || []);
+    setRotacion(Array.isArray(rotacionRes.data) ? rotacionRes.data : []);
+    setEmpresasValor(Array.isArray(empresasValorRes.data) ? empresasValorRes.data : []);
     setABC(abcRes.data || []);
     setHeatmap(heatmapRes.data || []);
 
   } catch (e) {
     console.error(e);
-  } finally {
-    setLoading(false); // 🔥 ESTO ES LO QUE TE FALTABA
+  }finally {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
   }
 };
 
@@ -341,7 +371,9 @@ const loadTopValor = async () => {
       `/api/dashboard/top-productos-valor?page=${pageValor}&size=${sizeValor}&order=${orderValor}&${query}`
     );
 
-    setTopValor(res.data.data || []);
+    const data = res.data?.data;
+
+    setTopValor(Array.isArray(data) ? data : []);
     setHasMoreValor(res.data.hasMore);
   } catch (e) {
     console.error(e);
@@ -356,7 +388,7 @@ const loadStock = async () => {
       `/api/dashboard/productos-stock?page=${pageStock}&size=${sizeStock}&order=${orderStock}&${query}`
     );
 
-    setStockProductos(res.data.data || []);
+    setStockProductos(Array.isArray(res.data?.data) ? res.data.data : []);
     setHasMoreStock(res.data.hasMore);
   } catch (e) {
     console.error(e);
@@ -370,7 +402,7 @@ const loadTabla = async () => {
       `/api/dashboard/inventario?page=${pageTabla}&size=${sizeTabla}&producto=${productoSeleccionado || ""}&tipo=${graficoActivo || ""}&${query}`
     );
 
-    setInventario(res.data.data || []);
+    setInventario(Array.isArray(res.data?.data) ? res.data.data : []);
     setHasMoreTabla(res.data.hasMore);
   } catch (e) {
     console.error(e);
@@ -406,11 +438,78 @@ useEffect(() => {
 
 useEffect(() => {
   setPageValor(0);
+
+  // 🔥 LIMPIAR SELECCIÓN
+  setActiveIndexValor(null);
+  setProductoSeleccionado(null);
+  setGraficoActivo(null);
+
 }, [orderValor]);
 
 useEffect(() => {
   setPageStock(0);
+
+  // 🔥 LIMPIAR SELECCIÓN
+  setActiveIndexStock(null);
+  setProductoSeleccionado(null);
+  setGraficoActivo(null);
+
 }, [orderStock]);
+
+
+useEffect(() => {
+  setActiveIndexValor(null);
+}, [sizeValor]);
+
+useEffect(() => {
+  setActiveIndexStock(null);
+}, [sizeStock]);
+
+
+
+useEffect(() => {
+  const chart = chartValorRef.current;
+
+  if (!chart) return;
+
+  const canvas = chart.canvas;
+
+  const handleLeave = () => {
+    setActiveIndexValor(null);
+
+    chart.setActiveElements([]);
+    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    chart.update();
+  };
+
+  canvas.addEventListener("mouseleave", handleLeave);
+
+  return () => {
+    canvas.removeEventListener("mouseleave", handleLeave);
+  };
+}, [chartValorRef]);
+
+useEffect(() => {
+  const chart = chartStockRef.current;
+
+  if (!chart) return;
+
+  const canvas = chart.canvas;
+
+  const handleLeave = () => {
+    setActiveIndexStock(null);
+
+    chart.setActiveElements([]);
+    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    chart.update();
+  };
+
+  canvas.addEventListener("mouseleave", handleLeave);
+
+  return () => {
+    canvas.removeEventListener("mouseleave", handleLeave);
+  };
+}, [chartStockRef]);
 /* ======================= INIT ======================= */
 
 
@@ -420,12 +519,15 @@ const handleBarClick = useCallback((event, elements) => {
   if (!elements.length) return;
 
   const index = elements[0].index;
+
+  setActiveIndexValor(index); // 🔥 SOLO AQUÍ SE PINTA
+
   if (!topValor[index]) return;
 
   const producto = topValor[index].codigo_producto;
 
   setProductoSeleccionado(producto);
-  setGraficoActivo("valor"); // 🔥 NUEVO
+  setGraficoActivo("valor");
 
   setPageTabla(0);
   setSizeTabla(10);
@@ -444,20 +546,18 @@ const handleStockBarClick = useCallback((event, elements) => {
   if (!elements.length) return;
 
   const index = elements[0].index;
+
+  setActiveIndexStock(index); // 🔥 SOLO CLICK
+
   if (!stockProductos[index]) return;
 
   const producto = stockProductos[index].codigo_producto;
 
   setProductoSeleccionado(producto);
-  setGraficoActivo("stock"); // 🔥 NUEVO
+  setGraficoActivo("stock");
 
   setPageTabla(0);
   setSizeTabla(10);
-
-  window.scrollTo({
-    top: document.body.scrollHeight,
-    behavior: "smooth"
-  });
 
 }, [stockProductos]);
 
@@ -480,26 +580,38 @@ useEffect(() => {
 }, [filters.categoria]);
 /* ======================= DATASETS ======================= */
 
+const safeTopValor = Array.isArray(topValor) ? topValor : [];
+
 const dataValor = useMemo(() => ({
-  labels: topValor.map(p => p.codigo_producto),
+  labels: safeTopValor.map(p => p.codigo_producto),
   datasets: [{
-    data: topValor.map(p => Number(p.valor_total_producto)),
-    backgroundColor: "#2563eb",
+    data: safeTopValor.map(p => Number(p.valor_total_producto || 0)),
+
+    backgroundColor: safeTopValor.map((_, i) =>
+      i === activeIndexValor ? "#1d4ed8" : "#93c5fd"
+    ),
+
     borderRadius: 6
   }]
-}), [topValor]);
+}), [safeTopValor, activeIndexValor]);
 
 
 
+
+const safeStock = Array.isArray(stockProductos) ? stockProductos : [];
 
 const dataStock = useMemo(() => ({
-  labels: stockProductos.map(p => p.codigo_producto),
+  labels: safeStock.map(p => p.codigo_producto),
   datasets: [{
-    data: stockProductos.map(p => Number(p.stock_total_producto)),
-    backgroundColor: "#16a34a",
+    data: safeStock.map(p => Number(p.stock_total_producto || 0)),
+
+    backgroundColor: safeStock.map((_, i) =>
+      i === activeIndexStock ? "#15803d" : "#86efac"
+    ),
+
     borderRadius: 6
   }]
-}), [stockProductos]);
+}), [safeStock, activeIndexStock]);
 
 const getColorRotacion = (estado) => {
   if (!estado) return "#6b7280";
@@ -554,6 +666,13 @@ useEffect(() => {
   setPageStock(0);
 }, [stockTopLimit, orderStock, pageSize]);
 
+
+useEffect(() => {
+  setActiveIndexValor(null);
+  setActiveIndexStock(null);
+}, [filters.categoria]);
+
+
 /* ======================= LOADING ======================= */
 
 if(loading){
@@ -563,18 +682,34 @@ if(loading){
 
 
 const limpiarSeleccion = () => {
+  setActiveIndexValor(null);
+  setActiveIndexStock(null);
+
   setProductoSeleccionado(null);
   setGraficoActivo(null);
 
   setPageTabla(0);
+  setSizeTabla(10);
 
-  setSizeTabla(10); // 🔥 ESTE ES EL FIX REAL
-
-  // ❌ NO LLAMES loadTabla() manualmente
+  // 🔥 FORZAR REFRESH DE GRÁFICOS
+  chartValorRef.current?.update();
+  chartStockRef.current?.update();
 };
 /* ======================= UI ======================= */
 
+
+const getCategoriaNombre = (id) => {
+  const cat = categorias.find(
+    c => String(c.categoria_id) === String(id)
+  );
+  return cat ? cat.categoria : "";
+};
+
+
 return(
+
+
+  
 
 <div className="inventory-dashboard">
 
@@ -603,32 +738,80 @@ return(
 </div>
 
 <div className="kpi-card categoria-card">
-<div className="kpi-title">Categoría</div>
+  <div className="kpi-title">📦 Filtro de categoría</div>
 
-<select
-  className="categoria-select"
-    value={filters.categoria}
-    onChange={(e)=>setFilters({...filters,categoria:e.target.value})}
->
-  <option value="">Todas las categorias</option>
+  <div className="filter-row">
 
-  {categorias.map(c=>(
 
-    <option
-      key={c.categoria_id}
-      value={c.categoria_id}
+
+    <select
+      className="categoria-select-modern"
+      value={filters.categoria}
+      onChange={(e) =>
+        setFilters({ ...filters, categoria: e.target.value })
+      }
     >
-      {c.categoria} | 📦 {c.stock_total} | 💰 {formatCurrency(c.valor_total)}
-    </option>
+      <option value="">
+        Todas las categorías
+      </option>
 
-  ))}
-</select>
+      {categorias.map((c) => (
+        <option key={c.categoria_id} value={c.categoria_id}>
+          {c.categoria} | 🔵 Stock: {c.stock_total} | 🟢 {formatCurrency(c.valor_total)}
+        </option>
+      ))}
+    </select>
 
-<button onClick={limpiarSeleccion}>
-  Limpiar selección
-</button>
+        <button
+      className="btn-clear-icon"
+      onClick={limpiarSeleccion}
+      title="Limpiar filtro"
+    >
+      <Trash2 size={18} />
+    </button>
+
+
+
+    
+
+  </div>
+
+      
+
 
 </div>
+
+{filters.categoria && (
+  <div className="categoria-detalle">
+
+    <div className="selected-categoria">
+      {getCategoriaNombre(filters.categoria)}
+    </div>
+
+    <div className="categoria-info">
+      {(() => {
+        const cat = categorias.find(
+          c => String(c.categoria_id) === String(filters.categoria)
+        );
+
+        if (!cat) return null;
+
+        return (
+          <>
+            <span className="label-stock">
+              Stock: {cat.stock_total}
+            </span>
+
+            <span className="label-valor">
+              Valor: {formatCurrency(cat.valor_total)}
+            </span>
+          </>
+        );
+      })()}
+    </div>
+
+  </div>
+)}
 
 </div>
 </div>
@@ -642,10 +825,7 @@ return(
 
   <div className="chart-buttons">
 
-  {/* TOP */}
-  <button onClick={() => setValorTopLimit(50)}>Top 50</button>
-  <button onClick={() => setValorTopLimit(100)}>Top 100</button>
-  <button onClick={() => setValorTopLimit(200)}>Top 200</button>
+
 
   {/* ORDEN */}
  <button
@@ -678,6 +858,7 @@ return(
 <div className="chart-body">
     
 <Bar 
+  ref={chartValorRef}
   data={dataValor} 
   options={{
     ...baseChartOptions,
@@ -732,8 +913,11 @@ return(
       }
     },
 
+
+
     onClick: handleBarClick
   }} 
+
 />
 </div>
 
@@ -761,9 +945,7 @@ return(
     <h3>Inventario por stock</h3>
 <div className="chart-buttons">
 
-  {/* TOP */}
-  <button onClick={() => setStockTopLimit(50)}>Top 50</button>
-  <button onClick={() => setStockTopLimit(100)}>Top 100</button>
+
 
   {/* ORDEN */}
 <button
@@ -796,9 +978,16 @@ return(
 
   <div className="chart-body">
     <Bar 
+      ref={chartStockRef}
+    
       data={dataStock} 
       options={{
         ...stockChartOptions,
+
+
+
+
+
         onClick: handleStockBarClick
       }}
     />

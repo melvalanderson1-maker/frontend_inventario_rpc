@@ -457,3 +457,115 @@
 .btn-active:hover {
   background-color: #2cc924;
 }
+
+
+/* ================= FILTRO PRO ================= */
+
+.enhanced-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+/* CONTENEDOR FILA */
+.filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* SELECT */
+.categoria-select-modern {
+  flex: 1; /* 🔥 ocupa todo el espacio */
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.categoria-select-modern:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* BOTÓN ESCObita 🔥 */
+.btn-clear-icon {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 10px;
+  border: none;
+
+  background: #ef4444;
+  color: white;
+
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+/* hover bonito */
+.btn-clear-icon:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* click */
+.btn-clear-icon:active {
+  transform: scale(0.95);
+}
+
+.categoria-info {
+  margin: 0; /* 🔥 elimina separación */
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.label-stock {
+  font-size: 14.3px;
+  color: #2563eb; /* 🔵 azul */
+}
+
+.label-valor {
+  font-size: 14.3px;
+  color: #16a34a; /* 🟢 verde */
+}
+
+.btn-clear-icon svg {
+  transition: transform 0.2s ease;
+}
+
+.btn-clear-icon:hover svg {
+  transform: scale(1.2);
+}
+
+.selected-categoria {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0; /* 🔥 clave */
+}
+
+.categoria-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* 🔥 controla qué tan pegado está */
+  margin-top: 6px;
+}
