@@ -4,31 +4,32 @@ import api from "../../api/api";
 import { Bar, Pie } from "react-chartjs-2";
 
 import {
-Chart as ChartJS,
-CategoryScale,
-LinearScale,
-BarElement,
-ArcElement,
-Tooltip,
-Legend
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
 } from "chart.js";
 
 import "./InventoryDashboard.css";
 
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
 ChartJS.register(
-CategoryScale,
-LinearScale,
-BarElement,
-ArcElement,
-Tooltip,
-Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartDataLabels
 );
 
 export default function InventoryDashboard(){
 
-/* =======================
-STATE
-======================= */
+/* ======================= STATE ======================= */
 
 const [kpis,setKpis]=useState({});
 const [topValor,setTopValor]=useState([]);
@@ -42,287 +43,543 @@ const [categorias,setCategorias]=useState([]);
 const [valorTipo,setValorTipo]=useState("mayor");
 const [stockTipo,setStockTipo]=useState("mayor");
 
-const [limit,setLimit]=useState(10);
+const [valorTopLimit, setValorTopLimit] = useState(100);
+const [stockTopLimit, setStockTopLimit] = useState(100);
 
 const [productoSeleccionado,setProductoSeleccionado]=useState(null);
 
 const [abc,setABC]=useState([]);
 const [heatmap,setHeatmap]=useState([]);
 
-const [filters,setFilters]=useState({
-categoria:""
-});
+
 
 const [loading,setLoading]=useState(true);
 
 
-/* =======================
-UTILS
-======================= */
+const [hasMoreValor, setHasMoreValor] = useState(true);
+const [hasMoreStock, setHasMoreStock] = useState(true);
+
+
+const [hasMoreTabla, setHasMoreTabla] = useState(true);
+
+
+const [pageSize, setPageSize] = useState(10);
+
+const [valorLimit, setValorLimit] = useState(100);
+const [stockLimit, setStockLimit] = useState(100);
+const [tablaLimit, setTablaLimit] = useState(10);
+
+
+
+
+
+
+// ================= TOP VALOR =================
+const [pageValor, setPageValor] = useState(0);
+const [sizeValor, setSizeValor] = useState(10);
+const [orderValor, setOrderValor] = useState("desc");
+
+// ================= TOP STOCK =================
+const [pageStock, setPageStock] = useState(0);
+const [sizeStock, setSizeStock] = useState(10);
+const [orderStock, setOrderStock] = useState("desc");
+
+// ================= TABLA =================
+const [pageTabla, setPageTabla] = useState(0);
+const [sizeTabla, setSizeTabla] = useState(10);
+
+
+
+
+const [graficoActivo, setGraficoActivo] = useState(null);
+// valores: "valor" | "stock" | null
+
+// ================= FILTRO GLOBAL (solo si quieres) =================
+const [filters, setFilters] = useState({ categoria: "" });
+
+useEffect(() => {
+  setPageValor(0);
+  setPageStock(0);
+  setPageTabla(0);
+}, [filters]);
+
+
+
+
+
+/* ======================= OPTIONS ======================= */
+
+const baseChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: "index", intersect: false },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: "#111827",
+      titleColor: "#fff",
+      bodyColor: "#fff"
+    }
+  },
+  scales: {
+    x: {
+      ticks: { color: "#6b7280", autoSkip:true },
+      grid: { display:false }
+    },
+    y: {
+      ticks: { color:"#6b7280" },
+      grid: { color:"#e5e7eb" }
+    }
+  }
+};
+
+
+const rotacionChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+
+  layout: {
+    padding: 10 // 👈 IMPORTANTE: evita choque con legend
+  },
+
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        color: "#374151",
+        font: { size: 12 },
+        padding: 15 // 👈 separa leyenda del pie
+      }
+    },
+
+    tooltip: {
+      backgroundColor: "#111827",
+      titleColor: "#fff",
+      bodyColor: "#fff"
+    },
+
+    datalabels: {
+      color: "#fff",
+      font: {
+        weight: "bold",
+        size: 12
+      },
+
+      anchor: "center",   // 🔥 CLAVE
+      align: "center",    // 🔥 CLAVE
+      offset: 0,          // 🔥 CLAVE
+
+      clamp: true,
+      clip: false,
+
+      display: (context) => {
+        const value = context.dataset.data[context.dataIndex];
+        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+        const percent = (value / total) * 100;
+
+        return percent > 4; // 👈 evita saturación
+      },
+
+      formatter: (value, context) => {
+        const total = context.chart.data.datasets[0].data
+          .reduce((a, b) => a + b, 0);
+
+        const percent = ((value / total) * 100).toFixed(1);
+        return `${percent}%`;
+      },
+
+      textStrokeColor: "#000",
+      textStrokeWidth: 2
+    }
+  }
+};
+
+const stockChartOptions = {
+  ...baseChartOptions,
+
+  layout: {
+    padding: {
+      top: 20
+    }
+  },
+
+  scales: {
+    ...baseChartOptions.scales,
+    y: {
+      ...baseChartOptions.scales.y,
+      grace: "10%"
+    }
+  },
+
+  plugins: {
+    ...baseChartOptions.plugins,
+    datalabels: {
+      display: true,
+      anchor: "end",
+      align: "top",
+      offset: 4,
+      clamp: true,
+      clip: false,
+      color: "#111827",
+      font: {
+        weight: "bold",
+        size: 10
+      },
+      formatter: (value) =>
+          new Intl.NumberFormat("es-PE").format(value)
+    }
+  }
+};
+
+
+
+const empresaChartOptions = {
+  ...baseChartOptions,
+
+  indexAxis: "y", // 🔥 IMPORTANTE: horizontal
+
+  layout: {
+    padding: {
+      right: 30, // 🔥 espacio para que el número respire afuera
+      left: 10
+    }
+  },
+
+  scales: {
+    ...baseChartOptions.scales,
+    x: {
+      ...baseChartOptions.scales.x,
+      grace: "10%" // 🔥 da espacio extra al final de la barra
+    }
+  },
+
+  plugins: {
+    ...baseChartOptions.plugins,
+
+    datalabels: {
+      display: true,
+
+      // 🔥 CLAVE PARA BARRA HORIZONTAL
+      anchor: "end",   // se pega al final de la barra
+      align: "right",  // lo manda hacia afuera (derecha)
+      offset: 6,       // separación de la barra
+
+      clamp: false,
+      clip: false,
+
+      color: "#111827",
+      font: {
+        weight: "bold",
+        size: 10
+      },
+
+        formatter: (value) =>
+        `S/ ${new Intl.NumberFormat("es-PE").format(value)}`
+    }
+  }
+};
+
+/* ======================= UTILS ======================= */
 
 const formatCurrency=(value)=>
 new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"}).format(value||0);
 
+/* ======================= QUERY ======================= */
 
-/* =======================
-QUERY BUILDER
-======================= */
+const buildQuery = () => {
+  const params = new URLSearchParams();
 
-const buildQuery=useCallback(()=>{
+  if (filters.categoria) {
+    params.append("categoria", filters.categoria);
+  }
 
-const params=new URLSearchParams();
+  return params.toString();
+};
 
-Object.entries(filters).forEach(([k,v])=>{
-if(v) params.append(k,v);
-});
-
-return params.toString();
-
-},[filters]);
-
-
-/* =======================
-CARGAR CATEGORIAS
-======================= */
+/* ======================= LOAD DATA ======================= */
 
 const loadCategorias=async()=>{
-
-try{
-
-const res=await api.get("/api/dashboard/categorias-resumen");
-
-const ordenadas=(res.data||[]).sort(
-(a,b)=>b.stock_total-a.stock_total
-);
-
-setCategorias(ordenadas);
-
-}catch(e){
-console.error(e);
-}
-
+  try{
+    const res=await api.get("/api/dashboard/categorias-resumen");
+    const ordenadas=(res.data||[]).sort((a,b)=>b.stock_total-a.stock_total);
+    setCategorias(ordenadas);
+  }catch(e){ console.error(e); }
 };
 
+const loadResumen = async () => {
+  try {
+    setLoading(true); // 👈 inicia loading
 
-/* =======================
-CARGAR DATA
-======================= */
+    const query = buildQuery();
 
-const loadData=async()=>{
+    const [kpisRes, rotacionRes, empresasValorRes, abcRes, heatmapRes] = await Promise.all([
+      api.get(`/api/dashboard/kpis?${query}`),
+      api.get(`/api/dashboard/rotacion?${query}`),
+      api.get(`/api/dashboard/valor-por-empresa?${query}`),
+      api.get(`/api/dashboard/abc-inventario?${query}`),
+      api.get(`/api/dashboard/heatmap-almacenes?${query}`)
+    ]);
 
-setLoading(true);
+    setKpis(kpisRes.data || {});
+    setRotacion(rotacionRes.data || []);
+    setEmpresasValor(empresasValorRes.data || []);
+    setABC(abcRes.data || []);
+    setHeatmap(heatmapRes.data || []);
 
-try{
-
-const query=buildQuery();
-
-const [
-kpisRes,
-topValorRes,
-rotacionRes,
-inventarioRes,
-stockRes,
-empresasValorRes,
-abcRes,
-heatmapRes
-]=await Promise.all([
-
-api.get(`/api/dashboard/kpis?${query}`),
-
-api.get(`/api/dashboard/top-productos-valor?tipo=${valorTipo}&limit=${limit}&${query}`),
-
-api.get(`/api/dashboard/rotacion?${query}`),
-
-api.get(`/api/dashboard/inventario?${query}`),
-
-api.get(`/api/dashboard/productos-stock?tipo=${stockTipo}&limit=${limit}&${query}`),
-
-api.get(`/api/dashboard/valor-por-empresa?${query}`),
-
-api.get(`/api/dashboard/abc-inventario?${query}`),
-
-api.get(`/api/dashboard/heatmap-almacenes?${query}`)
-
-]);
-
-setKpis(kpisRes.data||{});
-setTopValor(topValorRes.data||[]);
-setRotacion(rotacionRes.data||[]);
-setInventario(inventarioRes.data||[]);
-setStockProductos(stockRes.data||[]);
-setEmpresasValor(empresasValorRes.data||[]);
-
-setABC(abcRes.data||[]);
-setHeatmap(heatmapRes.data||[]);
-
-}catch(e){
-
-console.error(e);
-
-}
-
-setLoading(false);
-
+  } catch (e) {
+    console.error(e);
+  } finally {
+    setLoading(false); // 🔥 ESTO ES LO QUE TE FALTABA
+  }
 };
 
+const loadTopValor = async () => {
+  try {
+    const query = buildQuery();
 
-/* =======================
-INIT
-======================= */
+    const res = await api.get(
+      `/api/dashboard/top-productos-valor?page=${pageValor}&size=${sizeValor}&order=${orderValor}&${query}`
+    );
 
-useEffect(()=>{ loadCategorias(); },[]);
+    setTopValor(res.data.data || []);
+    setHasMoreValor(res.data.hasMore);
+  } catch (e) {
+    console.error(e);
+  }
+};
 
-useEffect(()=>{
-loadData();
-},[filters,valorTipo,stockTipo,limit]);
+const loadStock = async () => {
+  try {
+    const query = buildQuery();
 
+    const res = await api.get(
+      `/api/dashboard/productos-stock?page=${pageStock}&size=${sizeStock}&order=${orderStock}&${query}`
+    );
 
-/* =======================
-CLICK BARRA
-======================= */
+    setStockProductos(res.data.data || []);
+    setHasMoreStock(res.data.hasMore);
+  } catch (e) {
+    console.error(e);
+  }
+};
+const loadTabla = async () => {
+  try {
+    const query = buildQuery();
 
-const handleBarClick=useCallback((event,elements)=>{
+    const res = await api.get(
+      `/api/dashboard/inventario?page=${pageTabla}&size=${sizeTabla}&producto=${productoSeleccionado || ""}&tipo=${graficoActivo || ""}&${query}`
+    );
 
-if(!elements.length) return;
+    setInventario(res.data.data || []);
+    setHasMoreTabla(res.data.hasMore);
+  } catch (e) {
+    console.error(e);
+  }
+};
+// reset páginas cuando cambia filtro
+useEffect(() => {
+  setPageValor(0);
+  setPageStock(0);
+  setPageTabla(0);
+}, [filters]);
 
-const index=elements[0].index;
+useEffect(() => {
+  loadCategorias();
+}, []);
 
-if(!topValor[index]) return;
+useEffect(() => {
+  loadResumen();
+}, [filters]);
 
-const producto=topValor[index].codigo_producto;
+useEffect(() => {
+  loadTopValor();
+}, [pageValor, sizeValor, orderValor, filters]);
 
-setProductoSeleccionado(producto);
+useEffect(() => {
+  loadStock();
+}, [pageStock, sizeStock, orderStock, filters]);
 
-window.scrollTo({
-top:document.body.scrollHeight,
-behavior:"smooth"
-});
-
-},[topValor]);
-
-
-/* =======================
-FILTRAR TABLA
-======================= */
-
-const inventarioFiltrado=useMemo(()=>{
-
-if(!productoSeleccionado) return inventario;
-
-return inventario.filter(
-i=>String(i.codigo_producto)===String(productoSeleccionado)
-);
-
-},[inventario,productoSeleccionado]);
-
-
-/* =======================
-DATASETS
-======================= */
-
-const dataValor=useMemo(()=>({
-
-labels:topValor.map(p=>p.codigo_producto),
-
-datasets:[{
-label:"Valor inventario",
-data:topValor.map(p=>Number(p.valor_total_producto)),
-backgroundColor:"#2563eb"
-}]
-
-}),[topValor]);
-
-
-const dataStock=useMemo(()=>({
-
-labels:stockProductos.map(p=>p.codigo_producto),
-
-datasets:[{
-label:"Stock",
-data:stockProductos.map(p=>Number(p.stock_total_producto)),
-backgroundColor:stockTipo==="mayor"?"#16a34a":"#dc2626"
-}]
-
-}),[stockProductos,stockTipo]);
+useEffect(() => {
+  loadTabla();
+}, [pageTabla, sizeTabla, filters, productoSeleccionado, graficoActivo]);
 
 
-const dataRotacion=useMemo(()=>({
+useEffect(() => {
+  setPageValor(0);
+}, [orderValor]);
 
-labels:rotacion.map(r=>r.estado),
+useEffect(() => {
+  setPageStock(0);
+}, [orderStock]);
+/* ======================= INIT ======================= */
 
-datasets:[{
-data:rotacion.map(r=>Number(r.total)),
-backgroundColor:["#16a34a","#f59e0b","#dc2626"]
-}]
 
-}),[rotacion]);
+/* ======================= CLICK ======================= */
 
+const handleBarClick = useCallback((event, elements) => {
+  if (!elements.length) return;
+
+  const index = elements[0].index;
+  if (!topValor[index]) return;
+
+  const producto = topValor[index].codigo_producto;
+
+  setProductoSeleccionado(producto);
+  setGraficoActivo("valor"); // 🔥 NUEVO
+
+  setPageTabla(0);
+  setSizeTabla(10);
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: "smooth"
+  });
+
+}, [topValor]);
+
+
+
+
+const handleStockBarClick = useCallback((event, elements) => {
+  if (!elements.length) return;
+
+  const index = elements[0].index;
+  if (!stockProductos[index]) return;
+
+  const producto = stockProductos[index].codigo_producto;
+
+  setProductoSeleccionado(producto);
+  setGraficoActivo("stock"); // 🔥 NUEVO
+
+  setPageTabla(0);
+  setSizeTabla(10);
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: "smooth"
+  });
+
+}, [stockProductos]);
+
+/* ======================= FILTER TABLE ======================= */
+const inventarioFiltrado = useMemo(() => {
+  let data = inventario;
+
+  if (filters.categoria) {
+    data = data.filter(i =>
+      String(i.categoria_id) === String(filters.categoria)
+    );
+  }
+
+  return data;
+}, [inventario, filters]);
+
+useEffect(() => {
+  setProductoSeleccionado(null);
+  setGraficoActivo(null); // 🔥 NUEVO
+}, [filters.categoria]);
+/* ======================= DATASETS ======================= */
+
+const dataValor = useMemo(() => ({
+  labels: topValor.map(p => p.codigo_producto),
+  datasets: [{
+    data: topValor.map(p => Number(p.valor_total_producto)),
+    backgroundColor: "#2563eb",
+    borderRadius: 6
+  }]
+}), [topValor]);
+
+
+
+
+const dataStock = useMemo(() => ({
+  labels: stockProductos.map(p => p.codigo_producto),
+  datasets: [{
+    data: stockProductos.map(p => Number(p.stock_total_producto)),
+    backgroundColor: "#16a34a",
+    borderRadius: 6
+  }]
+}), [stockProductos]);
+
+const getColorRotacion = (estado) => {
+  if (!estado) return "#6b7280";
+
+  const e = String(estado).toLowerCase();
+
+  if (e.includes("inmovilizado")) return "#dc2626"; // 🔴 rojo
+  if (e.includes("lenta")) return "#f59e0b";        // 🟡 amarillo
+  if (e.includes("normal")) return "#16a34a";       // 🟢 verde
+
+  return "#6b7280"; // gris fallback
+};
+
+const dataRotacion = useMemo(() => ({
+  labels: rotacion.map(r => r.estado),
+  datasets: [{
+    data: rotacion.map(r => Number(r.total)),
+    backgroundColor: rotacion.map(r => getColorRotacion(r.estado))
+  }]
+}), [rotacion]);
 
 const dataEmpresas=useMemo(()=>({
-
-labels:empresasValor.map(e=>e.empresa),
-
-datasets:[{
-label:"Valor inventario",
-data:empresasValor.map(e=>Number(e.valor_inventario)),
-backgroundColor:"#2563eb",
-borderRadius:6,
-barThickness:18
-}]
-
+  labels:empresasValor.map(e=>e.empresa),
+  datasets:[{
+    data:empresasValor.map(e=>Number(e.valor_inventario)),
+    backgroundColor:"#2563eb",
+    borderRadius:6
+  }]
 }),[empresasValor]);
 
 
-const totalABC = useMemo(
-() => abc.reduce((sum,a)=>sum + Number(a.valor||0),0),
-[abc]
-);
 
-const dataABC=useMemo(()=>({
+const getRowColor = (() => {
+  let lastCode = null;
+  let toggle = false;
 
-labels:abc.map(a=>{
+  return (codigo) => {
+    if (codigo !== lastCode) {
+      lastCode = codigo;
+      toggle = !toggle;
+    }
 
-const porcentaje = totalABC
-? ((Number(a.valor)/totalABC)*100).toFixed(1)
-: 0;
+    return toggle ? "row-blue" : "row-white";
+  };
+})();
 
-if(a.categoria==="A") return `A - Críticos (${a.productos} productos | ${porcentaje}%)`;
-if(a.categoria==="B") return `B - Importantes (${a.productos} productos | ${porcentaje}%)`;
-return `C - Bajo impacto (${a.productos} productos | ${porcentaje}%)`;
+useEffect(() => {
+  setPageValor(0);
+}, [valorTopLimit, orderValor, pageSize]);
 
-}),
+useEffect(() => {
+  setPageStock(0);
+}, [stockTopLimit, orderStock, pageSize]);
 
-datasets:[{
-label:"Valor inventario",
-data:abc.map(a=>Number(a.valor)),
-backgroundColor:["#dc2626","#f59e0b","#16a34a"]
-}]
+/* ======================= LOADING ======================= */
 
-}),[abc,totalABC]);
-
-
-/* =======================
-LOADING
-======================= */
-
-if(loading)
-return <div className="dashboard-loading">Cargando...</div>;
+if(loading){
+  return <div className="dashboard-loading">Cargando...</div>;
+}
 
 
-/* =======================
-UI
-======================= */
+
+const limpiarSeleccion = () => {
+  setProductoSeleccionado(null);
+  setGraficoActivo(null);
+
+  setPageTabla(0);
+
+  setSizeTabla(10); // 🔥 ESTE ES EL FIX REAL
+
+  // ❌ NO LLAMES loadTabla() manualmente
+};
+/* ======================= UI ======================= */
 
 return(
 
 <div className="inventory-dashboard">
 
-{/* =======================
-HEADER KPIS + FILTRO
-======================= */}
-
+{/* ================= KPIs ================= */}
 <div className="kpi-header">
-
 <div className="kpi-grid">
 
 <div className="kpi-card">
@@ -345,293 +602,328 @@ HEADER KPIS + FILTRO
 <div className="kpi-value">{kpis.inmovilizado}</div>
 </div>
 
-{/* FILTRO CATEGORIA COMO KPI */}
-
 <div className="kpi-card categoria-card">
-
-<div className="kpi-title">
-Categoría
-</div>
+<div className="kpi-title">Categoría</div>
 
 <select
-className="categoria-select"
-value={filters.categoria}
-onChange={(e)=>
-setFilters({
-...filters,
-categoria:e.target.value
-})
-}
+  className="categoria-select"
+    value={filters.categoria}
+    onChange={(e)=>setFilters({...filters,categoria:e.target.value})}
 >
+  <option value="">Todas las categorias</option>
 
-<option value="">Todas las categorias</option>
+  {categorias.map(c=>(
 
-{categorias.map(c=>(
+    <option
+      key={c.categoria_id}
+      value={c.categoria_id}
+    >
+      {c.categoria} | 📦 {c.stock_total} | 💰 {formatCurrency(c.valor_total)}
+    </option>
 
-<option
-key={c.categoria_id}
-value={c.categoria_id}
->
-
-{c.categoria} | 📦 {c.stock_total} | 💰 {formatCurrency(c.valor_total)}
-
-</option>
-
-))}
-
+  ))}
 </select>
 
-</div>
+<button onClick={limpiarSeleccion}>
+  Limpiar selección
+</button>
 
 </div>
 
 </div>
+</div>
 
-
-{/* =======================
-CHARTS
-======================= */}
-
+{/* ================= CHARTS ================= */}
 <div className="charts-grid">
 
-<div className="chart-card">
-
+<div className={`chart-card ${graficoActivo === "valor" ? "chart-active" : ""}`}>
 <div className="chart-header">
-
 <h3>Inventario por valor</h3>
 
+  <div className="chart-buttons">
+
+  {/* TOP */}
+  <button onClick={() => setValorTopLimit(50)}>Top 50</button>
+  <button onClick={() => setValorTopLimit(100)}>Top 100</button>
+  <button onClick={() => setValorTopLimit(200)}>Top 200</button>
+
+  {/* ORDEN */}
+ <button
+  className={orderValor === "desc" ? "btn-active" : "btn"}
+  onClick={() => setOrderValor("desc")}
+>
+  Mayor
+</button>
+
+<button
+  className={orderValor === "asc" ? "btn-active" : "btn"}
+  onClick={() => setOrderValor("asc")}
+>
+  Menor
+</button>
+
+
+  {/* TAMAÑO */}
+  <select
+    value={sizeValor}
+    onChange={(e) => setSizeValor(Number(e.target.value))}
+  >
+    <option value={5}>5</option>
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+  </select>
+
+</div>
+</div>
+<div className="chart-body">
+    
+<Bar 
+  data={dataValor} 
+  options={{
+    ...baseChartOptions,
+
+    layout: {
+      padding: {
+        top: 20 // 🔥 espacio arriba
+      }
+    },
+
+    scales: {
+      ...baseChartOptions.scales,
+      y: {
+        ...baseChartOptions.scales.y,
+        grace: "10%" // 🔥 espacio para labels
+      }
+    },
+
+    plugins:{
+      ...baseChartOptions.plugins,
+
+      datalabels: {
+        anchor: "end",
+        align: "top",
+        offset: 4,
+
+        clamp: true,
+        clip: false,
+
+        color: "#111827",
+        font: {
+          weight: "bold",
+          size: 10
+        },
+
+        display: (context) => {
+          const total = context.dataset.data.length;
+
+          if (total > 10) {
+            return context.dataIndex % 2 === 0;
+          }
+
+          return true;
+        },
+
+        formatter: (value) => {
+          if (value >= 1000) {
+            return `S/ ${(value / 1000).toFixed(1)}K`;
+          }
+          return `S/ ${value}`;
+        }
+      }
+    },
+
+    onClick: handleBarClick
+  }} 
+/>
+</div>
+
+<div className="pagination-controls">
+  <button
+    onClick={() => setPageValor(p => Math.max(p - 1, 0))}
+    disabled={pageValor === 0}
+  >
+    ◀ Anterior
+  </button>
+
+  <span>Página {pageValor + 1}</span>
+
+  <button
+    onClick={() => setPageValor(p => p + 1)}
+    disabled={!hasMoreValor}
+  >
+    Siguiente ▶
+  </button>
+</div>
+</div>
+
+<div className={`chart-card ${graficoActivo === "stock" ? "chart-active" : ""}`}>
+  <div className="chart-header">
+    <h3>Inventario por stock</h3>
 <div className="chart-buttons">
 
+  {/* TOP */}
+  <button onClick={() => setStockTopLimit(50)}>Top 50</button>
+  <button onClick={() => setStockTopLimit(100)}>Top 100</button>
+
+  {/* ORDEN */}
 <button
-className={valorTipo==="mayor"?"active":""}
-onClick={()=>setValorTipo("mayor")}
+  className={orderStock === "desc" ? "btn-active" : "btn"}
+  onClick={() => setOrderStock("desc")}
 >
-Mayor
+  Mayor
 </button>
 
 <button
-className={valorTipo==="menor"?"active":""}
-onClick={()=>setValorTipo("menor")}
+  className={orderStock === "asc" ? "btn-active" : "btn"}
+  onClick={() => setOrderStock("asc")}
 >
-Menor
+  Menor
 </button>
 
-</div>
+
+  {/* TAMAÑO */}
+  <select
+    value={sizeStock}
+    onChange={(e) => setSizeStock(Number(e.target.value))}
+  >
+    <option value={5}>5</option>
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+  </select>
 
 </div>
+  </div>
 
-<Bar
-data={dataValor}
-options={{
-responsive:true,
-maintainAspectRatio:false,
-onClick:handleBarClick,
-plugins:{legend:{display:false}}
-}}
-/>
+  <div className="chart-body">
+    <Bar 
+      data={dataStock} 
+      options={{
+        ...stockChartOptions,
+        onClick: handleStockBarClick
+      }}
+    />
+  </div>
 
+
+<div className="pagination-controls">
+  <button
+    onClick={() => setPageStock(p => Math.max(p - 1, 0))}
+    disabled={pageStock === 0}
+  >
+    ◀ Anterior
+  </button>
+
+  <span>Página {pageStock + 1}</span>
+
+  <button
+    onClick={() => setPageStock(p => p + 1)}
+    disabled={!hasMoreStock}
+  >
+    Siguiente ▶
+  </button>
 </div>
-
+</div>
 
 <div className="chart-card">
-
-<div className="chart-header">
-
-<h3>Inventario por stock</h3>
-
-<div className="chart-buttons">
-
-<button
-className={stockTipo==="mayor"?"active":""}
-onClick={()=>setStockTipo("mayor")}
->
-Mayor
-</button>
-
-<button
-className={stockTipo==="menor"?"active":""}
-onClick={()=>setStockTipo("menor")}
->
-Menor
-</button>
-
-</div>
-
-</div>
-
-<Bar
-data={dataStock}
-options={{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}}
-}}
-/>
-
-</div>
-
-
-<div className="chart-card">
-
 <h3>Rotación inventario</h3>
-
-<Pie
-data={dataRotacion}
-options={{
-plugins:{legend:{position:"bottom"}}
-}}
+<div className="chart-body">
+<Pie 
+  data={dataRotacion} 
+  options={rotacionChartOptions}
 />
-
 </div>
-
+</div>
 
 <div className="chart-card">
+  <h3>Valor por empresa</h3>
 
-<h3>Valor inventario por empresa</h3>
-
-<Bar
-data={dataEmpresas}
-options={{
-responsive:true,
-maintainAspectRatio:false,
-indexAxis:'y',
-plugins:{legend:{display:false}}
-}}
-/>
-
-</div>
-
-
-
-
-<div className="chart-card">
-
-<h3>Matriz ABC Inventario</h3>
-
-<Bar
-data={dataABC}
-options={{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}}
-}}
-/>
-
-</div>
-
-
-
-<div className="chart-card">
-
-<h3>Inventario por almacén</h3>
-
-<table className="heatmap-table">
-
-<thead>
-<tr>
-<th>Almacen</th>
-<th>Valor inventario</th>
-</tr>
-</thead>
-
-<tbody>
-
-{heatmap.map((a,i)=>{
-
-let color="green";
-
-if(a.valor_inventario>1000000) color="red";
-else if(a.valor_inventario>300000) color="orange";
-
-return(
-
-<tr key={i}>
-
-<td>{a.almacen}</td>
-
-<td className={`heat-${color}`}>
-{formatCurrency(a.valor_inventario)}
-</td>
-
-</tr>
-
-);
-
-})}
-
-</tbody>
-
-</table>
-
+  <div className="chart-body">
+    <Bar
+      data={dataEmpresas}
+      options={empresaChartOptions}
+    />
+  </div>
 </div>
 
 </div>
 
-
-{/* =======================
-TABLA
-======================= */}
-
+{/* ================= TABLA ================= */}
 <div className="tabla-inventario">
 
 <h3>
 Detalle inventario
-{productoSeleccionado&&` - Producto ${productoSeleccionado}`}
+{productoSeleccionado && ` - Producto ${productoSeleccionado}`}
+{graficoActivo && ` (Filtrado desde ${graficoActivo})`}
 </h3>
 
-<div className="table-container">
+<div className="historial-container">
+<div className="tabla tabla-stock-dashboard">
 
-<table>
+    <div className="pagination-controls">
+  <button
+    onClick={() => setPageTabla(p => Math.max(p - 1, 0))}
+    disabled={pageTabla === 0}
+  >
+    ◀ Anterior
+  </button>
 
-<thead>
+  <span>Página {pageTabla + 1}</span>
 
-<tr>
-<th>Codigo</th>
-<th>Producto</th>
-<th>Empresa</th>
-<th>Almacen</th>
-<th>Fabricante</th>
-<th>Stock lote</th>
-<th>Precio</th>
-<th>Valor lote</th>
-<th>Dias sin mov</th>
-<th>Rotacion</th>
-</tr>
+  <button
+    onClick={() => setPageTabla(p => p + 1)}
+    disabled={!hasMoreTabla}
+  >
+    Siguiente ▶
+  </button>
+</div>
 
-</thead>
+<div className="fila header">
+<div>Codigo</div>
+<div>Producto</div>
+<div>Empresa</div>
+<div>Almacen</div>
+<div>Fabricante</div>
+<div className="num">Stock</div>
+<div className="num">Precio</div>
+<div className="num">Valor</div>
+<div>Dias</div>
+<div>Rotacion</div>
+</div>
 
-<tbody>
+{inventarioFiltrado.length===0?(
+<div className="empty">No hay datos</div>
+):(
+inventarioFiltrado.map((row,i)=>(
 
-{inventarioFiltrado.map((row,i)=>(
+    
+  <div
+    key={i}
+    className={`fila ${getRowColor(row.codigo_producto)}`}
+  >
 
-<tr
-key={i}
-className={
-productoSeleccionado && row.codigo_producto===productoSeleccionado
-? "highlight-row"
-: ""
-}
->
+<div>{row.codigo_producto}</div>
+<div>{row.producto}</div>
+<div>{row.empresa}</div>
+<div>{row.almacen}</div>
+<div>{row.fabricante}</div>
 
-<td>{row.codigo_producto}</td>
-<td>{row.producto}</td>
-<td>{row.empresa}</td>
-<td>{row.almacen}</td>
-<td>{row.fabricante}</td>
-<td>{row.stock_lote}</td>
-<td>{formatCurrency(row.precio_promedio_lote)}</td>
-<td>{formatCurrency(row.valor_lote)}</td>
-<td>{row.dias_sin_movimiento}</td>
-<td>{row.estado_rotacion}</td>
+<div className="num">{row.stock_lote}</div>
+<div className="num">{formatCurrency(row.precio_promedio_lote)}</div>
+<div className="num strong">{formatCurrency(row.valor_lote)}</div>
 
-</tr>
+<div>{row.dias_sin_movimiento}</div>
 
-))}
+<div>
+<span className={`estado estado-${row.estado_rotacion}`}>
+{row.estado_rotacion}
+</span>
+</div>
 
-</tbody>
+</div>
+))
+)}
 
-</table>
-
+</div>
 </div>
 
 </div>
@@ -639,5 +931,4 @@ productoSeleccionado && row.codigo_producto===productoSeleccionado
 </div>
 
 );
-
 }
