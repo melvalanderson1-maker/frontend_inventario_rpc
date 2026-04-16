@@ -49,9 +49,11 @@ export default function ProductoDetalle() {
   useEffect(() => {
     if (location.state?.toast) {
       setToast(location.state.toast);
-    }
-  }, [location.state]);
 
+      // 🔥 LIMPIAR EL STATE PARA QUE NO SE REPITA
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   useEffect(() => {
     api.get(`/api/compras/productos/${id}`)

@@ -19,6 +19,9 @@ export default function MovimientoSalida() {
   const [preciosHistoricos, setPreciosHistoricos] = useState([]);
 
 
+
+
+
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -84,22 +87,38 @@ export default function MovimientoSalida() {
         )
       : [];
 
-  const stockSeleccionado =
-    form.empresa_id && form.almacen_id
-      ? stockRows.find(
-          r =>
-            String(r.empresa_id) === String(form.empresa_id) &&
-            String(r.almacen_id) === String(form.almacen_id) &&
-            (
-              (!r.fabricante_id && !form.fabricante_id) ||
-              String(r.fabricante_id) === String(form.fabricante_id)
-            )
-        )
-      : null;
+
+    const hayFabricantesReales = fabricantesDisponibles.some(f => f.fabricante_id !== null);
+
+    const stockSeleccionado =
+      form.empresa_id && form.almacen_id
+        ? stockRows.find(r => {
+            const fabRow =
+              r.fabricante_id === null ? "null" : String(r.fabricante_id);
+
+            const fabForm = form.fabricante_id || "";
+
+            // 🔥 si hay fabricantes → obligar selección
+            if (hayFabricantesReales && fabForm === "") {
+              return false;
+            }
+
+            return (
+              String(r.empresa_id) === String(form.empresa_id) &&
+              String(r.almacen_id) === String(form.almacen_id) &&
+              fabRow === fabForm
+            );
+          })
+        : null;
 
         // 🔥 AUTO COSTO PROMEDIO (REEMPLAZA PRECIO)
       useEffect(() => {
         if (!stockSeleccionado) return;
+
+        // 🔥 si hay fabricantes y no seleccionó → NO setear costo
+        if (hayFabricantesReales && !form.fabricante_id && !form.fabricante_nuevo) {
+          return;
+        }
 
         const costo = Number(stockSeleccionado?.costo_promedio || 0);
 
@@ -110,7 +129,7 @@ export default function MovimientoSalida() {
           precio: costo.toFixed(4)
         }));
 
-      }, [stockSeleccionado]);
+      }, [stockSeleccionado, hayFabricantesReales, form.fabricante_id, form.fabricante_nuevo]);
 
 
 
@@ -125,6 +144,10 @@ export default function MovimientoSalida() {
     if (!tieneValor(form.empresa_id, form.empresa_nueva)) return false;
     if (!tieneValor(form.almacen_id, form.almacen_nuevo)) return false;
 
+
+    if (hayFabricantesReales && !tieneValor(form.fabricante_id, form.fabricante_nuevo)) {
+    return false;
+  }
     const cant = Number(form.cantidad);
     if (!Number.isInteger(cant) || cant <= 0) return false;
 
@@ -153,6 +176,10 @@ export default function MovimientoSalida() {
         f[`${base}_nuevo`] = "";
       }
 
+      if (name === "fabricante_id") {
+        f.fabricante_id = value; // 🔥 NO convertir a null aquí
+      }
+
       // Si escribe NUEVO → limpia ID
       if (name.endsWith("_nuevo")) {
         const base = name.replace("_nuevo", "");
@@ -173,6 +200,8 @@ export default function MovimientoSalida() {
         f.fabricante_nuevo = "";
         f.cantidad = "";
       }
+
+
 
       if (name === "fabricante_id" || name === "fabricante_nuevo") {
         f.cantidad = "";
@@ -205,7 +234,12 @@ const guardar = async () => {
       empresa_nueva: form.empresa_nueva,
       almacen_id: form.almacen_id,
       almacen_nuevo: form.almacen_nuevo,
-      fabricante_id: form.fabricante_id,
+      fabricante_id:
+        form.fabricante_id === "null" ||
+        form.fabricante_id === "" ||
+        form.fabricante_id === undefined
+          ? null
+          : Number(form.fabricante_id),
       fabricante_nuevo: form.fabricante_nuevo,
       motivo_id: form.motivo_id,
       motivo_nuevo: form.motivo_nuevo,
@@ -323,6 +357,7 @@ const guardar = async () => {
             nameNuevo="fabricante_nuevo"
             options={fabricantesDisponibles.map(f => ({
               ...f,
+              fabricante_id: f.fabricante_id === null ? "null" : String(f.fabricante_id), // 🔥 CLAVE
               label: `${f.fabricante || "Sin fabricante"} (${f.cantidad}) - S/ ${Number(f.costo_promedio).toFixed(2)}`
             }))}
             optionLabel="label"
