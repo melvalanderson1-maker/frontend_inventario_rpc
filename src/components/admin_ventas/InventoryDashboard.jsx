@@ -1,13 +1,19 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import api from "../../api/api";
-
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Pie, Line } from "react-chartjs-2";
 import { Trash2 } from "lucide-react";
+import { ArrowUp, ArrowDown, DollarSign } from "lucide-react";
+import InventoryChartsSection from "./InventoryChartsSection";
+
+
+import { resolveImageUrl } from "../../utils/imageUrl";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  PointElement,   // 🔥 AGREGA ESTO
+  LineElement,    // 🔥 AGREGA ESTO
   ArcElement,
   Tooltip,
   Legend
@@ -21,11 +27,15 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  PointElement,  // 🔥
+  LineElement,   // 🔥
   ArcElement,
   Tooltip,
   Legend,
   ChartDataLabels
 );
+
+
 
 
 
@@ -58,9 +68,69 @@ const [productoSeleccionado,setProductoSeleccionado]=useState(null);
 const [abc,setABC]=useState([]);
 const [heatmap,setHeatmap]=useState([]);
 
+const [evolucionInventario, setEvolucionInventario] = useState([]);
+
+
+const [valorMensual, setValorMensual] = useState([]);
+
+const [resumenMensual, setResumenMensual] = useState([]);
+
+
+const [imagenPreview, setImagenPreview] = useState(null);
+
+
+const MESES = [
+  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+];
+
+const dataValorMensual = useMemo(() => {
+  return {
+    labels: resumenMensual.map(r =>
+      MESES[Number(r.mes.split("-")[1]) - 1]
+    ),
+    datasets: [
+      {
+        label: "Valor inventario",
+        data: resumenMensual.map(r => Number(r.valor)),
+        borderColor: "#16a34a",
+        backgroundColor: "rgba(22,163,74,0.2)",
+        tension: 0.3
+      }
+    ]
+  };
+}, [resumenMensual]);
+
+// 🔥 NUEVOS (IMPORTANTE)
+const [entradasSalidas, setEntradasSalidas] = useState({});
+const [sinMovimiento, setSinMovimiento] = useState([]);
+const [rankingAntiguedad, setRankingAntiguedad] = useState([]);
+
+// 🔥 DETALLE MOVIMIENTOS
+const [movimientosProducto, setMovimientosProducto] = useState([]);
+
+
+
+const totalEntradas = Number(entradasSalidas?.unidades_entrada ?? 0);
+const totalSalidas = Number(entradasSalidas?.unidades_salida ?? 0);
+
+const totalMovEntradas = entradasSalidas.movimientos_entrada || 0;
+const totalMovSalidas = entradasSalidas.movimientos_salida || 0;
+
+
 
 
 const [loading,setLoading]=useState(true);
+
+
+
+
+
+
+const [comparacionMes, setComparacionMes] = useState({
+  actual: {},
+  anterior: {}
+});
 
 
 const [hasMoreValor, setHasMoreValor] = useState(true);
@@ -97,6 +167,13 @@ const [pageTabla, setPageTabla] = useState(0);
 const [sizeTabla, setSizeTabla] = useState(10);
 
 
+const [stockInicial, setStockInicial] = useState(0);
+
+
+
+const stockFinal = stockInicial + totalEntradas - totalSalidas;
+
+
 
 
 const [graficoActivo, setGraficoActivo] = useState(null);
@@ -104,6 +181,12 @@ const [graficoActivo, setGraficoActivo] = useState(null);
 
 // ================= FILTRO GLOBAL (solo si quieres) =================
 const [filters, setFilters] = useState({ categoria: "" });
+
+const getCurrentMonth = () => {
+  return new Date().toISOString().slice(0, 7);
+};
+
+const [mes, setMes] = useState(getCurrentMonth());
 
 useEffect(() => {
   setPageValor(0);
@@ -140,15 +223,18 @@ x: {
     callback: function(value) {
       const label = this.getLabelForValue(value);
 
-      // 🔥 divide en bloques de 8 caracteres
+      if (!label) return "";
+
+      const str = String(label);
+
       const chunkSize = 15;
       const result = [];
 
-      for (let i = 0; i < label.length; i += chunkSize) {
-        result.push(label.substring(i, i + chunkSize));
+      for (let i = 0; i < str.length; i += chunkSize) {
+        result.push(str.substring(i, i + chunkSize));
       }
 
-      return result; // 🔥 ESTO HACE MULTILINEA
+      return result;
     }
   }
 },
@@ -319,9 +405,10 @@ const buildQuery = () => {
     params.append("categoria", filters.categoria);
   }
 
+  params.append("mes", mes);
+
   return params.toString();
 };
-
 /* ======================= LOAD DATA ======================= */
 
 const loadCategorias=async()=>{
@@ -338,13 +425,26 @@ const loadResumen = async () => {
 
     const query = buildQuery();
 
-    const [kpisRes, rotacionRes, empresasValorRes, abcRes, heatmapRes] = await Promise.all([
+    const [
+      kpisRes,
+      rotacionRes,
+      empresasValorRes,
+      abcRes,
+      heatmapRes,
+      evolucionRes
+    ] = await Promise.all([
       api.get(`/api/dashboard/kpis?${query}`),
       api.get(`/api/dashboard/rotacion?${query}`),
       api.get(`/api/dashboard/valor-por-empresa?${query}`),
       api.get(`/api/dashboard/abc-inventario?${query}`),
-      api.get(`/api/dashboard/heatmap-almacenes?${query}`)
+      api.get(`/api/dashboard/heatmap-almacenes?${query}`),
+      api.get(`/api/dashboard/evolucion-inventario?${query}`)
     ]);
+
+
+
+
+    setEvolucionInventario(evolucionRes.data || []);
 
     setKpis(kpisRes.data || {});
     setRotacion(Array.isArray(rotacionRes.data) ? rotacionRes.data : []);
@@ -362,6 +462,148 @@ const loadResumen = async () => {
     return () => clearTimeout(timer);
   }
 };
+
+
+  const loadValorMensual = async () => {
+    try {
+      const res = await api.get(
+        `/api/dashboard/valor-inventario-mensual?${buildQuery()}`
+      );
+
+      setValorMensual(res.data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+
+
+
+const loadExtras = async () => {
+  try {
+    const queryActual = buildQuery();
+
+    let mesAnterior = "";
+
+    if (mes) {
+      const [y, m] = mes.split("-").map(Number);
+
+      const date = new Date(y, m - 1);
+      date.setMonth(date.getMonth() - 1);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+
+      mesAnterior = `${year}-${month}`;
+    }
+
+    const queryAnterior = new URLSearchParams({
+      ...Object.fromEntries(new URLSearchParams(queryActual)),
+      mes: mesAnterior
+    }).toString();
+
+    const [actual, anterior] = await Promise.all([
+      api.get(`/api/dashboard/entradas-salidas?${queryActual}`),
+      api.get(`/api/dashboard/entradas-salidas?${queryAnterior}`)
+    ]);
+
+    const [valorActual, valorAnterior] = await Promise.all([
+      api.get(`/api/dashboard/valor-inventario?${queryActual}`),
+      api.get(`/api/dashboard/valor-inventario?${queryAnterior}`)
+    ]);
+
+    setEntradasSalidas(actual.data || {});
+
+    setComparacionMes({
+      actual: {
+        entradas: actual.data?.unidades_entrada || 0,
+        salidas: actual.data?.unidades_salida || 0,
+        valor: valorActual.data?.valor_final || 0
+      },
+      anterior: {
+        entradas: anterior.data?.unidades_entrada || 0,
+        salidas: anterior.data?.unidades_salida || 0,
+        valor: valorAnterior.data?.valor_final || 0
+      }
+    });
+
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+
+
+
+const loadResumen12Meses = async () => {
+  try {
+
+    const year = new Date().getFullYear();
+
+    // 🔥 GENERAR ENERO → DICIEMBRE (FIJO)
+    const meses = Array.from({ length: 12 }, (_, i) => {
+      const month = String(i + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    });
+
+    const resultados = await Promise.all(
+      meses.map(async (mesItem) => {
+
+        // 🔥 SOLO USA CATEGORÍA (NO ARRASTRES OTROS FILTROS)
+        const params = new URLSearchParams();
+
+        if (filters.categoria) {
+          params.append("categoria", filters.categoria);
+        }
+
+        params.append("mes", mesItem);
+
+        const query = params.toString();
+
+        try {
+          const [movRes, valorRes] = await Promise.all([
+            api.get(`/api/dashboard/entradas-salidas?${query}`),
+            api.get(`/api/dashboard/valor-inventario?${query}`)
+          ]);
+
+        return {
+          mes: mesItem,
+
+          entradas: Number(movRes.data?.unidades_entrada || 0),
+          salidas: Number(movRes.data?.unidades_salida || 0),
+
+          movimientos_entrada: Number(movRes.data?.movimientos_entrada || 0),
+          movimientos_salida: Number(movRes.data?.movimientos_salida || 0),
+
+          valor: Number(valorRes.data?.valor_final || 0)
+        };
+
+        } catch (err) {
+          console.error("Error en mes:", mesItem, err);
+
+          // 🔥 fallback seguro
+          return {
+            mes: mesItem,
+            entradas: 0,
+            salidas: 0,
+            valor: 0
+          };
+        }
+
+      })
+    );
+
+    // 🔥 ORDENAR POR MES (por si acaso)
+    resultados.sort((a, b) => a.mes.localeCompare(b.mes));
+
+    setResumenMensual(resultados);
+
+  } catch (e) {
+    console.error("ERROR GENERAL:", e);
+  }
+};
+
+
 
 const loadTopValor = async () => {
   try {
@@ -402,18 +644,60 @@ const loadTabla = async () => {
       `/api/dashboard/inventario?page=${pageTabla}&size=${sizeTabla}&producto=${productoSeleccionado || ""}&tipo=${graficoActivo || ""}&${query}`
     );
 
+
+
     setInventario(Array.isArray(res.data?.data) ? res.data.data : []);
     setHasMoreTabla(res.data.hasMore);
   } catch (e) {
     console.error(e);
   }
 };
+
+const loadResumenMensual = async () => {
+  try {
+    const year = new Date().getFullYear();
+
+    const res = await api.get(
+      `/api/dashboard/entradas-salidas-anual?anio=${year}`
+    );
+
+    setResumenMensual(res.data || []);
+
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const loadMovimientosProducto = async (productoId) => {
+  if (!productoId) return; // 🔥 evita undefined
+
+  try {
+    const res = await api.get(`/api/dashboard/movimientos-producto/${productoId}`);
+    setMovimientosProducto(res.data || []);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+
+
 // reset páginas cuando cambia filtro
 useEffect(() => {
   setPageValor(0);
   setPageStock(0);
   setPageTabla(0);
-}, [filters]);
+}, [filters, mes]);
+
+
+// 🔥 RESET CUANDO CAMBIA MES (IMPORTANTE)
+useEffect(() => {
+  setPageValor(0);
+  setPageStock(0);
+  setPageTabla(0);
+
+  setProductoSeleccionado(null);
+  setGraficoActivo(null);
+}, [mes]);
 
 useEffect(() => {
   loadCategorias();
@@ -421,21 +705,36 @@ useEffect(() => {
 
 useEffect(() => {
   loadResumen();
-}, [filters]);
+  loadResumen12Meses();
+}, [filters, mes]);
+
+useEffect(() => {
+  loadValorMensual();
+}, [filters, mes]);
+
+
+useEffect(() => {
+  loadExtras();
+}, [filters, mes]);
 
 useEffect(() => {
   loadTopValor();
-}, [pageValor, sizeValor, orderValor, filters]);
+}, [pageValor, sizeValor, orderValor, filters, mes]);
 
 useEffect(() => {
   loadStock();
-}, [pageStock, sizeStock, orderStock, filters]);
+}, [pageStock, sizeStock, orderStock, filters, mes]);
 
 useEffect(() => {
   loadTabla();
-}, [pageTabla, sizeTabla, filters, productoSeleccionado, graficoActivo]);
+}, [pageTabla, sizeTabla, filters, productoSeleccionado, graficoActivo, mes]);
 
 
+useEffect(() => {
+  return () => {
+    ChartJS.getChart("canvas")?.destroy();
+  };
+}, []);
 useEffect(() => {
   setPageValor(0);
 
@@ -464,6 +763,24 @@ useEffect(() => {
 useEffect(() => {
   setActiveIndexStock(null);
 }, [sizeStock]);
+
+
+
+
+useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setImagenPreview(null);
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, []);
+
 
 
 
@@ -581,16 +898,18 @@ useEffect(() => {
 /* ======================= DATASETS ======================= */
 
 const safeTopValor = Array.isArray(topValor) ? topValor : [];
+ 
+
 
 const dataValor = useMemo(() => ({
-  labels: safeTopValor.map(p => p.codigo_producto),
+  labels: (safeTopValor || []).map(p =>
+    String(p?.codigo_producto ?? "SIN CODIGO")
+  ),
   datasets: [{
-    data: safeTopValor.map(p => Number(p.valor_total_producto || 0)),
-
+    data: safeTopValor.map(p => Number(p.valor_total_producto ?? 0)),
     backgroundColor: safeTopValor.map((_, i) =>
       i === activeIndexValor ? "#1d4ed8" : "#93c5fd"
     ),
-
     borderRadius: 6
   }]
 }), [safeTopValor, activeIndexValor]);
@@ -601,7 +920,9 @@ const dataValor = useMemo(() => ({
 const safeStock = Array.isArray(stockProductos) ? stockProductos : [];
 
 const dataStock = useMemo(() => ({
-  labels: safeStock.map(p => p.codigo_producto),
+  labels: (safeStock || []).map(p =>
+    String(p?.codigo_producto ?? "SIN CODIGO")
+  ),
   datasets: [{
     data: safeStock.map(p => Number(p.stock_total_producto || 0)),
 
@@ -626,7 +947,9 @@ const getColorRotacion = (estado) => {
 };
 
 const dataRotacion = useMemo(() => ({
-  labels: rotacion.map(r => r.estado),
+  labels: (rotacion || []).map(r =>
+    String(r?.estado ?? "SIN ESTADO")
+  ),
   datasets: [{
     data: rotacion.map(r => Number(r.total)),
     backgroundColor: rotacion.map(r => getColorRotacion(r.estado))
@@ -634,7 +957,9 @@ const dataRotacion = useMemo(() => ({
 }), [rotacion]);
 
 const dataEmpresas=useMemo(()=>({
-  labels:empresasValor.map(e=>e.empresa),
+  labels: (empresasValor || []).map(e =>
+    String(e?.empresa ?? "SIN EMPRESA")
+  ),
   datasets:[{
     data:empresasValor.map(e=>Number(e.valor_inventario)),
     backgroundColor:"#2563eb",
@@ -675,10 +1000,6 @@ useEffect(() => {
 
 /* ======================= LOADING ======================= */
 
-if(loading){
-  return <div className="dashboard-loading">Cargando...</div>;
-}
-
 
 
 const limpiarSeleccion = () => {
@@ -706,6 +1027,12 @@ const getCategoriaNombre = (id) => {
 };
 
 
+
+
+
+
+
+
 return(
 
 
@@ -713,9 +1040,33 @@ return(
 
 <div className="inventory-dashboard">
 
+
+  {loading && (
+  <div className="dashboard-overlay-loader">
+
+    <div className="dashboard-loader-card">
+
+      <div className="spinner"></div>
+
+      <div className="loader-title">
+        Cargando dashboard
+      </div>
+
+      <div className="loader-subtitle">
+        Procesando inventario y métricas...
+      </div>
+
+    </div>
+
+  </div>
+)}
+
 {/* ================= KPIs ================= */}
 <div className="kpi-header">
 <div className="kpi-grid">
+
+
+
 
 <div className="kpi-card">
 <div className="kpi-title">Productos</div>
@@ -736,6 +1087,8 @@ return(
 <div className="kpi-title">Inmovilizado</div>
 <div className="kpi-value">{kpis.inmovilizado}</div>
 </div>
+
+
 
 <div className="kpi-card categoria-card">
   <div className="kpi-title">📦 Filtro de categoría</div>
@@ -816,8 +1169,57 @@ return(
 </div>
 </div>
 
+
+
+<div className="timeline-meses">
+  {resumenMensual.map((m, i) => {
+
+    const mesActual = new Date().toISOString().slice(0, 7);
+    const esMesActual = m.mes === mesActual;
+
+    const mesIndex = Number(m.mes.split("-")[1]) - 1;
+
+    return (
+      <div
+          key={i}
+          className={`timeline-card ${esMesActual ? "mes-actual" : ""}`}
+        >
+        <div className="timeline-mes">{MESES[mesIndex]}</div>
+
+        <div className="timeline-data">
+
+          {/* 🔵 CANTIDAD */}
+          <div className="entrada">↑ {m.entradas}</div>
+          <div className="salida">↓ {m.salidas}</div>
+
+          {/* 🟡 MOVIMIENTOS */}
+          <div className="movimientos">
+            Mov: {m.movimientos_entrada} / {m.movimientos_salida}
+          </div>
+
+          <div className="valor">{formatCurrency(m.valor)}</div>
+
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+
+
+
+
+
+{/* ================= CHARTS SEPARADOS ================= */}
+<InventoryChartsSection />
+
+
+
 {/* ================= CHARTS ================= */}
 <div className="charts-grid">
+
+
+
 
 <div className={`chart-card ${graficoActivo === "valor" ? "chart-active" : ""}`}>
 <div className="chart-header">
@@ -857,9 +1259,10 @@ return(
 </div>
 <div className="chart-body">
     
-<Bar 
+<Bar
+  key={`valor-${pageValor}-${sizeValor}-${orderValor}-${mes}-${filters.categoria}`}
   ref={chartValorRef}
-  data={dataValor} 
+  data={dataValor}
   options={{
     ...baseChartOptions,
 
@@ -920,6 +1323,9 @@ return(
 
 />
 </div>
+
+
+
 
 <div className="pagination-controls">
   <button
@@ -1091,7 +1497,39 @@ inventarioFiltrado.map((row,i)=>(
   >
 
 <div>{row.codigo_producto}</div>
-<div>{row.producto}</div>
+<div
+  style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+  onClick={() => loadMovimientosProducto(row.producto_id)}
+>
+
+ 
+  <img
+    src={resolveImageUrl({
+      storage_provider: row.storage_provider,
+      storage_key: row.storage_key
+    })}
+    alt="producto"
+
+    onClick={() =>
+      setImagenPreview(
+        resolveImageUrl({
+          storage_provider: row.storage_provider,
+          storage_key: row.storage_key
+        })
+      )
+    }
+    onError={(e) => {
+      e.target.src = "/no-image.png"; // opcional fallback
+    }}
+    style={{
+      width: 40,
+      height: 40,
+      objectFit: "cover",
+      borderRadius: 6
+    }}
+  />
+  {row.producto}
+</div>
 <div>{row.empresa}</div>
 <div>{row.almacen}</div>
 <div>{row.fabricante}</div>
@@ -1115,7 +1553,48 @@ inventarioFiltrado.map((row,i)=>(
 </div>
 </div>
 
+{movimientosProducto.length > 0 && (
+  <div className="movimientos-box">
+    <h3>Movimientos del producto</h3>
+
+    <div className="tabla">
+      <div className="fila header">
+        <div>Tipo</div>
+        <div>Cantidad</div>
+        <div>Precio</div>
+        <div>Estado</div>
+        <div>Fecha</div>
+      </div>
+
+      {movimientosProducto.map((m, i) => (
+        <div key={i} className="fila">
+          <div>{m.tipo_movimiento}</div>
+          <div>{m.cantidad}</div>
+          <div>{formatCurrency(m.precio)}</div>
+          <div>{m.estado}</div>
+          <div>{m.fecha}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 </div>
+
+
+{imagenPreview && (
+  <div
+    className="image-modal-overlay"
+    onClick={() => setImagenPreview(null)}
+  >
+    <img
+      src={imagenPreview}
+      alt="preview"
+      className="image-modal"
+      onClick={(e) => e.stopPropagation()} // evita cerrar al hacer click en la imagen
+    />
+  </div>
+)}
 
 </div>
 

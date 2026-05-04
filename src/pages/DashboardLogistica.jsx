@@ -12,7 +12,7 @@ export default function DashboardLogistica() {
       <MenuLogistica />
 
       <main className="logistica-main">
-        <h1 className="logistica-title">Panel de Logística</h1>
+    
         <p className="logistica-subtitle">
           Validación de movimientos, control de almacenes y transferencias.
         </p>
