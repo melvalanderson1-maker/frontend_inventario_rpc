@@ -569,9 +569,15 @@ const loadResumen12Meses = async () => {
         return {
           mes: mesItem,
 
+          inicial: Number(movRes.data?.unidades_inicial || 0),
           entradas: Number(movRes.data?.unidades_entrada || 0),
           salidas: Number(movRes.data?.unidades_salida || 0),
 
+          monto_inicial: Number(movRes.data?.monto_inicial || 0),
+          monto_entrada: Number(movRes.data?.monto_entrada || 0),
+          monto_salida: Number(movRes.data?.monto_salida || 0),
+
+          movimientos_inicial: Number(movRes.data?.movimientos_inicial || 0),
           movimientos_entrada: Number(movRes.data?.movimientos_entrada || 0),
           movimientos_salida: Number(movRes.data?.movimientos_salida || 0),
 
@@ -1188,13 +1194,24 @@ return(
 
         <div className="timeline-data">
 
-          {/* 🔵 CANTIDAD */}
-          <div className="entrada">↑ {m.entradas}</div>
-          <div className="salida">↓ {m.salidas}</div>
+          {/* 🟣 SALDO INICIAL (solo se muestra si hubo movimientos ese mes) */}
+          {m.movimientos_inicial > 0 && (
+            <div className="inicial">
+              ● {m.inicial} <span className="monto">({formatCurrency(m.monto_inicial)})</span>
+            </div>
+          )}
+
+          {/* 🔵 CANTIDAD + MONTO */}
+          <div className="entrada">
+            ↑ {m.entradas} <span className="monto">({formatCurrency(m.monto_entrada)})</span>
+          </div>
+          <div className="salida">
+            ↓ {m.salidas} <span className="monto">({formatCurrency(m.monto_salida)})</span>
+          </div>
 
           {/* 🟡 MOVIMIENTOS */}
           <div className="movimientos">
-            Mov: {m.movimientos_entrada} / {m.movimientos_salida}
+            Mov: {m.movimientos_inicial} / {m.movimientos_entrada} / {m.movimientos_salida}
           </div>
 
           <div className="valor">{formatCurrency(m.valor)}</div>
